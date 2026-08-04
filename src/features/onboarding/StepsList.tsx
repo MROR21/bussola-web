@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getOnboardingSteps } from './onboardingService'
 import type { OnboardingStep } from './types'
+import { StepCard } from './StepCard'
 
 export function StepsList() {
   const [steps, setSteps] = useState<OnboardingStep[]>([])
@@ -18,28 +19,33 @@ export function StepsList() {
   if (loading) return <p className="text-neutral-400">Carregando passos...</p>
   if (error) return <p className="text-red-400">Erro: {error}</p>
 
+  // Agrupa os passos por fase. O reduce "acumula" cada passo no grupo da sua fase.
+  // Como a API já manda ordenado, as fases aparecem na ordem de primeira aparição.
+  const stepsByPhase = steps.reduce<Record<string, OnboardingStep[]>>((groups, step) => {
+    const phaseGroup = groups[step.phase] ?? []
+    phaseGroup.push(step)
+    groups[step.phase] = phaseGroup
+    return groups
+  }, {})
+
   return (
-    <ul className="flex w-full max-w-lg flex-col gap-2">
-      {steps.map((step) => (
-        <li
-          key={step.id}
-          className="rounded-lg border border-neutral-800 bg-neutral-900 p-3"
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-neutral-500">{step.order}.</span>
-            <span className="font-medium">{step.title}</span>
-            {step.isCompanySpecific && (
-              <span className="ml-auto rounded-full bg-purple-500/20 px-2 py-0.5 text-xs text-purple-300">
-                Agilean
-              </span>
-            )}
-          </div>
-          <p className="mt-1 text-sm text-neutral-400">{step.description}</p>
-          <span className="mt-2 inline-block text-xs text-neutral-600">
-            {step.phase}
-          </span>
-        </li>
+    <div className="flex w-full max-w-lg flex-col gap-6">
+      {/* Object.entries transforma o objeto {fase: passos[]} em pares [fase, passos[]] pra mapear */}
+      {Object.entries(stepsByPhase).map(([phase, phaseSteps]) => (
+        <section key={phase} className="flex flex-col gap-2">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+            {phase}
+            <span className="ml-2 font-normal normal-case text-neutral-600">
+              ({phaseSteps.length})
+            </span>
+          </h2>
+          <ul className="flex flex-col gap-2">
+            {phaseSteps.map((step) => (
+              <StepCard key={step.id} step={step} />
+            ))}
+          </ul>
+        </section>
       ))}
-    </ul>
+    </div>
   )
 }
