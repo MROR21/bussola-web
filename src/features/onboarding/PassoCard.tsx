@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { cx } from '../../utils/cx'
 import type { TrailStep } from './types'
 
-// Card de um passo da jornada. Concluído = check + esmaecido; destaque = próximo passo (aro roxo).
-// Essencial abre a descrição; Resumo começa recolhido ("Ver detalhes").
+// Card de um passo na jornada. Check = concluído (esmaecido); destaque = próximo passo (aro roxo).
+// Clicar no título abre a página do passo com o conteúdo completo.
 export function PassoCard({
   step,
   concluido,
@@ -16,7 +16,6 @@ export function PassoCard({
   onToggle: () => void
 }) {
   const isResumo = step.recommendedDepth === 'Resumo'
-  const [aberto, setAberto] = useState(!isResumo)
 
   return (
     <li
@@ -61,26 +60,24 @@ export function PassoCard({
             )}
           </div>
 
-          <h4
+          <Link
+            to={`/passo/${step.id}`}
             className={cx(
-              'font-medium leading-snug',
+              'font-medium leading-snug hover:underline',
               concluido ? 'text-neutral-500 line-through' : 'text-neutral-100',
             )}
           >
             {step.title}
-          </h4>
+          </Link>
 
-          {aberto ? (
-            <p className="text-sm text-neutral-400">{step.description}</p>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setAberto(true)}
-              className="self-start text-sm text-purple-300 hover:text-purple-200"
-            >
-              Ver detalhes
-            </button>
-          )}
+          <p className="text-sm text-neutral-400">{step.description}</p>
+
+          <Link
+            to={`/passo/${step.id}`}
+            className="self-start text-sm text-purple-300 hover:text-purple-200"
+          >
+            Ver passo →
+          </Link>
         </div>
       </div>
     </li>
