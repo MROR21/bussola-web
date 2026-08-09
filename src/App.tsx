@@ -1,8 +1,16 @@
 import { useEffect, useState } from 'react'
-import { StepsList } from './features/onboarding/StepsList'
+import { NivelamentoForm } from './features/nivelamento/NivelamentoForm'
+import { postTrail } from './features/nivelamento/nivelamentoService'
+import { perfilPadrao } from './features/nivelamento/types'
+import type { Perfil } from './features/nivelamento/types'
+import { TrailView } from './features/onboarding/TrailView'
+import type { TrailStep } from './features/onboarding/types'
 
 function App() {
   const [status, setStatus] = useState('...')
+  const [trail, setTrail] = useState<TrailStep[] | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/health')
@@ -10,6 +18,19 @@ function App() {
       .then((d) => setStatus(d.status ?? 'desconhecido'))
       .catch(() => setStatus('offline'))
   }, [])
+
+  // Envia o perfil pro back e guarda a trilha personalizada. "Pular" chama com o perfil padrão.
+  async function carregarTrilha(perfil: Perfil) {
+    setLoading(true)
+    setError(null)
+    try {
+      setTrail(await postTrail(perfil))
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erro ao montar a trilha')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center gap-6 bg-neutral-950 py-12 text-neutral-100">
@@ -24,7 +45,18 @@ function App() {
         </span>
       </header>
 
-      <StepsList />
+      {loading && <p className="text-neutral-400">Montando sua trilha...</p>}
+      {error && <p className="text-red-400">Erro: {error}</p>}
+
+      {!loading &&
+        (trail ? (
+          <TrailView trail={trail} onRestart={() => setTrail(null)} />
+        ) : (
+          <NivelamentoForm
+            onSubmit={carregarTrilha}
+            onSkip={() => carregarTrilha(perfilPadrao)}
+          />
+        ))}
     </main>
   )
 }
