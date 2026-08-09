@@ -11,3 +11,11 @@ export interface OnboardingStep {
   isCompanySpecific: boolean
   skillArea: SkillArea
 }
+
+// Profundidade recomendada de um passo, calculada pelo back a partir do Perfil.
+export type StepDepth = 'Essencial' | 'Resumo'
+
+// Um passo já com a profundidade recomendada (resposta do POST /onboarding/trail).
+export interface TrailStep extends OnboardingStep {
+  recommendedDepth: StepDepth
+}
