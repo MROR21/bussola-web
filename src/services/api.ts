@@ -2,10 +2,24 @@
 // O caminho começa com /api → o proxy do Vite manda pro back (http://localhost:5093).
 const API_BASE = '/api'
 
+// Extrai a mensagem de erro do back. Padrão do back: corpo { erro: "..." }.
+// Se não vier JSON (ex.: 204 ou 500 cru), cai numa mensagem genérica com o status.
+async function extrairErro(response: Response, path: string): Promise<string> {
+  try {
+    const body = await response.json()
+    if (body && typeof body.erro === 'string') {
+      return body.erro
+    }
+  } catch {
+    // resposta sem corpo JSON — usa o fallback abaixo
+  }
+  return `Erro ${response.status} ao chamar ${path}`
+}
+
 export async function apiGet<T>(path: string): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`)
   if (!response.ok) {
-    throw new Error(`Erro ${response.status} ao chamar ${path}`)
+    throw new Error(await extrairErro(response, path))
   }
   return response.json() as Promise<T>
 }
@@ -18,7 +32,7 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
     body: JSON.stringify(body),
   })
   if (!response.ok) {
-    throw new Error(`Erro ${response.status} ao chamar ${path}`)
+    throw new Error(await extrairErro(response, path))
   }
   return response.json() as Promise<T>
 }
@@ -36,6 +50,6 @@ export async function apiSend(
     body: body === undefined ? undefined : JSON.stringify(body),
   })
   if (!response.ok) {
-    throw new Error(`Erro ${response.status} ao chamar ${path}`)
+    throw new Error(await extrairErro(response, path))
   }
 }
