@@ -5,6 +5,7 @@ import type { UsuarioLogado } from '../features/auth/types'
 import type { Perfil } from '../features/nivelamento/types'
 import { AppLayout } from './AppLayout'
 import { ChatPage } from '../pages/ChatPage'
+import { FluxoDetalhePage } from '../pages/FluxoDetalhePage'
 import { FluxosPage } from '../pages/FluxosPage'
 import { GestorPage } from '../pages/GestorPage'
 import { JornadaPage } from '../pages/JornadaPage'
@@ -77,6 +78,7 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
           />
           <Route path="/passo/:id" element={<PassoDetalhePage />} />
           <Route path="/fluxos" element={<FluxosPage />} />
+          <Route path="/fluxo/:id" element={<FluxoDetalhePage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/gestor" element={<GestorPage />} />
           <Route

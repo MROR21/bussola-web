@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import ReactMarkdown from 'react-markdown'
+import { Markdown } from '../components/Markdown'
 import { useAuthStore } from '../features/auth/authStore'
 import { cx } from '../utils/cx'
 import { getStep } from '../features/onboarding/onboardingService'
@@ -73,38 +73,8 @@ export function PassoDetalhePage() {
         <h1 className="text-2xl font-bold text-neutral-100">{step.title}</h1>
       </header>
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-neutral-800 bg-neutral-900 p-6 leading-relaxed text-neutral-300">
-        <ReactMarkdown
-          components={{
-            h2: ({ children }) => (
-              <h2 className="mb-1 mt-2 text-lg font-semibold text-neutral-100">{children}</h2>
-            ),
-            p: ({ children }) => <p className="text-neutral-300">{children}</p>,
-            ul: ({ children }) => (
-              <ul className="ml-5 list-disc space-y-1 text-neutral-300">{children}</ul>
-            ),
-            ol: ({ children }) => (
-              <ol className="ml-5 list-decimal space-y-1 text-neutral-300">{children}</ol>
-            ),
-            a: ({ children, href }) => (
-              <a href={href} className="text-purple-300 hover:text-purple-200">
-                {children}
-              </a>
-            ),
-            code: ({ children }) => (
-              <code className="rounded bg-neutral-800 px-1.5 py-0.5 text-sm text-purple-200">
-                {children}
-              </code>
-            ),
-            blockquote: ({ children }) => (
-              <blockquote className="border-l-2 border-neutral-700 pl-3 text-neutral-400">
-                {children}
-              </blockquote>
-            ),
-          }}
-        >
-          {step.conteudo}
-        </ReactMarkdown>
+      <div className="flex flex-col gap-3 rounded-2xl border border-neutral-800 bg-neutral-900 p-6 leading-relaxed">
+        <Markdown>{step.conteudo}</Markdown>
       </div>
 
       <button
