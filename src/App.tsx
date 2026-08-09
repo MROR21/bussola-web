@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useAuthStore } from './features/auth/authStore'
+import { getUser } from './features/auth/userService'
 import { LoginForm } from './features/auth/LoginForm'
 import { NivelamentoForm } from './features/nivelamento/NivelamentoForm'
 import { postTrail, salvarPerfil } from './features/nivelamento/nivelamentoService'
 import { perfilPadrao } from './features/nivelamento/types'
 import type { Perfil } from './features/nivelamento/types'
-import { TrailView } from './features/onboarding/TrailView'
+import { JornadaView } from './features/onboarding/JornadaView'
 import type { TrailStep } from './features/onboarding/types'
 
 function App() {
@@ -24,7 +25,30 @@ function App() {
       .catch(() => setStatus('offline'))
   }, [])
 
-  // Envia o perfil pro back e guarda a trilha personalizada. "Pular" chama com o perfil padrão.
+  // Ao logar: busca o usuário. Se já nivelou, monta a trilha do perfil salvo (pula o questionário);
+  // senão, deixa a trilha nula pra mostrar o nivelamento.
+  useEffect(() => {
+    if (!usuario) return
+    let cancelado = false
+    setLoading(true)
+    setError(null)
+    getUser(usuario.id)
+      .then(async (detalhe) => {
+        if (cancelado) return
+        setTrail(detalhe.nivelamentoConcluido ? await postTrail(detalhe.perfil) : null)
+      })
+      .catch((e) => {
+        if (!cancelado) setError(e instanceof Error ? e.message : 'Erro ao carregar sua jornada')
+      })
+      .finally(() => {
+        if (!cancelado) setLoading(false)
+      })
+    return () => {
+      cancelado = true
+    }
+  }, [usuario])
+
+  // Fim do questionário: salva o perfil no usuário e monta a trilha. "Pular" usa o perfil padrão.
   async function carregarTrilha(perfil: Perfil) {
     if (!usuario) return
     setLoading(true)
@@ -45,7 +69,7 @@ function App() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center gap-6 bg-neutral-950 py-12 text-neutral-100">
+    <main className="flex min-h-screen flex-col items-center gap-6 bg-neutral-950 px-4 py-12 text-neutral-100">
       <header className="flex flex-col items-center gap-2">
         <h1 className="text-4xl font-bold tracking-tight">🧭 Bússola</h1>
         <p className="text-neutral-400">Onboarding técnico</p>
@@ -74,13 +98,15 @@ function App() {
         <LoginForm />
       ) : (
         <>
-          {loading && <p className="text-neutral-400">Montando sua trilha...</p>}
+          {loading && <p className="text-neutral-400">Carregando sua jornada...</p>}
           {error && <p className="text-red-400">Erro: {error}</p>}
           {!loading &&
+            !error &&
             (trail ? (
-              <TrailView
+              <JornadaView
                 trail={trail}
                 userId={usuario.id}
+                nome={usuario.nome}
                 onRestart={() => setTrail(null)}
               />
             ) : (
