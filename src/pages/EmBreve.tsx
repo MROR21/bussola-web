@@ -1,0 +1,19 @@
+// Placeholder de seção ainda não construída — mantém a moldura navegável.
+export function EmBreve({
+  icone,
+  titulo,
+  descricao,
+}: {
+  icone: string
+  titulo: string
+  descricao: string
+}) {
+  return (
+    <div className="flex max-w-md flex-col items-center gap-3 rounded-2xl border border-neutral-800 bg-neutral-900 p-10 text-center">
+      <span className="text-4xl">{icone}</span>
+      <h2 className="text-xl font-semibold text-neutral-100">{titulo}</h2>
+      <p className="text-sm text-neutral-400">{descricao}</p>
+      <span className="rounded-full bg-neutral-800 px-3 py-1 text-xs text-neutral-400">Em breve</span>
+    </div>
+  )
+}
