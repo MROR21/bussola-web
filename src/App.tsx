@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react'
+import { useAuthStore } from './features/auth/authStore'
+import { LoginForm } from './features/auth/LoginForm'
 import { NivelamentoForm } from './features/nivelamento/NivelamentoForm'
-import { postTrail } from './features/nivelamento/nivelamentoService'
+import { postTrail, salvarPerfil } from './features/nivelamento/nivelamentoService'
 import { perfilPadrao } from './features/nivelamento/types'
 import type { Perfil } from './features/nivelamento/types'
 import { TrailView } from './features/onboarding/TrailView'
 import type { TrailStep } from './features/onboarding/types'
 
 function App() {
+  const usuario = useAuthStore((state) => state.usuario)
+  const logout = useAuthStore((state) => state.logout)
+
   const [status, setStatus] = useState('...')
   const [trail, setTrail] = useState<TrailStep[] | null>(null)
   const [loading, setLoading] = useState(false)
@@ -21,15 +26,22 @@ function App() {
 
   // Envia o perfil pro back e guarda a trilha personalizada. "Pular" chama com o perfil padrão.
   async function carregarTrilha(perfil: Perfil) {
+    if (!usuario) return
     setLoading(true)
     setError(null)
     try {
+      await salvarPerfil(usuario.id, perfil)
       setTrail(await postTrail(perfil))
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao montar a trilha')
     } finally {
       setLoading(false)
     }
+  }
+
+  function sair() {
+    setTrail(null)
+    logout()
   }
 
   return (
@@ -43,20 +55,42 @@ function App() {
             {status}
           </strong>
         </span>
+        {usuario && (
+          <span className="text-sm text-neutral-400">
+            Olá, <strong className="text-neutral-200">{usuario.nome}</strong>
+            {' · '}
+            <button
+              type="button"
+              onClick={sair}
+              className="text-purple-300 hover:text-purple-200"
+            >
+              Sair
+            </button>
+          </span>
+        )}
       </header>
 
-      {loading && <p className="text-neutral-400">Montando sua trilha...</p>}
-      {error && <p className="text-red-400">Erro: {error}</p>}
-
-      {!loading &&
-        (trail ? (
-          <TrailView trail={trail} onRestart={() => setTrail(null)} />
-        ) : (
-          <NivelamentoForm
-            onSubmit={carregarTrilha}
-            onSkip={() => carregarTrilha(perfilPadrao)}
-          />
-        ))}
+      {!usuario ? (
+        <LoginForm />
+      ) : (
+        <>
+          {loading && <p className="text-neutral-400">Montando sua trilha...</p>}
+          {error && <p className="text-red-400">Erro: {error}</p>}
+          {!loading &&
+            (trail ? (
+              <TrailView
+                trail={trail}
+                userId={usuario.id}
+                onRestart={() => setTrail(null)}
+              />
+            ) : (
+              <NivelamentoForm
+                onSubmit={carregarTrilha}
+                onSkip={() => carregarTrilha(perfilPadrao)}
+              />
+            ))}
+        </>
+      )}
     </main>
   )
 }

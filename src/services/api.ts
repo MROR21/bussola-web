@@ -22,3 +22,20 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
   }
   return response.json() as Promise<T>
 }
+
+// Ações que respondem 204 (sem corpo): salvar perfil, marcar/desmarcar passo.
+// Valida o ok e não faz parse de JSON (204 não tem corpo).
+export async function apiSend(
+  method: 'PUT' | 'POST' | 'DELETE',
+  path: string,
+  body?: unknown,
+): Promise<void> {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  })
+  if (!response.ok) {
+    throw new Error(`Erro ${response.status} ao chamar ${path}`)
+  }
+}
