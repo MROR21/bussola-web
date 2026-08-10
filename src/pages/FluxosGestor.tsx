@@ -85,6 +85,9 @@ export function FluxosGestor() {
 
   const nomesDoFluxo = (fluxo: Fluxo) => supervisionados.filter((s) => jaTem(fluxo, s)).map((s) => s.nome)
 
+  // Tem alguém pra receber esse fluxo? (Se todos os supervisionados já têm, não dá pra atribuir.)
+  const temParaAtribuir = (fluxo: Fluxo) => supervisionados.some((s) => !jaTem(fluxo, s))
+
   const disponiveisParaModal = modalFluxo
     ? supervisionados.filter((s) => !jaTem(modalFluxo, s))
     : []
@@ -126,13 +129,19 @@ export function FluxosGestor() {
                       <span className="font-medium text-neutral-100">{fluxo.titulo}</span>
                       <span className="text-sm text-neutral-400">{fluxo.descricao}</span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setModalFluxo(fluxo)}
-                      className="shrink-0 rounded-lg bg-purple-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-400"
-                    >
-                      + Atribuir
-                    </button>
+                    {temParaAtribuir(fluxo) ? (
+                      <button
+                        type="button"
+                        onClick={() => setModalFluxo(fluxo)}
+                        className="shrink-0 rounded-lg bg-purple-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-400"
+                      >
+                        + Atribuir
+                      </button>
+                    ) : (
+                      <span className="shrink-0 text-xs text-neutral-500">
+                        Atribuído a todos os supervisionados
+                      </span>
+                    )}
                   </div>
                   {nomes.length > 0 && (
                     <p className="text-xs text-neutral-500">Com: {nomes.join(', ')}</p>

@@ -120,9 +120,10 @@ export function NotificationBell() {
         <button
           type="button"
           onClick={abrir}
-          className="fixed right-4 top-4 z-50 flex items-center gap-2 rounded-xl border border-purple-500/40 bg-neutral-900 px-4 py-3 text-sm text-neutral-100 shadow-lg"
+          className="absolute right-full top-0 z-50 mr-3 flex w-max items-center gap-2 rounded-xl border border-purple-500/40 bg-neutral-900 px-4 py-3 text-sm text-neutral-100 shadow-lg"
         >
           🔔 Você tem {naoLidas} {naoLidas === 1 ? 'nova notificação' : 'novas notificações'}
+          <span className="absolute -right-1 top-1/2 size-2 -translate-y-1/2 rotate-45 border-r border-t border-purple-500/40 bg-neutral-900" />
         </button>
       )}
     </div>

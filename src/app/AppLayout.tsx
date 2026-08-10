@@ -74,7 +74,11 @@ export function AppLayout() {
               {' · '}
               <button
                 type="button"
-                onClick={logout}
+                onClick={() => {
+                  if (window.confirm('Tem certeza que deseja sair do Bússola?')) {
+                    logout()
+                  }
+                }}
                 className="text-purple-300 hover:text-purple-200"
               >
                 Sair
