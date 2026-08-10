@@ -31,16 +31,16 @@ export function FluxosPage() {
     const q = busca.trim().toLowerCase()
     if (!q) return fluxos
     return fluxos.filter((f) =>
-      `${f.titulo} ${f.descricao} ${f.categoria}`.toLowerCase().includes(q),
+      `${f.titulo} ${f.descricao} ${f.categoria} ${f.modulo}`.toLowerCase().includes(q),
     )
   }, [busca, fluxos])
 
-  const porCategoria = useMemo(() => {
+  const porModulo = useMemo(() => {
     const grupos = new Map<string, Fluxo[]>()
     for (const fluxo of filtrados) {
-      const lista = grupos.get(fluxo.categoria) ?? []
+      const lista = grupos.get(fluxo.modulo) ?? []
       lista.push(fluxo)
-      grupos.set(fluxo.categoria, lista)
+      grupos.set(fluxo.modulo, lista)
     }
     return [...grupos.entries()]
   }, [filtrados])
@@ -67,10 +67,11 @@ export function FluxosPage() {
         <p className="text-neutral-500">Nenhum fluxo encontrado.</p>
       )}
 
-      {porCategoria.map(([categoria, itens]) => (
-        <section key={categoria} className="flex flex-col gap-2">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
-            {categoria}
+      {porModulo.map(([modulo, itens]) => (
+        <section key={modulo} className="flex flex-col gap-2">
+          <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+            {modulo}
+            <span className="font-normal normal-case text-neutral-600">({itens.length})</span>
           </h2>
           <ul className="flex flex-col gap-2">
             {itens.map((fluxo) => (
@@ -79,7 +80,15 @@ export function FluxosPage() {
                   to={`/fluxo/${fluxo.id}`}
                   className="flex flex-col gap-1 rounded-xl border border-neutral-800 bg-neutral-900 p-4 transition-colors hover:border-purple-500/50"
                 >
-                  <span className="font-medium text-neutral-100">{fluxo.titulo}</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-medium text-neutral-100">{fluxo.titulo}</span>
+                    {fluxo.videoUrl && <span title="Tem vídeo">🎬</span>}
+                    {fluxo.categoria && (
+                      <span className="rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-400">
+                        {fluxo.categoria}
+                      </span>
+                    )}
+                  </div>
                   <span className="text-sm text-neutral-400">{fluxo.descricao}</span>
                 </Link>
               </li>

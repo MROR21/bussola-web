@@ -2,8 +2,10 @@
 export interface Fluxo {
   id: string
   order: number
+  modulo: string
   categoria: string
   titulo: string
   descricao: string
   conteudo: string
+  videoUrl: string
 }
