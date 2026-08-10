@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuthStore } from '../features/auth/authStore'
 import { listarFluxos } from '../features/fluxos/fluxosService'
 import type { Fluxo } from '../features/fluxos/types'
 
@@ -9,6 +10,14 @@ export function FluxosPage() {
   const [busca, setBusca] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const isGestor = useAuthStore((s) => s.usuario?.isGestor ?? false)
+  const meuSquad = useAuthStore((s) => s.usuario?.squad)
+
+  // Gestor vê os fluxos de todos os squads; colaborador vê só o do seu squad + os sem squad (Básico do dev).
+  const visiveis = useMemo(
+    () => (isGestor ? fluxos : fluxos.filter((f) => f.squad == null || f.squad === meuSquad)),
+    [fluxos, isGestor, meuSquad],
+  )
 
   useEffect(() => {
     let cancelado = false
@@ -29,11 +38,11 @@ export function FluxosPage() {
 
   const filtrados = useMemo(() => {
     const q = busca.trim().toLowerCase()
-    if (!q) return fluxos
-    return fluxos.filter((f) =>
+    if (!q) return visiveis
+    return visiveis.filter((f) =>
       `${f.titulo} ${f.descricao} ${f.categoria} ${f.modulo}`.toLowerCase().includes(q),
     )
-  }, [busca, fluxos])
+  }, [busca, visiveis])
 
   const porModulo = useMemo(() => {
     const grupos = new Map<string, Fluxo[]>()
@@ -42,7 +51,10 @@ export function FluxosPage() {
       lista.push(fluxo)
       grupos.set(fluxo.modulo, lista)
     }
-    return [...grupos.entries()]
+    // "Básico do dev" sempre por último → o módulo do squad aparece primeiro.
+    return [...grupos.entries()].sort(
+      (a, b) => Number(a[0] === 'Básico do dev') - Number(b[0] === 'Básico do dev'),
+    )
   }, [filtrados])
 
   return (

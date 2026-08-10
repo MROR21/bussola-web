@@ -1,11 +1,17 @@
 import { useState } from 'react'
-import type { Cargo, Perfil, SkillLevel } from './types'
+import type { Cargo, Perfil, SkillLevel, Squad } from './types'
 import { perfilPadrao } from './types'
 
 const CARGOS: { value: Cargo; label: string }[] = [
   { value: 'Estagiario', label: 'Estagiário' },
   { value: 'Junior', label: 'Júnior' },
   { value: 'Pleno', label: 'Pleno' },
+]
+
+const SQUADS: { value: Squad; label: string }[] = [
+  { value: 'MaoDeObra', label: 'Mão de Obra' },
+  { value: 'QuizQuality', label: 'Quiz Quality' },
+  { value: 'Agilean', label: 'Agilean (desktop)' },
 ]
 
 const NIVEIS: { value: SkillLevel; label: string }[] = [
@@ -51,9 +57,10 @@ export function NivelamentoForm({
   onSubmit,
   onSkip,
 }: {
-  onSubmit: (perfil: Perfil) => void
-  onSkip: () => void
+  onSubmit: (perfil: Perfil, squad: Squad) => void
+  onSkip: (squad: Squad) => void
 }) {
+  const [squad, setSquad] = useState<Squad>('MaoDeObra')
   const [cargo, setCargo] = useState<Cargo>('Estagiario')
   const [git, setGit] = useState<SkillLevel>('Nenhum')
 
@@ -65,6 +72,11 @@ export function NivelamentoForm({
           Rápido — só ajusta a profundidade do que você já domina. O específico da
           Agilean aparece sempre.
         </p>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium text-neutral-300">Seu squad</span>
+        <OptionGroup options={SQUADS} value={squad} onChange={setSquad} />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -82,14 +94,14 @@ export function NivelamentoForm({
       <div className="flex items-center gap-3">
         <button
           type="button"
-          onClick={() => onSubmit({ ...perfilPadrao, cargo, git })}
+          onClick={() => onSubmit({ ...perfilPadrao, cargo, git }, squad)}
           className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400"
         >
           Ver minha trilha
         </button>
         <button
           type="button"
-          onClick={onSkip}
+          onClick={() => onSkip(squad)}
           className="text-sm text-neutral-400 hover:text-neutral-200"
         >
           Pular (trilha completa)

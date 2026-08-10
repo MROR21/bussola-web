@@ -1,4 +1,4 @@
-import type { Cargo, Perfil } from '../nivelamento/types'
+import type { Cargo, Perfil, Squad } from '../nivelamento/types'
 
 // Usuário logado (o que o back devolve no /auth/login, dentro de "usuario").
 export interface UsuarioLogado {
@@ -6,6 +6,7 @@ export interface UsuarioLogado {
   nome: string
   email: string
   cargo: Cargo
+  squad: Squad
   isGestor: boolean
 }
 

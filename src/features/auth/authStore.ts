@@ -8,6 +8,7 @@ interface AuthState {
   usuario: UsuarioLogado | null
   token: string | null
   login: (usuario: UsuarioLogado, token: string) => void
+  atualizarUsuario: (patch: Partial<UsuarioLogado>) => void
   logout: () => void
 }
 
@@ -17,6 +18,9 @@ export const useAuthStore = create<AuthState>()(
       usuario: null,
       token: null,
       login: (usuario, token) => set({ usuario, token }),
+      // Atualiza campos do usuário na sessão sem relogar (ex.: squad ao refazer o nivelamento).
+      atualizarUsuario: (patch) =>
+        set((s) => (s.usuario ? { usuario: { ...s.usuario, ...patch } } : {})),
       logout: () => set({ usuario: null, token: null }),
     }),
     { name: 'bussola-auth' },

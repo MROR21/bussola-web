@@ -1,8 +1,11 @@
+import type { Squad } from '../nivelamento/types'
+
 // Um fluxo da Referência viva (espelha a entidade Fluxo do back, em camelCase).
 export interface Fluxo {
   id: string
   order: number
   modulo: string
+  squad: Squad | null
   categoria: string
   titulo: string
   descricao: string

@@ -1,8 +1,9 @@
 import { useState } from 'react'
+import { useAuthStore } from '../features/auth/authStore'
 import { NivelamentoForm } from '../features/nivelamento/NivelamentoForm'
 import { salvarPerfil } from '../features/nivelamento/nivelamentoService'
 import { perfilPadrao } from '../features/nivelamento/types'
-import type { Perfil } from '../features/nivelamento/types'
+import type { Perfil, Squad } from '../features/nivelamento/types'
 import type { UsuarioLogado } from '../features/auth/types'
 
 // Tela de nivelamento — focada, SEM o menu lateral (só aparece depois que a pessoa "entra").
@@ -15,11 +16,13 @@ export function NivelamentoPage({
   onConcluir: (perfil: Perfil) => void
 }) {
   const [erro, setErro] = useState<string | null>(null)
+  const atualizarUsuario = useAuthStore((s) => s.atualizarUsuario)
 
-  async function concluir(perfil: Perfil) {
+  async function concluir(perfil: Perfil, squad: Squad) {
     setErro(null)
     try {
-      await salvarPerfil(usuario.id, perfil)
+      await salvarPerfil(usuario.id, perfil, squad)
+      atualizarUsuario({ squad }) // mantém o squad da sessão em dia (o filtro de Fluxos usa ele)
       onConcluir(perfil)
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Erro ao salvar o nivelamento')
@@ -33,7 +36,7 @@ export function NivelamentoPage({
         <p className="text-sm text-neutral-400">Responda rápido pra personalizar sua jornada.</p>
       </div>
       {erro && <p className="text-sm text-red-400">{erro}</p>}
-      <NivelamentoForm onSubmit={concluir} onSkip={() => concluir(perfilPadrao)} />
+      <NivelamentoForm onSubmit={concluir} onSkip={(squad) => concluir(perfilPadrao, squad)} />
     </main>
   )
 }

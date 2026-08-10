@@ -1,6 +1,7 @@
 // Espelham os enums do back (vêm/vão como texto no JSON).
 export type Cargo = 'Estagiario' | 'Junior' | 'Pleno'
 export type SkillLevel = 'Nenhum' | 'Basico' | 'Confortavel'
+export type Squad = 'MaoDeObra' | 'QuizQuality' | 'Agilean'
 
 // Respostas do questionário: cargo + nível por área. Mesmo shape do record Perfil do back.
 export interface Perfil {
