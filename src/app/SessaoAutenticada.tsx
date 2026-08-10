@@ -27,6 +27,7 @@ function TelaCheia({ children }: { children: React.ReactNode }) {
 export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
   const [estado, setEstado] = useState<Estado>('carregando')
   const [perfil, setPerfil] = useState<Perfil | null>(null)
+  const [gestorNome, setGestorNome] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -36,6 +37,7 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
     getUser(usuario.id)
       .then((detalhe) => {
         if (cancelado) return
+        setGestorNome(detalhe.gestorNome)
         // Gestor não passa pelo nivelamento — cai direto na casca (e o "/" redireciona pro painel).
         if (detalhe.isGestor || detalhe.nivelamentoConcluido) {
           setPerfil(detalhe.perfil)
@@ -79,7 +81,11 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
               usuario.isGestor ? (
                 <Navigate to="/gestor" replace />
               ) : (
-                <JornadaPage perfil={perfil!} onRefazer={() => setEstado('nivelar')} />
+                <JornadaPage
+                  perfil={perfil!}
+                  gestorNome={gestorNome}
+                  onRefazer={() => setEstado('nivelar')}
+                />
               )
             }
           />
@@ -87,14 +93,21 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
           <Route path="/fluxos" element={<FluxosPage />} />
           <Route path="/fluxo/:id" element={<FluxoDetalhePage />} />
           <Route path="/chat" element={<ChatPage />} />
-          <Route path="/gestor" element={<GestorPage />} />
+          <Route
+            path="/gestor"
+            element={usuario.isGestor ? <GestorPage /> : <Navigate to="/" replace />}
+          />
           <Route
             path="*"
             element={
               usuario.isGestor ? (
                 <Navigate to="/gestor" replace />
               ) : (
-                <JornadaPage perfil={perfil!} onRefazer={() => setEstado('nivelar')} />
+                <JornadaPage
+                  perfil={perfil!}
+                  gestorNome={gestorNome}
+                  onRefazer={() => setEstado('nivelar')}
+                />
               )
             }
           />

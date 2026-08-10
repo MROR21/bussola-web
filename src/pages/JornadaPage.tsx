@@ -9,9 +9,11 @@ import type { TrailStep } from '../features/onboarding/types'
 // montar a trilha do perfil e mostrar. "Refazer nivelamento" volta pra tela de nivelamento (no pai).
 export function JornadaPage({
   perfil,
+  gestorNome,
   onRefazer,
 }: {
   perfil: Perfil
+  gestorNome: string | null
   onRefazer: () => void
 }) {
   const usuario = useAuthStore((state) => state.usuario)
@@ -44,6 +46,12 @@ export function JornadaPage({
   if (!trail) return null
 
   return (
-    <JornadaView trail={trail} userId={usuario.id} nome={usuario.nome} onRestart={onRefazer} />
+    <JornadaView
+      trail={trail}
+      userId={usuario.id}
+      nome={usuario.nome}
+      gestorNome={gestorNome}
+      onRestart={onRefazer}
+    />
   )
 }

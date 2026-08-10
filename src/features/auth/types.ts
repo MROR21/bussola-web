@@ -12,5 +12,6 @@ export interface UsuarioLogado {
 // Dados completos do usuário (GET /users/{id}): inclui o perfil salvo e se já nivelou.
 export interface UsuarioDetalhe extends UsuarioLogado {
   nivelamentoConcluido: boolean
+  gestorNome: string | null
   perfil: Perfil
 }

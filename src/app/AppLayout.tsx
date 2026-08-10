@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuthStore } from '../features/auth/authStore'
+import { NotificationBell } from '../features/notificacoes/NotificationBell'
 import { cx } from '../utils/cx'
 
 type Papel = 'gestor' | 'colaborador'
@@ -66,17 +67,20 @@ export function AppLayout() {
               {status}
             </strong>
           </span>
-          <span className="text-sm text-neutral-400">
-            Olá, <strong className="text-neutral-200">{nome}</strong>
-            {' · '}
-            <button
-              type="button"
-              onClick={logout}
-              className="text-purple-300 hover:text-purple-200"
-            >
-              Sair
-            </button>
-          </span>
+          <div className="flex items-center gap-4">
+            <NotificationBell />
+            <span className="text-sm text-neutral-400">
+              Olá, <strong className="text-neutral-200">{nome}</strong>
+              {' · '}
+              <button
+                type="button"
+                onClick={logout}
+                className="text-purple-300 hover:text-purple-200"
+              >
+                Sair
+              </button>
+            </span>
+          </div>
         </header>
 
         <main className="flex-1 overflow-y-auto p-6">

@@ -18,11 +18,13 @@ export function JornadaView({
   trail,
   userId,
   nome,
+  gestorNome,
   onRestart,
 }: {
   trail: TrailStep[]
   userId: string
   nome: string
+  gestorNome?: string | null
   onRestart: () => void
 }) {
   const [concluidos, setConcluidos] = useState<Set<string>>(new Set())
@@ -88,6 +90,11 @@ export function JornadaView({
             {feitos} de {total} passos · Fase {Math.min(faseAtualIndex + 1, fases.length)} de{' '}
             {fases.length}
           </p>
+          {gestorNome && (
+            <p className="text-xs text-neutral-500">
+              Seu gestor: <span className="text-neutral-400">{gestorNome}</span>
+            </p>
+          )}
         </div>
       </header>
 
