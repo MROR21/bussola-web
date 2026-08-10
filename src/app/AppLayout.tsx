@@ -6,10 +6,10 @@ import { cx } from '../utils/cx'
 
 type Papel = 'gestor' | 'colaborador'
 const NAV: { to: string; label: string; icon: string; end: boolean; papel?: Papel }[] = [
+  { to: '/gestor', label: 'Supervisionados', icon: '👥', end: false, papel: 'gestor' },
   { to: '/', label: 'Jornada', icon: '🧭', end: true, papel: 'colaborador' },
   { to: '/fluxos', label: 'Fluxos', icon: '📚', end: false },
   { to: '/chat', label: 'Assistente', icon: '💬', end: false },
-  { to: '/gestor', label: 'Gestor', icon: '📊', end: false, papel: 'gestor' },
 ]
 
 // Casca do app (logado): menu lateral fixo + header + área de conteúdo que troca por rota.

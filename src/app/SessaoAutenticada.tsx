@@ -11,6 +11,7 @@ import { GestorPage } from '../pages/GestorPage'
 import { JornadaPage } from '../pages/JornadaPage'
 import { NivelamentoPage } from '../pages/NivelamentoPage'
 import { PassoDetalhePage } from '../pages/PassoDetalhePage'
+import { SupervisionadoPage } from '../pages/SupervisionadoPage'
 
 type Estado = 'carregando' | 'nivelar' | 'pronto'
 
@@ -96,6 +97,10 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
           <Route
             path="/gestor"
             element={usuario.isGestor ? <GestorPage /> : <Navigate to="/" replace />}
+          />
+          <Route
+            path="/supervisionado/:id"
+            element={usuario.isGestor ? <SupervisionadoPage /> : <Navigate to="/" replace />}
           />
           <Route
             path="*"

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   adicionarSupervisionado,
   getDisponiveis,
@@ -14,6 +15,7 @@ export function GestorPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [adicionando, setAdicionando] = useState(false)
+  const navegar = useNavigate()
 
   async function carregar() {
     setError(null)
@@ -72,7 +74,8 @@ export function GestorPage() {
           return (
             <li
               key={u.id}
-              className="flex flex-col gap-2 rounded-xl border border-neutral-800 bg-neutral-900 p-4"
+              onClick={() => navegar(`/supervisionado/${u.id}`)}
+              className="flex cursor-pointer flex-col gap-2 rounded-xl border border-neutral-800 bg-neutral-900 p-4 transition-colors hover:border-purple-500/50"
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 flex-col">
@@ -85,7 +88,10 @@ export function GestorPage() {
                   </span>
                   <button
                     type="button"
-                    onClick={() => remover(u.id)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      remover(u.id)
+                    }}
                     className="text-sm text-neutral-500 hover:text-red-400"
                   >
                     Remover

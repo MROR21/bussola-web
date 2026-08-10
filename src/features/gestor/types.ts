@@ -19,3 +19,18 @@ export interface UsuarioDisponivel {
   email: string
   cargo: Cargo
 }
+
+// Um passo com a flag de concluído (detalhe do progresso de um supervisionado).
+export interface PassoProgresso {
+  id: string
+  order: number
+  phase: string
+  title: string
+  concluido: boolean
+}
+
+// Progresso detalhado de um supervisionado (GET /gestor/usuarios/{id}/progresso).
+export interface ProgressoSupervisionado {
+  nome: string
+  passos: PassoProgresso[]
+}
