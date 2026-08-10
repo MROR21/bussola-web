@@ -3,6 +3,7 @@ export interface Notificacao {
   id: string
   usuarioId: string
   mensagem: string
+  link: string
   lida: boolean
   criadaEm: string
 }

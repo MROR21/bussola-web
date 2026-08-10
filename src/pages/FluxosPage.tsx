@@ -1,29 +1,49 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '../features/auth/authStore'
-import { listarFluxos } from '../features/fluxos/fluxosService'
+import { getFluxosConcluidos, getMeusFluxos } from '../features/fluxos/fluxosService'
 import type { Fluxo } from '../features/fluxos/types'
+import { FluxosGestor } from './FluxosGestor'
 
-// Referência viva: lista de fluxos do dia a dia, buscável, agrupada por categoria.
+// Aba Fluxos: gestor vê a visão de atribuição; colaborador navega os fluxos dele.
 export function FluxosPage() {
+  const isGestor = useAuthStore((s) => s.usuario?.isGestor ?? false)
+  return isGestor ? <FluxosGestor /> : <FluxosColaborador />
+}
+
+// Referência viva do colaborador: só os fluxos que ele vê (squad + Básico + atribuídos).
+function FluxosColaborador() {
   const [fluxos, setFluxos] = useState<Fluxo[]>([])
+  const [concluidos, setConcluidos] = useState<Set<string>>(new Set())
   const [busca, setBusca] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const isGestor = useAuthStore((s) => s.usuario?.isGestor ?? false)
-  const meuSquad = useAuthStore((s) => s.usuario?.squad)
+  const [params] = useSearchParams()
+  const destaqueParam = params.get('destaque')
+  const [destacado, setDestacado] = useState<string | null>(destaqueParam)
 
-  // Gestor vê os fluxos de todos os squads; colaborador vê só o do seu squad + os sem squad (Básico do dev).
-  const visiveis = useMemo(
-    () => (isGestor ? fluxos : fluxos.filter((f) => f.squad == null || f.squad === meuSquad)),
-    [fluxos, isGestor, meuSquad],
-  )
+  // Ao chegar via notificação (?destaque=), rola até o fluxo e pulsa a borda por alguns segundos.
+  useEffect(() => {
+    setDestacado(destaqueParam)
+  }, [destaqueParam])
+
+  useEffect(() => {
+    if (!destacado || loading) return
+    document.getElementById(`fluxo-${destacado}`)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+    })
+    const t = setTimeout(() => setDestacado(null), 4000)
+    return () => clearTimeout(t)
+  }, [destacado, loading])
 
   useEffect(() => {
     let cancelado = false
-    listarFluxos()
-      .then((f) => {
-        if (!cancelado) setFluxos(f)
+    Promise.all([getMeusFluxos(), getFluxosConcluidos()])
+      .then(([f, ids]) => {
+        if (cancelado) return
+        setFluxos(f)
+        setConcluidos(new Set(ids))
       })
       .catch((e) => {
         if (!cancelado) setError(e instanceof Error ? e.message : 'Erro ao carregar os fluxos')
@@ -36,13 +56,15 @@ export function FluxosPage() {
     }
   }, [])
 
+  const feitos = fluxos.filter((f) => concluidos.has(f.id)).length
+
   const filtrados = useMemo(() => {
     const q = busca.trim().toLowerCase()
-    if (!q) return visiveis
-    return visiveis.filter((f) =>
+    if (!q) return fluxos
+    return fluxos.filter((f) =>
       `${f.titulo} ${f.descricao} ${f.categoria} ${f.modulo}`.toLowerCase().includes(q),
     )
-  }, [busca, visiveis])
+  }, [busca, fluxos])
 
   const porModulo = useMemo(() => {
     const grupos = new Map<string, Fluxo[]>()
@@ -64,6 +86,11 @@ export function FluxosPage() {
         <p className="text-sm text-neutral-400">
           Consulte qualquer fluxo do dia a dia, quando precisar.
         </p>
+        {fluxos.length > 0 && (
+          <p className="text-xs text-neutral-500">
+            {feitos} de {fluxos.length} concluídos
+          </p>
+        )}
       </header>
 
       <input
@@ -87,14 +114,22 @@ export function FluxosPage() {
           </h2>
           <ul className="flex flex-col gap-2">
             {itens.map((fluxo) => (
-              <li key={fluxo.id}>
+              <li key={fluxo.id} id={`fluxo-${fluxo.id}`}>
                 <Link
                   to={`/fluxo/${fluxo.id}`}
-                  className="flex flex-col gap-1 rounded-xl border border-neutral-800 bg-neutral-900 p-4 transition-colors hover:border-purple-500/50"
+                  className={
+                    'flex flex-col gap-1 rounded-xl border border-neutral-800 bg-neutral-900 p-4 transition-colors hover:border-purple-500/50' +
+                    (destacado === fluxo.id ? ' animate-pulse ring-2 ring-purple-400' : '')
+                  }
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium text-neutral-100">{fluxo.titulo}</span>
                     {fluxo.videoUrl && <span title="Tem vídeo">🎬</span>}
+                    {concluidos.has(fluxo.id) && (
+                      <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
+                        ✓ Concluído
+                      </span>
+                    )}
                     {fluxo.categoria && (
                       <span className="rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-400">
                         {fluxo.categoria}

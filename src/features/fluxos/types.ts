@@ -12,3 +12,10 @@ export interface Fluxo {
   conteudo: string
   videoUrl: string
 }
+
+// Atribuição de um fluxo a um supervisionado (quem tem qual fluxo), pro painel do gestor.
+export interface Atribuicao {
+  fluxoId: string
+  usuarioId: string
+  nome: string
+}

@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Markdown } from '../components/Markdown'
-import { getFluxo } from '../features/fluxos/fluxosService'
+import { cx } from '../utils/cx'
+import {
+  concluirFluxo,
+  desmarcarFluxo,
+  getFluxo,
+  getFluxosConcluidos,
+} from '../features/fluxos/fluxosService'
 import type { Fluxo } from '../features/fluxos/types'
 
 // Converte links comuns de YouTube pro formato /embed; outros (Vimeo, interno) passam direto.
@@ -24,6 +30,7 @@ function paraEmbed(url: string): string {
 export function FluxoDetalhePage() {
   const { id = '' } = useParams()
   const [fluxo, setFluxo] = useState<Fluxo | null>(null)
+  const [concluido, setConcluido] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -31,9 +38,11 @@ export function FluxoDetalhePage() {
     let cancelado = false
     setLoading(true)
     setError(null)
-    getFluxo(id)
-      .then((f) => {
-        if (!cancelado) setFluxo(f)
+    Promise.all([getFluxo(id), getFluxosConcluidos()])
+      .then(([f, concluidos]) => {
+        if (cancelado) return
+        setFluxo(f)
+        setConcluido(concluidos.includes(id))
       })
       .catch((e) => {
         if (!cancelado) setError(e instanceof Error ? e.message : 'Erro ao carregar o fluxo')
@@ -45,6 +54,18 @@ export function FluxoDetalhePage() {
       cancelado = true
     }
   }, [id])
+
+  // Alterna concluído de forma otimista (desfaz se o back falhar).
+  async function toggle() {
+    const antes = concluido
+    setConcluido(!antes)
+    try {
+      if (antes) await desmarcarFluxo(id)
+      else await concluirFluxo(id)
+    } catch {
+      setConcluido(antes)
+    }
+  }
 
   if (loading) return <p className="text-neutral-400">Carregando o fluxo...</p>
   if (error) return <p className="text-red-400">Erro: {error}</p>
@@ -76,6 +97,19 @@ export function FluxoDetalhePage() {
       <div className="flex flex-col gap-3 rounded-2xl border border-neutral-800 bg-neutral-900 p-6 leading-relaxed">
         <Markdown>{fluxo.conteudo}</Markdown>
       </div>
+
+      <button
+        type="button"
+        onClick={toggle}
+        className={cx(
+          'self-start rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+          concluido
+            ? 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+            : 'bg-purple-500 text-white hover:bg-purple-400',
+        )}
+      >
+        {concluido ? '✓ Concluído · desmarcar' : 'Marcar como concluído'}
+      </button>
     </article>
   )
 }

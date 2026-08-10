@@ -1,5 +1,10 @@
 import { apiGet, apiSend } from '../../services/api'
-import type { ProgressoSupervisionado, UsuarioDisponivel, UsuarioProgresso } from './types'
+import type {
+  FluxoProgresso,
+  ProgressoSupervisionado,
+  UsuarioDisponivel,
+  UsuarioProgresso,
+} from './types'
 
 // Supervisionados do gestor logado, com progresso (endpoint protegido pela policy "Gestor").
 export function getUsuariosProgresso(): Promise<UsuarioProgresso[]> {
@@ -9,6 +14,11 @@ export function getUsuariosProgresso(): Promise<UsuarioProgresso[]> {
 // Progresso passo-a-passo de um supervisionado (nome + passos).
 export function getProgressoDetalhado(usuarioId: string): Promise<ProgressoSupervisionado> {
   return apiGet<ProgressoSupervisionado>(`/gestor/usuarios/${usuarioId}/progresso`)
+}
+
+// Fluxos visíveis do supervisionado com a flag de concluído.
+export function getFluxosSupervisionado(usuarioId: string): Promise<FluxoProgresso[]> {
+  return apiGet<FluxoProgresso[]>(`/gestor/usuarios/${usuarioId}/fluxos`)
 }
 
 // Colaboradores disponíveis pra adicionar como supervisionado.

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { getNotificacoes, marcarLidas } from './notificacoesService'
 import type { Notificacao } from './types'
 
@@ -9,6 +10,12 @@ export function NotificationBell() {
   const [aberto, setAberto] = useState(false)
   const [toast, setToast] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const navegar = useNavigate()
+
+  function irPara(link: string) {
+    setAberto(false)
+    navegar(link)
+  }
 
   useEffect(() => {
     getNotificacoes()
@@ -89,11 +96,19 @@ export function NotificationBell() {
           ) : (
             <ul className="max-h-80 overflow-y-auto">
               {itens.map((n) => (
-                <li
-                  key={n.id}
-                  className="border-b border-neutral-800/60 px-4 py-3 text-sm text-neutral-300 last:border-0"
-                >
-                  {n.mensagem}
+                <li key={n.id} className="border-b border-neutral-800/60 last:border-0">
+                  {n.link ? (
+                    <button
+                      type="button"
+                      onClick={() => irPara(n.link)}
+                      className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left text-sm text-neutral-300 hover:bg-neutral-800"
+                    >
+                      <span>{n.mensagem}</span>
+                      <span className="shrink-0 text-purple-300">→</span>
+                    </button>
+                  ) : (
+                    <span className="block px-4 py-3 text-sm text-neutral-300">{n.mensagem}</span>
+                  )}
                 </li>
               ))}
             </ul>
