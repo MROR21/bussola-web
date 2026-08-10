@@ -5,37 +5,32 @@ import { getFluxosConcluidos, getMeusFluxos } from '../features/fluxos/fluxosSer
 import type { Fluxo } from '../features/fluxos/types'
 import { FluxosGestor } from './FluxosGestor'
 
+// Emoji por módulo (fallback 🧩 = "peça/módulo") — dá mais cara de módulo que uma pastinha.
+const MODULO_EMOJI: Record<string, string> = {
+  'Mão de Obra': '👷',
+  'Básico do dev': '🛠️',
+  'Quiz Quality': '🔍',
+  'Agilean (desktop)': '🖥️',
+}
+const emojiDoModulo = (m: string) => MODULO_EMOJI[m] ?? '🧩'
+
 // Aba Fluxos: gestor vê a visão de atribuição; colaborador navega os fluxos dele.
 export function FluxosPage() {
   const isGestor = useAuthStore((s) => s.usuario?.isGestor ?? false)
   return isGestor ? <FluxosGestor /> : <FluxosColaborador />
 }
 
-// Referência viva do colaborador: só os fluxos que ele vê (squad + Básico + atribuídos).
+// Referência viva do colaborador: módulos em cards → entra → fluxos dentro (+ busca global).
 function FluxosColaborador() {
   const [fluxos, setFluxos] = useState<Fluxo[]>([])
   const [concluidos, setConcluidos] = useState<Set<string>>(new Set())
   const [busca, setBusca] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [moduloSelecionado, setModuloSelecionado] = useState<string | null>(null)
   const [params] = useSearchParams()
   const destaqueParam = params.get('destaque')
-  const [destacado, setDestacado] = useState<string | null>(destaqueParam)
-
-  // Ao chegar via notificação (?destaque=), rola até o fluxo e pulsa a borda por alguns segundos.
-  useEffect(() => {
-    setDestacado(destaqueParam)
-  }, [destaqueParam])
-
-  useEffect(() => {
-    if (!destacado || loading) return
-    document.getElementById(`fluxo-${destacado}`)?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center',
-    })
-    const t = setTimeout(() => setDestacado(null), 4000)
-    return () => clearTimeout(t)
-  }, [destacado, loading])
+  const [destacado, setDestacado] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelado = false
@@ -56,19 +51,37 @@ function FluxosColaborador() {
     }
   }, [])
 
-  const feitos = fluxos.filter((f) => concluidos.has(f.id)).length
+  // Notificação (?destaque=): entra no módulo do fluxo e marca ele pra pulsar.
+  useEffect(() => {
+    if (!destaqueParam || loading) return
+    const alvo = fluxos.find((f) => f.id === destaqueParam)
+    if (alvo) {
+      setModuloSelecionado(alvo.modulo)
+      setDestacado(destaqueParam)
+    }
+  }, [destaqueParam, loading, fluxos])
 
-  const filtrados = useMemo(() => {
-    const q = busca.trim().toLowerCase()
-    if (!q) return fluxos
-    return fluxos.filter((f) =>
-      `${f.titulo} ${f.descricao} ${f.categoria} ${f.modulo}`.toLowerCase().includes(q),
-    )
-  }, [busca, fluxos])
+  // Depois de entrar no módulo, rola até o fluxo e pulsa a borda por alguns segundos.
+  useEffect(() => {
+    if (!destacado) return
+    const rolar = setTimeout(() => {
+      document.getElementById(`fluxo-${destacado}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+    }, 60)
+    const limpar = setTimeout(() => setDestacado(null), 4000)
+    return () => {
+      clearTimeout(rolar)
+      clearTimeout(limpar)
+    }
+  }, [destacado, moduloSelecionado])
+
+  const feitos = fluxos.filter((f) => concluidos.has(f.id)).length
 
   const porModulo = useMemo(() => {
     const grupos = new Map<string, Fluxo[]>()
-    for (const fluxo of filtrados) {
+    for (const fluxo of fluxos) {
       const lista = grupos.get(fluxo.modulo) ?? []
       lista.push(fluxo)
       grupos.set(fluxo.modulo, lista)
@@ -77,8 +90,71 @@ function FluxosColaborador() {
     return [...grupos.entries()].sort(
       (a, b) => Number(a[0] === 'Básico do dev') - Number(b[0] === 'Básico do dev'),
     )
-  }, [filtrados])
+  }, [fluxos])
 
+  const resultadosBusca = useMemo(() => {
+    const q = busca.trim().toLowerCase()
+    if (!q) return []
+    return fluxos.filter((f) =>
+      `${f.titulo} ${f.descricao} ${f.categoria} ${f.modulo}`.toLowerCase().includes(q),
+    )
+  }, [busca, fluxos])
+
+  // Um item de fluxo (card com link), reusado na busca e dentro do módulo.
+  function itemFluxo(fluxo: Fluxo) {
+    return (
+      <li key={fluxo.id} id={`fluxo-${fluxo.id}`}>
+        <Link
+          to={`/fluxo/${fluxo.id}`}
+          className={
+            'flex flex-col gap-1 rounded-xl border border-neutral-800 bg-neutral-900 p-4 transition-colors hover:border-purple-500/50' +
+            (destacado === fluxo.id ? ' animate-pulse ring-2 ring-purple-400' : '')
+          }
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-medium text-neutral-100">{fluxo.titulo}</span>
+            {fluxo.videoUrl && <span title="Tem vídeo">🎬</span>}
+            {concluidos.has(fluxo.id) && (
+              <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
+                ✓ Concluído
+              </span>
+            )}
+            {fluxo.categoria && (
+              <span className="rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-400">
+                {fluxo.categoria}
+              </span>
+            )}
+          </div>
+          <span className="text-sm text-neutral-400">{fluxo.descricao}</span>
+        </Link>
+      </li>
+    )
+  }
+
+  if (loading) return <p className="text-neutral-400">Carregando fluxos...</p>
+  if (error) return <p className="text-red-400">Erro: {error}</p>
+
+  // ---- Dentro de um módulo ----
+  if (moduloSelecionado) {
+    const itens = porModulo.find(([m]) => m === moduloSelecionado)?.[1] ?? []
+    return (
+      <div className="flex w-full max-w-2xl flex-col gap-5">
+        <button
+          type="button"
+          onClick={() => setModuloSelecionado(null)}
+          className="self-start text-sm text-neutral-400 hover:text-neutral-200"
+        >
+          ← Voltar pros módulos
+        </button>
+        <h1 className="text-2xl font-bold text-neutral-100">{moduloSelecionado}</h1>
+        <ul className="flex flex-col gap-2">{itens.map(itemFluxo)}</ul>
+      </div>
+    )
+  }
+
+  const buscando = busca.trim().length > 0
+
+  // ---- Lista de módulos (cards) + busca global ----
   return (
     <div className="flex w-full max-w-2xl flex-col gap-6">
       <header className="flex flex-col gap-1">
@@ -100,49 +176,43 @@ function FluxosColaborador() {
         className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
       />
 
-      {loading && <p className="text-neutral-400">Carregando fluxos...</p>}
-      {error && <p className="text-red-400">Erro: {error}</p>}
-      {!loading && !error && filtrados.length === 0 && (
-        <p className="text-neutral-500">Nenhum fluxo encontrado.</p>
+      {buscando ? (
+        resultadosBusca.length === 0 ? (
+          <p className="text-neutral-500">Nenhum fluxo encontrado.</p>
+        ) : (
+          <ul className="flex flex-col gap-2">{resultadosBusca.map(itemFluxo)}</ul>
+        )
+      ) : (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {porModulo.map(([modulo, itens]) => {
+            const feitosMod = itens.filter((f) => concluidos.has(f.id)).length
+            const pct = itens.length > 0 ? Math.round((feitosMod / itens.length) * 100) : 0
+            return (
+              <button
+                key={modulo}
+                type="button"
+                onClick={() => setModuloSelecionado(modulo)}
+                className="flex flex-col gap-2 rounded-2xl border border-neutral-800 bg-neutral-900 p-5 text-left transition-colors hover:border-purple-500/50"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl">{emojiDoModulo(modulo)}</span>
+                  <span className="text-neutral-600">›</span>
+                </div>
+                <h3 className="font-semibold text-neutral-100">{modulo}</h3>
+                <span className="text-sm text-neutral-500">
+                  {feitosMod} de {itens.length} concluídos
+                </span>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
+                  <div
+                    className="h-full rounded-full bg-purple-500 transition-all"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </button>
+            )
+          })}
+        </div>
       )}
-
-      {porModulo.map(([modulo, itens]) => (
-        <section key={modulo} className="flex flex-col gap-2">
-          <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-neutral-500">
-            {modulo}
-            <span className="font-normal normal-case text-neutral-600">({itens.length})</span>
-          </h2>
-          <ul className="flex flex-col gap-2">
-            {itens.map((fluxo) => (
-              <li key={fluxo.id} id={`fluxo-${fluxo.id}`}>
-                <Link
-                  to={`/fluxo/${fluxo.id}`}
-                  className={
-                    'flex flex-col gap-1 rounded-xl border border-neutral-800 bg-neutral-900 p-4 transition-colors hover:border-purple-500/50' +
-                    (destacado === fluxo.id ? ' animate-pulse ring-2 ring-purple-400' : '')
-                  }
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-medium text-neutral-100">{fluxo.titulo}</span>
-                    {fluxo.videoUrl && <span title="Tem vídeo">🎬</span>}
-                    {concluidos.has(fluxo.id) && (
-                      <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
-                        ✓ Concluído
-                      </span>
-                    )}
-                    {fluxo.categoria && (
-                      <span className="rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-400">
-                        {fluxo.categoria}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-sm text-neutral-400">{fluxo.descricao}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
     </div>
   )
 }

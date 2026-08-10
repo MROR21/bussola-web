@@ -26,6 +26,11 @@ export function atribuirFluxo(fluxoId: string, usuarioId: string): Promise<void>
   return apiSend('POST', `/gestor/fluxos/${fluxoId}/atribuir/${usuarioId}`)
 }
 
+// Desvincula um fluxo antes atribuído a um supervisionado.
+export function desvincularFluxo(fluxoId: string, usuarioId: string): Promise<void> {
+  return apiSend('DELETE', `/gestor/fluxos/${fluxoId}/atribuir/${usuarioId}`)
+}
+
 // Ids dos fluxos que o usuário logado já concluiu.
 export function getFluxosConcluidos(): Promise<string[]> {
   return apiGet<string[]>('/fluxos/concluidos')

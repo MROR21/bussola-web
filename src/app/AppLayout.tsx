@@ -1,13 +1,35 @@
 import { useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuthStore } from '../features/auth/authStore'
 import { NotificationBell } from '../features/notificacoes/NotificationBell'
 import { cx } from '../utils/cx'
 
+// Ícone de trilha: uma linha ligando 4 pontos (etapas), herda a cor do link (currentColor).
+function TrilhaIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="size-[18px]"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 18 L10 11 L15 14 L19 6" />
+      <circle cx="5" cy="18" r="2.2" fill="currentColor" stroke="none" />
+      <circle cx="10" cy="11" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="14" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="19" cy="6" r="2.2" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
 type Papel = 'gestor' | 'colaborador'
-const NAV: { to: string; label: string; icon: string; end: boolean; papel?: Papel }[] = [
+const NAV: { to: string; label: string; icon: ReactNode; end: boolean; papel?: Papel }[] = [
   { to: '/gestor', label: 'Supervisionados', icon: '👥', end: false, papel: 'gestor' },
-  { to: '/', label: 'Jornada', icon: '🧭', end: true, papel: 'colaborador' },
+  { to: '/', label: 'Jornada', icon: <TrilhaIcon />, end: true, papel: 'colaborador' },
   { to: '/fluxos', label: 'Fluxos', icon: '📚', end: false },
   { to: '/chat', label: 'Assistente', icon: '💬', end: false },
 ]

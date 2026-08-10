@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { atribuirFluxo, getAtribuicoes, listarFluxos } from '../features/fluxos/fluxosService'
+import {
+  atribuirFluxo,
+  desvincularFluxo,
+  getAtribuicoes,
+  listarFluxos,
+} from '../features/fluxos/fluxosService'
 import type { Atribuicao, Fluxo } from '../features/fluxos/types'
 import { getUsuariosProgresso } from '../features/gestor/gestorService'
 import type { UsuarioProgresso } from '../features/gestor/types'
@@ -57,6 +62,16 @@ export function FluxosGestor() {
     }
   }
 
+  async function desvincular(fluxo: Fluxo, atrib: Atribuicao) {
+    try {
+      await desvincularFluxo(fluxo.id, atrib.usuarioId)
+      setToast({ texto: `"${fluxo.titulo}" removido de ${atrib.nome}`, ok: true })
+      await carregar()
+    } catch (e) {
+      setToast({ texto: e instanceof Error ? e.message : 'Erro ao remover', ok: false })
+    }
+  }
+
   const filtrados = useMemo(() => {
     const q = busca.trim().toLowerCase()
     if (!q) return fluxos
@@ -82,8 +97,6 @@ export function FluxosGestor() {
     fluxo.squad == null ||
     fluxo.squad === sup.squad ||
     atribuicoes.some((a) => a.fluxoId === fluxo.id && a.usuarioId === sup.id)
-
-  const nomesDoFluxo = (fluxo: Fluxo) => supervisionados.filter((s) => jaTem(fluxo, s)).map((s) => s.nome)
 
   // Tem alguém pra receber esse fluxo? (Se todos os supervisionados já têm, não dá pra atribuir.)
   const temParaAtribuir = (fluxo: Fluxo) => supervisionados.some((s) => !jaTem(fluxo, s))
@@ -118,7 +131,7 @@ export function FluxosGestor() {
           </h2>
           <ul className="flex flex-col gap-2">
             {itens.map((fluxo) => {
-              const nomes = nomesDoFluxo(fluxo)
+              const atribuidos = atribuicoes.filter((a) => a.fluxoId === fluxo.id)
               return (
                 <li
                   key={fluxo.id}
@@ -143,8 +156,26 @@ export function FluxosGestor() {
                       </span>
                     )}
                   </div>
-                  {nomes.length > 0 && (
-                    <p className="text-xs text-neutral-500">Com: {nomes.join(', ')}</p>
+                  {atribuidos.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-xs text-neutral-500">Atribuído a:</span>
+                      {atribuidos.map((a) => (
+                        <span
+                          key={a.usuarioId}
+                          className="flex items-center gap-1 rounded-full bg-purple-500/20 px-2 py-0.5 text-xs text-purple-200"
+                        >
+                          {a.nome}
+                          <button
+                            type="button"
+                            onClick={() => desvincular(fluxo, a)}
+                            aria-label={`Remover ${a.nome}`}
+                            className="text-purple-300 hover:text-white"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </li>
               )

@@ -13,6 +13,11 @@ function comAuth(headers: Record<string, string> = {}): Record<string, string> {
 // Extrai a mensagem de erro do back. Padrão do back: corpo { erro: "..." }.
 // Se não vier JSON (ex.: 204 ou 500 cru), cai numa mensagem genérica com o status.
 async function extrairErro(response: Response, path: string): Promise<string> {
+  // 401 fora do login = token expirado/inválido → desloga e volta pro login (sem erro cru).
+  if (response.status === 401 && !path.startsWith('/auth/')) {
+    useAuthStore.getState().logout()
+    return 'Sua sessão expirou. Entre novamente.'
+  }
   try {
     const body = await response.json()
     if (body && typeof body.erro === 'string') {
