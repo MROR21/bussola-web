@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { getUser } from '../features/auth/userService'
 import type { UsuarioLogado } from '../features/auth/types'
 import type { Perfil } from '../features/nivelamento/types'
@@ -36,7 +36,8 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
     getUser(usuario.id)
       .then((detalhe) => {
         if (cancelado) return
-        if (detalhe.nivelamentoConcluido) {
+        // Gestor não passa pelo nivelamento — cai direto na casca (e o "/" redireciona pro painel).
+        if (detalhe.isGestor || detalhe.nivelamentoConcluido) {
           setPerfil(detalhe.perfil)
           setEstado('pronto')
         } else {
@@ -74,7 +75,13 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
         <Route element={<AppLayout />}>
           <Route
             path="/"
-            element={<JornadaPage perfil={perfil!} onRefazer={() => setEstado('nivelar')} />}
+            element={
+              usuario.isGestor ? (
+                <Navigate to="/gestor" replace />
+              ) : (
+                <JornadaPage perfil={perfil!} onRefazer={() => setEstado('nivelar')} />
+              )
+            }
           />
           <Route path="/passo/:id" element={<PassoDetalhePage />} />
           <Route path="/fluxos" element={<FluxosPage />} />
@@ -83,7 +90,13 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
           <Route path="/gestor" element={<GestorPage />} />
           <Route
             path="*"
-            element={<JornadaPage perfil={perfil!} onRefazer={() => setEstado('nivelar')} />}
+            element={
+              usuario.isGestor ? (
+                <Navigate to="/gestor" replace />
+              ) : (
+                <JornadaPage perfil={perfil!} onRefazer={() => setEstado('nivelar')} />
+              )
+            }
           />
         </Route>
       </Routes>

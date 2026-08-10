@@ -3,11 +3,12 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { useAuthStore } from '../features/auth/authStore'
 import { cx } from '../utils/cx'
 
-const NAV = [
-  { to: '/', label: 'Jornada', icon: '🧭', end: true, soGestor: false },
-  { to: '/fluxos', label: 'Fluxos', icon: '📚', end: false, soGestor: false },
-  { to: '/chat', label: 'Assistente', icon: '💬', end: false, soGestor: false },
-  { to: '/gestor', label: 'Gestor', icon: '📊', end: false, soGestor: true },
+type Papel = 'gestor' | 'colaborador'
+const NAV: { to: string; label: string; icon: string; end: boolean; papel?: Papel }[] = [
+  { to: '/', label: 'Jornada', icon: '🧭', end: true, papel: 'colaborador' },
+  { to: '/fluxos', label: 'Fluxos', icon: '📚', end: false },
+  { to: '/chat', label: 'Assistente', icon: '💬', end: false },
+  { to: '/gestor', label: 'Gestor', icon: '📊', end: false, papel: 'gestor' },
 ]
 
 // Casca do app (logado): menu lateral fixo + header + área de conteúdo que troca por rota.
@@ -17,7 +18,9 @@ export function AppLayout() {
   const logout = useAuthStore((state) => state.logout)
   const [status, setStatus] = useState('...')
 
-  const itensMenu = NAV.filter((item) => !item.soGestor || isGestor)
+  const itensMenu = NAV.filter(
+    (item) => !item.papel || (item.papel === 'gestor' ? isGestor : !isGestor),
+  )
 
   useEffect(() => {
     fetch('/api/health')

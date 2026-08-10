@@ -11,3 +11,11 @@ export interface UsuarioProgresso {
   passosConcluidos: number
   totalPassos: number
 }
+
+// Colaborador disponível pra virar supervisionado (GET /gestor/disponiveis).
+export interface UsuarioDisponivel {
+  id: string
+  nome: string
+  email: string
+  cargo: Cargo
+}
