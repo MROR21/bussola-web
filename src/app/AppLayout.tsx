@@ -103,7 +103,7 @@ export function AppLayout() {
             <div className="flex flex-col gap-1">
               <h2 className="text-lg font-semibold text-neutral-100">Sair do Bússola?</h2>
               <p className="text-sm text-neutral-400">
-                Você vai precisar entrar de novo pra continuar sua jornada.
+                Tem certeza que deseja sair do Bússola?
               </p>
             </div>
             <div className="flex justify-end gap-2">
