@@ -20,6 +20,7 @@ export function FluxosGestor() {
   const [error, setError] = useState<string | null>(null)
   const [modalFluxo, setModalFluxo] = useState<Fluxo | null>(null)
   const [toast, setToast] = useState<{ texto: string; ok: boolean } | null>(null)
+  const [confirmando, setConfirmando] = useState<{ fluxo: Fluxo; atrib: Atribuicao } | null>(null)
 
   async function carregar() {
     setError(null)
@@ -167,7 +168,7 @@ export function FluxosGestor() {
                           {a.nome}
                           <button
                             type="button"
-                            onClick={() => desvincular(fluxo, a)}
+                            onClick={() => setConfirmando({ fluxo, atrib: a })}
                             aria-label={`Remover ${a.nome}`}
                             className="text-purple-300 hover:text-white"
                           >
@@ -227,6 +228,45 @@ export function FluxosGestor() {
                   ))}
                 </ul>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmando && (
+        <div
+          className="fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4"
+          onClick={() => setConfirmando(null)}
+        >
+          <div
+            className="flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-col gap-1">
+              <h2 className="text-lg font-semibold text-neutral-100">Desvincular fluxo?</h2>
+              <p className="text-sm text-neutral-400">
+                Tem certeza que deseja desatribuir "{confirmando.fluxo.titulo}" de{' '}
+                {confirmando.atrib.nome}?
+              </p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmando(null)}
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  desvincular(confirmando.fluxo, confirmando.atrib)
+                  setConfirmando(null)
+                }}
+                className="rounded-lg bg-red-500/90 px-4 py-2 text-sm font-medium text-white hover:bg-red-500"
+              >
+                Desvincular
+              </button>
             </div>
           </div>
         </div>
