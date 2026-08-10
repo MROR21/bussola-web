@@ -7,7 +7,12 @@ interface LoginResponse {
   usuario: UsuarioLogado
 }
 
-// Login demo: manda nome + email; o back faz get-or-create e devolve token + usuário.
-export function login(nome: string, email: string): Promise<LoginResponse> {
-  return apiPost<LoginResponse>('/auth/login', { nome, email })
+// Login: e-mail + senha.
+export function login(email: string, senha: string): Promise<LoginResponse> {
+  return apiPost<LoginResponse>('/auth/login', { email, senha })
+}
+
+// Cadastro (auto-serviço): nome + e-mail + senha → cria a conta e já loga.
+export function register(nome: string, email: string, senha: string): Promise<LoginResponse> {
+  return apiPost<LoginResponse>('/auth/register', { nome, email, senha })
 }
