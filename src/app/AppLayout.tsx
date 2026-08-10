@@ -18,6 +18,7 @@ export function AppLayout() {
   const isGestor = useAuthStore((state) => state.usuario?.isGestor ?? false)
   const logout = useAuthStore((state) => state.logout)
   const [status, setStatus] = useState('...')
+  const [confirmandoSaida, setConfirmandoSaida] = useState(false)
 
   const itensMenu = NAV.filter(
     (item) => !item.papel || (item.papel === 'gestor' ? isGestor : !isGestor),
@@ -74,11 +75,7 @@ export function AppLayout() {
               {' · '}
               <button
                 type="button"
-                onClick={() => {
-                  if (window.confirm('Tem certeza que deseja sair do Bússola?')) {
-                    logout()
-                  }
-                }}
+                onClick={() => setConfirmandoSaida(true)}
                 className="text-purple-300 hover:text-purple-200"
               >
                 Sair
@@ -93,6 +90,41 @@ export function AppLayout() {
           </div>
         </main>
       </div>
+
+      {confirmandoSaida && (
+        <div
+          className="fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4"
+          onClick={() => setConfirmandoSaida(false)}
+        >
+          <div
+            className="flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-col gap-1">
+              <h2 className="text-lg font-semibold text-neutral-100">Sair do Bússola?</h2>
+              <p className="text-sm text-neutral-400">
+                Você vai precisar entrar de novo pra continuar sua jornada.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmandoSaida(false)}
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={logout}
+                className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400"
+              >
+                Sair
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
