@@ -6,6 +6,7 @@ export interface UsuarioLogado {
   nome: string
   email: string
   cargo: Cargo
+  isGestor: boolean
 }
 
 // Dados completos do usuário (GET /users/{id}): inclui o perfil salvo e se já nivelou.

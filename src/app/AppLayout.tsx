@@ -4,17 +4,20 @@ import { useAuthStore } from '../features/auth/authStore'
 import { cx } from '../utils/cx'
 
 const NAV = [
-  { to: '/', label: 'Jornada', icon: '🧭', end: true },
-  { to: '/fluxos', label: 'Fluxos', icon: '📚', end: false },
-  { to: '/chat', label: 'Assistente', icon: '💬', end: false },
-  { to: '/gestor', label: 'Gestor', icon: '📊', end: false },
+  { to: '/', label: 'Jornada', icon: '🧭', end: true, soGestor: false },
+  { to: '/fluxos', label: 'Fluxos', icon: '📚', end: false, soGestor: false },
+  { to: '/chat', label: 'Assistente', icon: '💬', end: false, soGestor: false },
+  { to: '/gestor', label: 'Gestor', icon: '📊', end: false, soGestor: true },
 ]
 
 // Casca do app (logado): menu lateral fixo + header + área de conteúdo que troca por rota.
 export function AppLayout() {
   const nome = useAuthStore((state) => state.usuario?.nome ?? '')
+  const isGestor = useAuthStore((state) => state.usuario?.isGestor ?? false)
   const logout = useAuthStore((state) => state.logout)
   const [status, setStatus] = useState('...')
+
+  const itensMenu = NAV.filter((item) => !item.soGestor || isGestor)
 
   useEffect(() => {
     fetch('/api/health')
@@ -31,7 +34,7 @@ export function AppLayout() {
           <span className="text-lg font-bold">Bússola</span>
         </div>
         <nav className="flex flex-col gap-1">
-          {NAV.map((item) => (
+          {itensMenu.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
