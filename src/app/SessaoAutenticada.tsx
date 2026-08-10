@@ -11,6 +11,7 @@ import { GestorPage } from '../pages/GestorPage'
 import { JornadaPage } from '../pages/JornadaPage'
 import { NivelamentoPage } from '../pages/NivelamentoPage'
 import { PassoDetalhePage } from '../pages/PassoDetalhePage'
+import { PerfilPage } from '../pages/PerfilPage'
 import { SupervisionadoPage } from '../pages/SupervisionadoPage'
 
 type Estado = 'carregando' | 'nivelar' | 'pronto'
@@ -94,6 +95,7 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
           <Route path="/fluxos" element={<FluxosPage />} />
           <Route path="/fluxo/:id" element={<FluxoDetalhePage />} />
           <Route path="/chat" element={<ChatPage />} />
+          <Route path="/perfil" element={<PerfilPage />} />
           <Route
             path="/gestor"
             element={usuario.isGestor ? <GestorPage /> : <Navigate to="/" replace />}

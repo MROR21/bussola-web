@@ -8,6 +8,8 @@ export interface UsuarioLogado {
   cargo: Cargo
   squad: Squad
   isGestor: boolean
+  // Foto de perfil (data URI base64). Ausente/vazio = sem foto (mostra as iniciais).
+  foto?: string
 }
 
 // Dados completos do usuário (GET /users/{id}): inclui o perfil salvo e se já nivelou.

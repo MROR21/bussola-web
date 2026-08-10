@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuthStore } from '../features/auth/authStore'
 import { NotificationBell } from '../features/notificacoes/NotificationBell'
+import { Avatar } from '../features/perfil/Avatar'
 import { cx } from '../utils/cx'
 
 // Ícone de trilha: uma linha ligando 4 pontos (etapas), herda a cor do link (currentColor).
@@ -32,11 +33,13 @@ const NAV: { to: string; label: string; icon: ReactNode; end: boolean; papel?: P
   { to: '/', label: 'Jornada', icon: <TrilhaIcon />, end: true, papel: 'colaborador' },
   { to: '/fluxos', label: 'Fluxos', icon: '📚', end: false },
   { to: '/chat', label: 'Assistente', icon: '💬', end: false },
+  { to: '/perfil', label: 'Perfil', icon: '⚙️', end: false },
 ]
 
 // Casca do app (logado): menu lateral fixo + header + área de conteúdo que troca por rota.
 export function AppLayout() {
   const nome = useAuthStore((state) => state.usuario?.nome ?? '')
+  const foto = useAuthStore((state) => state.usuario?.foto)
   const isGestor = useAuthStore((state) => state.usuario?.isGestor ?? false)
   const logout = useAuthStore((state) => state.logout)
   const [status, setStatus] = useState('...')
@@ -90,19 +93,22 @@ export function AppLayout() {
               {status}
             </strong>
           </span>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <NotificationBell />
-            <span className="text-sm text-neutral-400">
-              Olá, <strong className="text-neutral-200">{nome}</strong>
-              {' · '}
-              <button
-                type="button"
-                onClick={() => setConfirmandoSaida(true)}
-                className="text-purple-300 hover:text-purple-200"
-              >
-                Sair
-              </button>
-            </span>
+            <NavLink
+              to="/perfil"
+              className="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-neutral-800"
+            >
+              <Avatar nome={nome} foto={foto} className="size-8 text-xs" />
+              <span className="text-sm text-neutral-200">{nome}</span>
+            </NavLink>
+            <button
+              type="button"
+              onClick={() => setConfirmandoSaida(true)}
+              className="text-sm text-purple-300 hover:text-purple-200"
+            >
+              Sair
+            </button>
           </div>
         </header>
 
