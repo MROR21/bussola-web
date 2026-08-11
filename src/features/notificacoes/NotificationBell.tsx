@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Avatar } from '../perfil/Avatar'
 import { getNotificacoes, marcarLidas } from './notificacoesService'
 import type { Notificacao } from './types'
 
@@ -146,13 +147,29 @@ export function NotificationBell() {
                     <button
                       type="button"
                       onClick={() => irPara(n.link)}
-                      className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left text-sm text-neutral-300 hover:bg-neutral-800"
+                      className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-neutral-300 hover:bg-neutral-800"
                     >
-                      <span>{n.mensagem}</span>
+                      {n.autorNome && (
+                        <Avatar
+                          nome={n.autorNome}
+                          foto={n.autorFoto ?? undefined}
+                          className="size-7 text-[10px]"
+                        />
+                      )}
+                      <span className="flex-1">{n.mensagem}</span>
                       <span className="shrink-0 text-purple-300">→</span>
                     </button>
                   ) : (
-                    <span className="block px-4 py-3 text-sm text-neutral-300">{n.mensagem}</span>
+                    <div className="flex items-center gap-2 px-4 py-3 text-sm text-neutral-300">
+                      {n.autorNome && (
+                        <Avatar
+                          nome={n.autorNome}
+                          foto={n.autorFoto ?? undefined}
+                          className="size-7 text-[10px]"
+                        />
+                      )}
+                      <span className="flex-1">{n.mensagem}</span>
+                    </div>
                   )}
                 </li>
               ))}

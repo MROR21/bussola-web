@@ -6,4 +6,7 @@ export interface Notificacao {
   link: string
   lida: boolean
   criadaEm: string
+  // Autor da notificação (gestor ou supervisionado) — pra mostrar avatar + nome ao lado.
+  autorNome?: string | null
+  autorFoto?: string | null
 }
