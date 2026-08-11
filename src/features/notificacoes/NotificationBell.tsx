@@ -130,7 +130,7 @@ export function NotificationBell() {
       </button>
 
       {aberto && (
-        <div className="absolute right-0 z-10 mt-2 w-72 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 shadow-lg">
+        <div className="anim-pop absolute right-0 z-10 mt-2 w-72 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 shadow-lg">
           <p className="border-b border-neutral-800 px-4 py-2 text-sm font-medium text-neutral-200">
             Notificações
           </p>
@@ -165,7 +165,7 @@ export function NotificationBell() {
         <button
           type="button"
           onClick={abrir}
-          className="absolute right-full top-0 z-50 mr-3 flex w-max items-center gap-2 rounded-xl border border-purple-500/40 bg-neutral-900 px-4 py-3 text-sm text-neutral-100 shadow-lg"
+          className="anim-pop absolute right-full top-0 z-50 mr-3 flex w-max items-center gap-2 rounded-xl border border-purple-500/40 bg-neutral-900 px-4 py-3 text-sm text-neutral-100 shadow-lg"
         >
           🔔 Você tem {naoLidas} {naoLidas === 1 ? 'nova notificação' : 'novas notificações'}
           <span className="absolute -right-1 top-1/2 size-2 -translate-y-1/2 rotate-45 border-r border-t border-purple-500/40 bg-neutral-900" />

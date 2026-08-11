@@ -187,11 +187,11 @@ export function FluxosGestor() {
 
       {modalFluxo && (
         <div
-          className="fixed inset-0 z-20 flex items-center justify-center bg-black/60 p-4"
+          className="anim-fade fixed inset-0 z-20 flex items-center justify-center bg-black/60 p-4"
           onClick={() => setModalFluxo(null)}
         >
           <div
-            className="flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900"
+            className="anim-pop flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900"
             onClick={(e) => e.stopPropagation()}
           >
             <header className="flex items-center justify-between border-b border-neutral-800 px-5 py-3">
@@ -235,11 +235,11 @@ export function FluxosGestor() {
 
       {confirmando && (
         <div
-          className="fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4"
+          className="anim-fade fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4"
           onClick={() => setConfirmando(null)}
         >
           <div
-            className="flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
+            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col gap-1">
@@ -275,7 +275,7 @@ export function FluxosGestor() {
       {toast && (
         <div
           className={
-            'fixed bottom-4 right-4 z-30 rounded-xl border bg-neutral-900 px-4 py-3 text-sm shadow-lg ' +
+            'anim-pop fixed bottom-4 right-4 z-30 rounded-xl border bg-neutral-900 px-4 py-3 text-sm shadow-lg ' +
             (toast.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300')
           }
         >

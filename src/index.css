@@ -1,1 +1,57 @@
 @import "tailwindcss";
+
+/* Animações sutis do Bússola. Classes próprias (o projeto não usa os tokens ads-* da Agilean).
+   Tudo é desligado pra quem prefere menos movimento. */
+@keyframes bussola-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bussola-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes bussola-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Entrada de página/conteúdo (sobe suave). */
+.anim-page {
+  animation: bussola-fade-in-up 0.28s ease-out both;
+}
+
+/* Fade puro (backdrops, banners). */
+.anim-fade {
+  animation: bussola-fade-in 0.2s ease-out both;
+}
+
+/* Aparição com leve zoom (modais, dropdowns, toasts). */
+.anim-pop {
+  animation: bussola-pop-in 0.18s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-page,
+  .anim-fade,
+  .anim-pop {
+    animation: none;
+  }
+}

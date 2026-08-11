@@ -107,7 +107,7 @@ function FluxosColaborador() {
         <Link
           to={`/fluxo/${fluxo.id}`}
           className={
-            'flex flex-col gap-1 rounded-xl border border-neutral-800 bg-neutral-900 p-4 transition-colors hover:border-purple-500/50' +
+            'flex flex-col gap-1 rounded-xl border border-neutral-800 bg-neutral-900 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-500/50' +
             (destacado === fluxo.id ? ' animate-pulse ring-2 ring-purple-400' : '')
           }
         >
@@ -192,7 +192,7 @@ function FluxosColaborador() {
                 key={modulo}
                 type="button"
                 onClick={() => setModuloSelecionado(modulo)}
-                className="flex flex-col gap-2 rounded-2xl border border-neutral-800 bg-neutral-900 p-5 text-left transition-colors hover:border-purple-500/50"
+                className="flex flex-col gap-2 rounded-2xl border border-neutral-800 bg-neutral-900 p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-500/50"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-2xl">{emojiDoModulo(modulo)}</span>

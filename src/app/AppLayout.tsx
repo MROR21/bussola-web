@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../features/auth/authStore'
 import { NotificationBell } from '../features/notificacoes/NotificationBell'
 import { Avatar } from '../features/perfil/Avatar'
+import { useApiStatus } from './useApiStatus'
 import { cx } from '../utils/cx'
 
 // Ícone de trilha: uma linha ligando 4 pontos (etapas), herda a cor do link (currentColor).
@@ -42,19 +43,13 @@ export function AppLayout() {
   const foto = useAuthStore((state) => state.usuario?.foto)
   const isGestor = useAuthStore((state) => state.usuario?.isGestor ?? false)
   const logout = useAuthStore((state) => state.logout)
-  const [status, setStatus] = useState('...')
   const [confirmandoSaida, setConfirmandoSaida] = useState(false)
+  const status = useApiStatus()
+  const location = useLocation()
 
   const itensMenu = NAV.filter(
     (item) => !item.papel || (item.papel === 'gestor' ? isGestor : !isGestor),
   )
-
-  useEffect(() => {
-    fetch('/api/health')
-      .then((r) => r.json())
-      .then((d) => setStatus(d.status ?? 'desconhecido'))
-      .catch(() => setStatus('offline'))
-  }, [])
 
   return (
     <div className="flex h-screen overflow-hidden bg-neutral-950 text-neutral-100">
@@ -89,8 +84,14 @@ export function AppLayout() {
         <header className="flex h-14 shrink-0 items-center justify-between border-b border-neutral-800 px-6">
           <span className="text-xs text-neutral-500">
             API:{' '}
-            <strong className={status === 'ok' ? 'text-green-400' : 'text-red-400'}>
-              {status}
+            <strong
+              className={cx(
+                status === 'ok' && 'text-green-400',
+                status === 'offline' && 'text-red-400',
+                status === 'checando' && 'text-neutral-400',
+              )}
+            >
+              {status === 'checando' ? '...' : status}
             </strong>
           </span>
           <div className="flex items-center gap-3">
@@ -112,8 +113,14 @@ export function AppLayout() {
           </div>
         </header>
 
+        {status === 'offline' && (
+          <div className="anim-fade flex items-center justify-center gap-2 bg-red-500/15 px-4 py-1.5 text-center text-xs text-red-300">
+            ⚠ Sem conexão com o servidor. Tentando reconectar…
+          </div>
+        )}
+
         <main className="flex-1 overflow-y-auto p-6">
-          <div className="flex w-full justify-center">
+          <div key={location.pathname} className="anim-page flex w-full justify-center">
             <Outlet />
           </div>
         </main>
@@ -121,11 +128,11 @@ export function AppLayout() {
 
       {confirmandoSaida && (
         <div
-          className="fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4"
+          className="anim-fade fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4"
           onClick={() => setConfirmandoSaida(false)}
         >
           <div
-            className="flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
+            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col gap-1">

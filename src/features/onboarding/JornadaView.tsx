@@ -176,7 +176,7 @@ export function JornadaView({
               key={fase}
               type="button"
               onClick={() => setFaseSelecionada(fase)}
-              className="flex flex-col gap-2 rounded-2xl border border-neutral-800 bg-neutral-900 p-5 text-left transition-colors hover:border-purple-500/50"
+              className="flex flex-col gap-2 rounded-2xl border border-neutral-800 bg-neutral-900 p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-500/50"
             >
               <div className="flex items-center justify-between">
                 <span className="text-2xl">{emojiDaFase(fase)}</span>
