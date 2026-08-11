@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { EstadoErro } from '../components/EstadoErro'
 import {
   atribuirFluxo,
   desvincularFluxo,
@@ -107,7 +108,7 @@ export function FluxosGestor() {
     : []
 
   if (loading) return <p className="text-neutral-400">Carregando os fluxos...</p>
-  if (error) return <p className="text-red-400">Erro: {error}</p>
+  if (error) return <EstadoErro onRetry={carregar} />
 
   return (
     <div className="flex w-full max-w-2xl flex-col gap-6">

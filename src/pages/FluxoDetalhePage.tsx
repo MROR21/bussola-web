@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { EstadoErro } from '../components/EstadoErro'
 import { Markdown } from '../components/Markdown'
 import { cx } from '../utils/cx'
 import {
@@ -33,6 +34,7 @@ export function FluxoDetalhePage() {
   const [concluido, setConcluido] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [tentativa, setTentativa] = useState(0)
 
   useEffect(() => {
     let cancelado = false
@@ -53,7 +55,7 @@ export function FluxoDetalhePage() {
     return () => {
       cancelado = true
     }
-  }, [id])
+  }, [id, tentativa])
 
   // Alterna concluído de forma otimista (desfaz se o back falhar).
   async function toggle() {
@@ -68,7 +70,7 @@ export function FluxoDetalhePage() {
   }
 
   if (loading) return <p className="text-neutral-400">Carregando o fluxo...</p>
-  if (error) return <p className="text-red-400">Erro: {error}</p>
+  if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
   if (!fluxo) return null
 
   return (

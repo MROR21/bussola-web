@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '../features/auth/authStore'
+import { EstadoErro } from '../components/EstadoErro'
 import { getFluxosConcluidos, getMeusFluxos } from '../features/fluxos/fluxosService'
 import type { Fluxo } from '../features/fluxos/types'
 import { FluxosGestor } from './FluxosGestor'
@@ -28,12 +29,15 @@ function FluxosColaborador() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [moduloSelecionado, setModuloSelecionado] = useState<string | null>(null)
+  const [tentativa, setTentativa] = useState(0)
   const [params] = useSearchParams()
   const destaqueParam = params.get('destaque')
   const [destacado, setDestacado] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelado = false
+    setLoading(true)
+    setError(null)
     Promise.all([getMeusFluxos(), getFluxosConcluidos()])
       .then(([f, ids]) => {
         if (cancelado) return
@@ -49,7 +53,7 @@ function FluxosColaborador() {
     return () => {
       cancelado = true
     }
-  }, [])
+  }, [tentativa])
 
   // Notificação (?destaque=): entra no módulo do fluxo e marca ele pra pulsar.
   useEffect(() => {
@@ -101,7 +105,8 @@ function FluxosColaborador() {
   }, [busca, fluxos])
 
   // Um item de fluxo (card com link), reusado na busca e dentro do módulo.
-  function itemFluxo(fluxo: Fluxo) {
+  // ocultarTag: esconde o chip da categoria quando o item já está sob o cabeçalho da tag.
+  function itemFluxo(fluxo: Fluxo, ocultarTag = false) {
     return (
       <li key={fluxo.id} id={`fluxo-${fluxo.id}`}>
         <Link
@@ -119,7 +124,7 @@ function FluxosColaborador() {
                 ✓ Concluído
               </span>
             )}
-            {fluxo.categoria && (
+            {!ocultarTag && fluxo.categoria && (
               <span className="rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-400">
                 {fluxo.categoria}
               </span>
@@ -132,11 +137,23 @@ function FluxosColaborador() {
   }
 
   if (loading) return <p className="text-neutral-400">Carregando fluxos...</p>
-  if (error) return <p className="text-red-400">Erro: {error}</p>
+  if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
 
   // ---- Dentro de um módulo ----
   if (moduloSelecionado) {
     const itens = porModulo.find(([m]) => m === moduloSelecionado)?.[1] ?? []
+
+    // Agrupa por tag (categoria) pra organizar por tópico. Se o módulo só tem uma tag
+    // (ex.: os de "Sistema"), mostra lista simples — sem cabeçalho redundante.
+    const porTag = new Map<string, Fluxo[]>()
+    for (const f of itens) {
+      const tag = f.categoria || 'Outros'
+      const lista = porTag.get(tag) ?? []
+      lista.push(f)
+      porTag.set(tag, lista)
+    }
+    const grupos = [...porTag.entries()].sort((a, b) => a[0].localeCompare(b[0], 'pt'))
+
     return (
       <div className="flex w-full max-w-2xl flex-col gap-5">
         <button
@@ -147,7 +164,22 @@ function FluxosColaborador() {
           ← Voltar pros módulos
         </button>
         <h1 className="text-2xl font-bold text-neutral-100">{moduloSelecionado}</h1>
-        <ul className="flex flex-col gap-2">{itens.map(itemFluxo)}</ul>
+        {grupos.length > 1 ? (
+          <div className="flex flex-col gap-6">
+            {grupos.map(([tag, fluxosTag]) => (
+              <section key={tag} className="flex flex-col gap-2">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+                  {tag}
+                </h2>
+                <ul className="flex flex-col gap-2">
+                  {fluxosTag.map((f) => itemFluxo(f, true))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        ) : (
+          <ul className="flex flex-col gap-2">{itens.map((f) => itemFluxo(f))}</ul>
+        )}
       </div>
     )
   }
@@ -180,7 +212,7 @@ function FluxosColaborador() {
         resultadosBusca.length === 0 ? (
           <p className="text-neutral-500">Nenhum fluxo encontrado.</p>
         ) : (
-          <ul className="flex flex-col gap-2">{resultadosBusca.map(itemFluxo)}</ul>
+          <ul className="flex flex-col gap-2">{resultadosBusca.map((f) => itemFluxo(f))}</ul>
         )
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
