@@ -101,13 +101,34 @@ export function SupervisionadoPage() {
               </h2>
               <ul className="flex flex-col gap-1">
                 {itens.map((p) => (
-                  <li key={p.id} className="flex items-center gap-2 text-sm">
-                    <span className={p.concluido ? 'text-purple-400' : 'text-neutral-600'}>
-                      {p.concluido ? '✓' : '○'}
-                    </span>
-                    <span className={p.concluido ? 'text-neutral-300' : 'text-neutral-500'}>
-                      {p.title}
-                    </span>
+                  <li key={p.id} className="flex flex-col gap-1 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className={p.concluido ? 'text-purple-400' : 'text-neutral-600'}>
+                        {p.concluido ? '✓' : '○'}
+                      </span>
+                      <span className={p.concluido ? 'text-neutral-300' : 'text-neutral-500'}>
+                        {p.title}
+                      </span>
+                    </div>
+                    {p.concluido && p.evidencia && (
+                      <div className="ml-6 flex items-start gap-1.5 text-xs">
+                        <span className="text-neutral-600">📎</span>
+                        {/^https?:\/\//i.test(p.evidencia.trim()) ? (
+                          <a
+                            href={p.evidencia}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="break-all text-purple-300 underline hover:text-purple-200"
+                          >
+                            {p.evidencia}
+                          </a>
+                        ) : (
+                          <span className="whitespace-pre-wrap break-words text-neutral-400">
+                            {p.evidencia}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>

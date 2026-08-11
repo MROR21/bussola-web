@@ -28,6 +28,8 @@ export interface PassoProgresso {
   phase: string
   title: string
   concluido: boolean
+  // Comprovação anexada pelo supervisionado (link do PR, print ou nota). Vazio = sem comprovação.
+  evidencia: string
 }
 
 // Progresso detalhado de um supervisionado (GET /gestor/usuarios/{id}/progresso).
