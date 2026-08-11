@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { cx } from '../../utils/cx'
 import { PassoCard } from './PassoCard'
 import { ProgressRing } from './ProgressRing'
 import { concluirPasso, desmarcarPasso, getProgresso } from './progressService'
@@ -166,40 +167,60 @@ export function JornadaView({
       )}
 
       {/* Fases em cards — clica e entra na fase */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {fases.map(([fase, passos]) => {
-          const feitosFase = passos.filter((step) => concluidos.has(step.id)).length
-          const pct = passos.length > 0 ? Math.round((feitosFase / passos.length) * 100) : 0
-          const faseCompleta = feitosFase === passos.length
-          return (
-            <button
-              key={fase}
-              type="button"
-              onClick={() => setFaseSelecionada(fase)}
-              className="flex flex-col gap-2 rounded-2xl border border-neutral-800 bg-neutral-900 p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-500/50"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-2xl">{emojiDaFase(fase)}</span>
-                {faseCompleta ? (
-                  <span title="Fase concluída">🎖️</span>
-                ) : (
-                  <span className="text-neutral-600">›</span>
+      <section className="flex flex-col gap-3">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+          Fases da jornada
+        </h3>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {fases.map(([fase, passos], i) => {
+            const feitosFase = passos.filter((step) => concluidos.has(step.id)).length
+            const pct = passos.length > 0 ? Math.round((feitosFase / passos.length) * 100) : 0
+            const faseCompleta = feitosFase === passos.length
+            const atual = proximo?.phase === fase
+            return (
+              <button
+                key={fase}
+                type="button"
+                onClick={() => setFaseSelecionada(fase)}
+                className={cx(
+                  'flex flex-col gap-2 rounded-2xl border bg-neutral-900 p-5 text-left transition-all duration-200 hover:-translate-y-0.5',
+                  atual
+                    ? 'border-purple-500/60 hover:border-purple-500'
+                    : 'border-neutral-800 hover:border-purple-500/50',
                 )}
-              </div>
-              <h3 className="font-semibold text-neutral-100">{fase}</h3>
-              <span className="text-sm text-neutral-500">
-                {feitosFase} de {passos.length} passos
-              </span>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
-                <div
-                  className="h-full rounded-full bg-purple-500 transition-all"
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-            </button>
-          )
-        })}
-      </div>
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl">{emojiDaFase(fase)}</span>
+                  {faseCompleta ? (
+                    <span title="Fase concluída">🎖️</span>
+                  ) : atual ? (
+                    <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] font-medium text-purple-200">
+                      Você está aqui
+                    </span>
+                  ) : (
+                    <span className="text-neutral-600">›</span>
+                  )}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+                    Fase {i + 1}
+                  </span>
+                  <h3 className="font-semibold text-neutral-100">{fase}</h3>
+                </div>
+                <span className="text-sm text-neutral-500">
+                  {feitosFase} de {passos.length} passos
+                </span>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
+                  <div
+                    className="h-full rounded-full bg-purple-500 transition-all"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </section>
 
       <button
         type="button"
