@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { cx } from '../../utils/cx'
 import { PassoCard } from './PassoCard'
 import { ProgressRing } from './ProgressRing'
@@ -29,7 +30,12 @@ export function JornadaView({
   onRestart: () => void
 }) {
   const [concluidos, setConcluidos] = useState<Set<string>>(new Set())
-  const [faseSelecionada, setFaseSelecionada] = useState<string | null>(null)
+  // A fase aberta vive na URL (?fase=...) — assim o "voltar" do navegador sai da fase
+  // (em vez de sair da página), igual entrar/sair funcionasse por rota.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const faseSelecionada = searchParams.get('fase')
+  const entrarFase = (fase: string) => setSearchParams({ fase })
+  const sairFase = () => setSearchParams({})
 
   useEffect(() => {
     getProgresso(userId)
@@ -79,22 +85,24 @@ export function JornadaView({
   const faseAtualIndex = proximo ? fases.findIndex(([fase]) => fase === proximo.phase) : fases.length - 1
 
   // ---- Vista de UMA fase (entrou no card) ----
-  if (faseSelecionada) {
-    const passos = fases.find(([f]) => f === faseSelecionada)?.[1] ?? []
+  // Só entra se a fase da URL existe de fato (param inválido/velho → cai na home).
+  const faseEntry = faseSelecionada ? fases.find(([f]) => f === faseSelecionada) : undefined
+  if (faseEntry) {
+    const [faseNome, passos] = faseEntry
     const feitosFase = passos.filter((s) => concluidos.has(s.id)).length
     return (
       <div className="flex w-full max-w-2xl flex-col gap-5">
         <button
           type="button"
-          onClick={() => setFaseSelecionada(null)}
+          onClick={sairFase}
           className="self-start text-sm text-neutral-400 hover:text-neutral-200"
         >
           ← Voltar pra jornada
         </button>
         <header className="flex items-center gap-3">
-          <span className="text-3xl">{emojiDaFase(faseSelecionada)}</span>
+          <span className="text-3xl">{emojiDaFase(faseNome)}</span>
           <div className="flex flex-col">
-            <h2 className="text-xl font-bold text-neutral-100">{faseSelecionada}</h2>
+            <h2 className="text-xl font-bold text-neutral-100">{faseNome}</h2>
             <span className="text-sm text-neutral-500">
               {feitosFase} de {passos.length} passos concluídos
             </span>
@@ -157,7 +165,7 @@ export function JornadaView({
             </div>
             <button
               type="button"
-              onClick={() => setFaseSelecionada(proximo.phase)}
+              onClick={() => entrarFase(proximo.phase)}
               className="self-start rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400"
             >
               Ir para o passo
@@ -181,7 +189,7 @@ export function JornadaView({
               <button
                 key={fase}
                 type="button"
-                onClick={() => setFaseSelecionada(fase)}
+                onClick={() => entrarFase(fase)}
                 className={cx(
                   'flex flex-col gap-2 rounded-2xl border bg-neutral-900 p-5 text-left transition-all duration-200 hover:-translate-y-0.5',
                   atual
