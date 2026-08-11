@@ -3,13 +3,19 @@ import { useNavigate } from 'react-router-dom'
 import { getNotificacoes, marcarLidas } from './notificacoesService'
 import type { Notificacao } from './types'
 
+// De quanto em quanto tempo o sino busca novidades (só enquanto a aba está visível).
+const POLL_MS = 20_000
+
 // Sininho do header: bolinha com o nº de não-lidas, dropdown (fecha ao clicar fora) e um
-// toast temporário ao entrar quando há notificação nova.
+// toast ao chegar notificação nova. Busca em tempo (quase) real via polling, pausando em
+// segundo plano.
 export function NotificationBell() {
   const [itens, setItens] = useState<Notificacao[]>([])
   const [aberto, setAberto] = useState(false)
   const [toast, setToast] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  // Ids que já dispararam toast — garante um aviso por notificação, sem repetir a cada poll.
+  const jaAvisadasRef = useRef<Set<string>>(new Set())
   const navegar = useNavigate()
 
   function irPara(link: string) {
@@ -18,12 +24,51 @@ export function NotificationBell() {
   }
 
   useEffect(() => {
-    getNotificacoes()
-      .then((n) => {
+    let ativo = true
+    let intervalo: ReturnType<typeof setInterval> | undefined
+
+    async function carregar() {
+      try {
+        const n = await getNotificacoes()
+        if (!ativo) return
         setItens(n)
-        if (n.some((x) => !x.lida)) setToast(true)
-      })
-      .catch(() => {})
+        // Novidade = não-lida que ainda não avisamos. Toast só pra essas.
+        const novas = n.filter((x) => !x.lida && !jaAvisadasRef.current.has(x.id))
+        if (novas.length > 0) {
+          novas.forEach((x) => jaAvisadasRef.current.add(x.id))
+          setToast(true)
+        }
+      } catch {
+        // silencioso — mantém a lista atual
+      }
+    }
+
+    function iniciar() {
+      if (!intervalo) intervalo = setInterval(carregar, POLL_MS)
+    }
+    function parar() {
+      if (intervalo) {
+        clearInterval(intervalo)
+        intervalo = undefined
+      }
+    }
+    function aoMudarVisibilidade() {
+      if (document.hidden) {
+        parar()
+      } else {
+        carregar() // ao voltar pra aba, atualiza na hora
+        iniciar()
+      }
+    }
+
+    carregar()
+    iniciar()
+    document.addEventListener('visibilitychange', aoMudarVisibilidade)
+    return () => {
+      ativo = false
+      parar()
+      document.removeEventListener('visibilitychange', aoMudarVisibilidade)
+    }
   }, [])
 
   // O toast some sozinho depois de alguns segundos.
