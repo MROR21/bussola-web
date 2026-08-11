@@ -152,7 +152,11 @@ function FluxosColaborador() {
       lista.push(f)
       porTag.set(tag, lista)
     }
-    const grupos = [...porTag.entries()].sort((a, b) => a[0].localeCompare(b[0], 'pt'))
+    // "Visão geral" sempre lidera; o resto em ordem alfabética.
+    const pesoTag = (t: string) => (t === 'Visão geral' ? '' : t)
+    const grupos = [...porTag.entries()].sort((a, b) =>
+      pesoTag(a[0]).localeCompare(pesoTag(b[0]), 'pt'),
+    )
 
     return (
       <div className="flex w-full max-w-2xl flex-col gap-5">
