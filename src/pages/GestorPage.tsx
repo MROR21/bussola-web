@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { EstadoErro } from '../components/EstadoErro'
 import {
   adicionarSupervisionado,
   getDisponiveis,
@@ -49,7 +50,7 @@ export function GestorPage() {
   }
 
   if (loading) return <p className="text-neutral-400">Carregando o painel...</p>
-  if (error) return <p className="text-red-400">Erro: {error}</p>
+  if (error) return <EstadoErro onRetry={carregar} />
 
   return (
     <div className="flex w-full max-w-2xl flex-col gap-6">

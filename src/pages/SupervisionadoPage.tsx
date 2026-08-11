@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { EstadoErro } from '../components/EstadoErro'
 import { cx } from '../utils/cx'
 import { getFluxosSupervisionado, getProgressoDetalhado } from '../features/gestor/gestorService'
 import type { FluxoProgresso, ProgressoSupervisionado } from '../features/gestor/types'
@@ -12,6 +13,7 @@ export function SupervisionadoPage() {
   const [aba, setAba] = useState<'passos' | 'fluxos'>('passos')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [tentativa, setTentativa] = useState(0)
 
   useEffect(() => {
     let cancelado = false
@@ -32,7 +34,7 @@ export function SupervisionadoPage() {
     return () => {
       cancelado = true
     }
-  }, [id])
+  }, [id, tentativa])
 
   const fasesPassos = useMemo(() => {
     const grupos: Record<string, ProgressoSupervisionado['passos']> = {}
@@ -57,7 +59,7 @@ export function SupervisionadoPage() {
   }, [fluxos])
 
   if (loading) return <p className="text-neutral-400">Carregando o progresso...</p>
-  if (error) return <p className="text-red-400">Erro: {error}</p>
+  if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
   if (!dados) return null
 
   const passosFeitos = dados.passos.filter((p) => p.concluido).length

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { EstadoErro } from '../components/EstadoErro'
 import { getUser } from '../features/auth/userService'
 import type { UsuarioLogado } from '../features/auth/types'
 import type { Perfil } from '../features/nivelamento/types'
@@ -31,6 +32,7 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
   const [perfil, setPerfil] = useState<Perfil | null>(null)
   const [gestorNome, setGestorNome] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [tentativa, setTentativa] = useState(0)
 
   useEffect(() => {
     let cancelado = false
@@ -54,9 +56,18 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
     return () => {
       cancelado = true
     }
-  }, [usuario.id])
+  }, [usuario.id, tentativa])
 
-  if (error) return <TelaCheia><p className="text-red-400">Erro: {error}</p></TelaCheia>
+  if (error) {
+    return (
+      <TelaCheia>
+        <EstadoErro
+          mensagem="Não consegui carregar sua sessão. Verifique a conexão e tente de novo."
+          onRetry={() => setTentativa((t) => t + 1)}
+        />
+      </TelaCheia>
+    )
+  }
   if (estado === 'carregando') {
     return <TelaCheia><p className="text-neutral-400">Carregando sua jornada...</p></TelaCheia>
   }

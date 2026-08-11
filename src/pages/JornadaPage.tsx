@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { EstadoErro } from '../components/EstadoErro'
 import { useAuthStore } from '../features/auth/authStore'
 import { postTrail } from '../features/nivelamento/nivelamentoService'
 import type { Perfil } from '../features/nivelamento/types'
@@ -20,6 +21,7 @@ export function JornadaPage({
   const [trail, setTrail] = useState<TrailStep[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [tentativa, setTentativa] = useState(0)
 
   useEffect(() => {
     let cancelado = false
@@ -38,11 +40,11 @@ export function JornadaPage({
     return () => {
       cancelado = true
     }
-  }, [perfil])
+  }, [perfil, tentativa])
 
   if (!usuario) return null
   if (loading) return <p className="text-neutral-400">Montando sua trilha...</p>
-  if (error) return <p className="text-red-400">Erro: {error}</p>
+  if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
   if (!trail) return null
 
   return (

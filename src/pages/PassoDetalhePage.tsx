@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { EstadoErro } from '../components/EstadoErro'
 import { Markdown } from '../components/Markdown'
 import { useAuthStore } from '../features/auth/authStore'
 import { cx } from '../utils/cx'
@@ -20,6 +21,7 @@ export function PassoDetalhePage() {
   const [concluido, setConcluido] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [tentativa, setTentativa] = useState(0)
 
   useEffect(() => {
     if (!usuario) return
@@ -41,7 +43,7 @@ export function PassoDetalhePage() {
     return () => {
       cancelado = true
     }
-  }, [id, usuario])
+  }, [id, usuario, tentativa])
 
   // Alterna concluído de forma otimista (desfaz se o back falhar).
   async function toggle() {
@@ -57,7 +59,7 @@ export function PassoDetalhePage() {
   }
 
   if (loading) return <p className="text-neutral-400">Carregando o passo...</p>
-  if (error) return <p className="text-red-400">Erro: {error}</p>
+  if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
   if (!step) return null
 
   return (
