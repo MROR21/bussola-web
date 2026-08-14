@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
 import { Markdown } from '../components/Markdown'
 import { cx } from '../utils/cx'
@@ -30,6 +30,7 @@ function paraEmbed(url: string): string {
 // Página de um fluxo (rota /fluxo/:id): o conteúdo em Markdown, consulta pura.
 export function FluxoDetalhePage() {
   const { id = '' } = useParams()
+  const navigate = useNavigate()
   const [fluxo, setFluxo] = useState<Fluxo | null>(null)
   const [concluido, setConcluido] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -75,9 +76,15 @@ export function FluxoDetalhePage() {
 
   return (
     <article className="flex w-full max-w-2xl flex-col gap-5">
-      <Link to="/fluxos" className="text-sm text-neutral-400 hover:text-neutral-200">
-        ← Voltar pro guia
-      </Link>
+      {/* Volta no histórico (não um destino fixo) — quem entrou pela Jornada (fase "Conheça o
+          sistema") retorna pra lá; quem entrou pelo Guia retorna pro Guia. */}
+      <button
+        type="button"
+        onClick={() => navigate(-1)}
+        className="self-start text-sm text-neutral-400 hover:text-neutral-200"
+      >
+        ← Voltar
+      </button>
 
       <header className="flex flex-col gap-1">
         <span className="text-sm text-neutral-500">{fluxo.categoria}</span>
