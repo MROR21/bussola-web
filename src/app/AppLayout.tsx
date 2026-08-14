@@ -32,7 +32,7 @@ type Papel = 'gestor' | 'colaborador'
 const NAV: { to: string; label: string; icon: ReactNode; end: boolean; papel?: Papel }[] = [
   { to: '/gestor', label: 'Supervisionados', icon: '👥', end: false, papel: 'gestor' },
   { to: '/', label: 'Jornada', icon: <TrilhaIcon />, end: true, papel: 'colaborador' },
-  { to: '/fluxos', label: 'Fluxos', icon: '📚', end: false },
+  { to: '/fluxos', label: 'Guias', icon: '📚', end: false },
   { to: '/chat', label: 'Assistente', icon: '💬', end: false },
   { to: '/perfil', label: 'Perfil', icon: '⚙️', end: false },
 ]

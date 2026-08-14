@@ -76,7 +76,7 @@ export function FluxoDetalhePage() {
   return (
     <article className="flex w-full max-w-2xl flex-col gap-5">
       <Link to="/fluxos" className="text-sm text-neutral-400 hover:text-neutral-200">
-        ← Voltar pros fluxos
+        ← Voltar pro guia
       </Link>
 
       <header className="flex flex-col gap-1">
