@@ -38,10 +38,12 @@ export interface ProgressoSupervisionado {
   passos: PassoProgresso[]
 }
 
-// Um fluxo visível do supervisionado com a flag de concluído (GET /gestor/usuarios/{id}/fluxos).
+// Um fluxo do guia com a flag de concluído do supervisionado (GET /gestor/usuarios/{id}/fluxos).
+// doSquad marca os que fazem parte do onboarding dele (o squad do próprio supervisionado).
 export interface FluxoProgresso {
   id: string
   titulo: string
   modulo: string
   concluido: boolean
+  doSquad: boolean
 }

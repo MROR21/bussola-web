@@ -87,7 +87,7 @@ export function SupervisionadoPage() {
                 : 'text-neutral-400 hover:text-neutral-200',
             )}
           >
-            {chave === 'passos' ? `Passos (${passosFeitos}/${passosTotal})` : `Fluxos (${fluxosFeitos}/${fluxos.length})`}
+            {chave === 'passos' ? `Passos (${passosFeitos}/${passosTotal})` : `Guia (${fluxosFeitos}/${fluxos.length})`}
           </button>
         ))}
       </div>
@@ -152,6 +152,14 @@ export function SupervisionadoPage() {
                     <span className={f.concluido ? 'text-neutral-300' : 'text-neutral-500'}>
                       {f.titulo}
                     </span>
+                    {f.doSquad && (
+                      <span
+                        title="Faz parte da jornada dele"
+                        className="rounded-full bg-purple-500/20 px-1.5 py-0.5 text-[10px] text-purple-300"
+                      >
+                        do squad
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>

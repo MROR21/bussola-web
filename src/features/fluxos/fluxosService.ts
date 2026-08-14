@@ -1,34 +1,14 @@
 import { apiGet, apiSend } from '../../services/api'
-import type { Atribuicao, Fluxo } from './types'
+import type { Fluxo } from './types'
 
-// Todos os fluxos (usado pelo gestor, que vê todos os squads).
+// Todos os fluxos do Guia pelo sistema — aberto a qualquer colaborador logado (sem recorte por squad).
 export function listarFluxos(): Promise<Fluxo[]> {
   return apiGet<Fluxo[]>('/fluxos')
-}
-
-// Fluxos visíveis do usuário logado (squad + Básico + atribuídos) — usado pelo colaborador.
-export function getMeusFluxos(): Promise<Fluxo[]> {
-  return apiGet<Fluxo[]>('/fluxos/meus')
 }
 
 // Um fluxo específico (com o conteúdo em Markdown).
 export function getFluxo(id: string): Promise<Fluxo> {
   return apiGet<Fluxo>(`/fluxos/${id}`)
-}
-
-// Atribuições dos supervisionados do gestor (quem tem qual fluxo).
-export function getAtribuicoes(): Promise<Atribuicao[]> {
-  return apiGet<Atribuicao[]>('/gestor/fluxos/atribuicoes')
-}
-
-// Atribui (libera) um fluxo a um supervisionado.
-export function atribuirFluxo(fluxoId: string, usuarioId: string): Promise<void> {
-  return apiSend('POST', `/gestor/fluxos/${fluxoId}/atribuir/${usuarioId}`)
-}
-
-// Desvincula um fluxo antes atribuído a um supervisionado.
-export function desvincularFluxo(fluxoId: string, usuarioId: string): Promise<void> {
-  return apiSend('DELETE', `/gestor/fluxos/${fluxoId}/atribuir/${usuarioId}`)
 }
 
 // Ids dos fluxos que o usuário logado já concluiu.

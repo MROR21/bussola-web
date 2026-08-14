@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { useAuthStore } from '../features/auth/authStore'
 import { EstadoErro } from '../components/EstadoErro'
-import { getFluxosConcluidos, getMeusFluxos } from '../features/fluxos/fluxosService'
+import { getFluxosConcluidos, listarFluxos } from '../features/fluxos/fluxosService'
 import type { Fluxo } from '../features/fluxos/types'
-import { FluxosGestor } from './FluxosGestor'
 
 // Emoji por módulo (fallback 🧩 = "peça/módulo") — dá mais cara de módulo que uma pastinha.
 const MODULO_EMOJI: Record<string, string> = {
@@ -15,14 +13,10 @@ const MODULO_EMOJI: Record<string, string> = {
 }
 const emojiDoModulo = (m: string) => MODULO_EMOJI[m] ?? '🧩'
 
-// Aba Fluxos: gestor vê a visão de atribuição; colaborador navega os fluxos dele.
+// Guia pelo sistema (referência viva): módulos em cards → entra → fluxos dentro (+ busca global).
+// Aberto a qualquer colaborador logado, gestor ou não — não há mais atribuição individual: o
+// fluxo do próprio squad já entra como parte da Jornada; aqui é a consulta livre de tudo.
 export function FluxosPage() {
-  const isGestor = useAuthStore((s) => s.usuario?.isGestor ?? false)
-  return isGestor ? <FluxosGestor /> : <FluxosColaborador />
-}
-
-// Referência viva do colaborador: módulos em cards → entra → fluxos dentro (+ busca global).
-function FluxosColaborador() {
   const [fluxos, setFluxos] = useState<Fluxo[]>([])
   const [concluidos, setConcluidos] = useState<Set<string>>(new Set())
   const [busca, setBusca] = useState('')
@@ -38,7 +32,7 @@ function FluxosColaborador() {
     let cancelado = false
     setLoading(true)
     setError(null)
-    Promise.all([getMeusFluxos(), getFluxosConcluidos()])
+    Promise.all([listarFluxos(), getFluxosConcluidos()])
       .then(([f, ids]) => {
         if (cancelado) return
         setFluxos(f)
@@ -136,7 +130,7 @@ function FluxosColaborador() {
     )
   }
 
-  if (loading) return <p className="text-neutral-400">Carregando fluxos...</p>
+  if (loading) return <p className="text-neutral-400">Carregando o guia...</p>
   if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
 
   // ---- Dentro de um módulo ----
@@ -194,9 +188,9 @@ function FluxosColaborador() {
   return (
     <div className="flex w-full max-w-2xl flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-neutral-100">📚 Fluxos</h1>
+        <h1 className="text-2xl font-bold text-neutral-100">🖥️ Guia pelo sistema</h1>
         <p className="text-sm text-neutral-400">
-          Consulte qualquer fluxo do dia a dia, quando precisar.
+          Consulte qualquer fluxo do sistema, de qualquer squad, quando precisar.
         </p>
         {fluxos.length > 0 && (
           <p className="text-xs text-neutral-500">
