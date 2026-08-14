@@ -16,7 +16,9 @@ export interface OnboardingStep {
 // Profundidade recomendada de um passo, calculada pelo back a partir do Perfil.
 export type StepDepth = 'Essencial' | 'Resumo'
 
-// Um passo já com a profundidade recomendada (resposta do POST /onboarding/trail).
+// Um item da trilha: um passo de onboarding OU um fluxo do squad (o back unifica os dois no mesmo
+// formato). `tipo` diz pra onde navegar (/passo/:id ou /fluxo/:id) e onde marcar a conclusão.
 export interface TrailStep extends OnboardingStep {
   recommendedDepth: StepDepth
+  tipo: 'passo' | 'fluxo'
 }

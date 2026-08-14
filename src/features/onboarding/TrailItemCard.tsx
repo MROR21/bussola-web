@@ -2,9 +2,10 @@ import { Link } from 'react-router-dom'
 import { cx } from '../../utils/cx'
 import type { TrailStep } from './types'
 
-// Card de um passo na jornada. Check = concluído (esmaecido); destaque = próximo passo (aro roxo).
-// Clicar no título abre a página do passo com o conteúdo completo.
-export function PassoCard({
+// Card de um item da trilha — passo de onboarding OU fluxo do squad (tipo === 'fluxo').
+// Check = concluído (esmaecido); destaque = próximo item (aro roxo).
+// Clicar no título abre a página do item (passo ou fluxo) com o conteúdo completo.
+export function TrailItemCard({
   step,
   concluido,
   destaque,
@@ -15,7 +16,9 @@ export function PassoCard({
   destaque: boolean
   onToggle: () => void
 }) {
-  const isResumo = step.recommendedDepth === 'Resumo'
+  const isFluxo = step.tipo === 'fluxo'
+  const href = isFluxo ? `/fluxo/${step.id}` : `/passo/${step.id}`
+  const isResumo = !isFluxo && step.recommendedDepth === 'Resumo'
 
   return (
     <li
@@ -47,8 +50,14 @@ export function PassoCard({
 
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-neutral-500">Passo {step.order}</span>
-            {step.isCompanySpecific && (
+            {isFluxo ? (
+              <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-xs text-purple-300">
+                Fluxo do seu squad
+              </span>
+            ) : (
+              <span className="text-xs text-neutral-500">Passo {step.order}</span>
+            )}
+            {step.isCompanySpecific && !isFluxo && (
               <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-xs text-purple-300">
                 Agilean
               </span>
@@ -61,7 +70,7 @@ export function PassoCard({
           </div>
 
           <Link
-            to={`/passo/${step.id}`}
+            to={href}
             className={cx(
               'font-medium leading-snug hover:underline',
               concluido ? 'text-neutral-500 line-through' : 'text-neutral-100',
@@ -72,11 +81,8 @@ export function PassoCard({
 
           <p className="text-sm text-neutral-400">{step.description}</p>
 
-          <Link
-            to={`/passo/${step.id}`}
-            className="self-start text-sm text-purple-300 hover:text-purple-200"
-          >
-            Ver passo →
+          <Link to={href} className="self-start text-sm text-purple-300 hover:text-purple-200">
+            Ver {isFluxo ? 'fluxo' : 'passo'} →
           </Link>
         </div>
       </div>

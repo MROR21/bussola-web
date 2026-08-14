@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { cx } from '../../utils/cx'
-import { PassoCard } from './PassoCard'
+import { concluirFluxo, desmarcarFluxo, getFluxosConcluidos } from '../fluxos/fluxosService'
+import { TrailItemCard } from './TrailItemCard'
 import { ProgressRing } from './ProgressRing'
 import { concluirPasso, desmarcarPasso, getProgresso } from './progressService'
 import type { TrailStep } from './types'
@@ -11,9 +12,14 @@ const FASE_EMOJI: Record<string, string> = {
   Ambientação: '👋',
   'Ambiente técnico': '💻',
   Padrões: '📐',
+  'Conheça o sistema': '🖥️',
   'Primeiro Card': '🏆',
 }
 const emojiDaFase = (fase: string) => FASE_EMOJI[fase] ?? '📍'
+
+// Só a fase final espera todo o resto pronto antes de liberar — as demais seguem no gate suave
+// (visitável a qualquer momento).
+const FASE_FINAL = 'Primeiro Card'
 
 // Home "Sua Jornada": progresso geral + próximo passo + fases em CARDS (clica e entra na fase).
 export function JornadaView({
@@ -29,7 +35,8 @@ export function JornadaView({
   gestorNome?: string | null
   onRestart: () => void
 }) {
-  const [concluidos, setConcluidos] = useState<Set<string>>(new Set())
+  const [passosConcluidos, setPassosConcluidos] = useState<Set<string>>(new Set())
+  const [fluxosConcluidos, setFluxosConcluidos] = useState<Set<string>>(new Set())
   // A fase aberta vive na URL (?fase=...) — assim o "voltar" do navegador sai da fase
   // (em vez de sair da página), igual entrar/sair funcionasse por rota.
   const [searchParams, setSearchParams] = useSearchParams()
@@ -38,58 +45,77 @@ export function JornadaView({
   const sairFase = () => setSearchParams({})
 
   useEffect(() => {
-    getProgresso(userId)
-      .then((ids) => setConcluidos(new Set(ids)))
-      .catch(() => {})
+    getProgresso(userId).then((ids) => setPassosConcluidos(new Set(ids))).catch(() => {})
+    getFluxosConcluidos().then((ids) => setFluxosConcluidos(new Set(ids))).catch(() => {})
   }, [userId])
 
+  const estaConcluido = (item: TrailStep) =>
+    item.tipo === 'fluxo' ? fluxosConcluidos.has(item.id) : passosConcluidos.has(item.id)
+
   // Marca/desmarca de forma otimista (atualiza a UI na hora, desfaz se o back falhar).
-  async function toggle(stepId: string) {
-    const jaConcluido = concluidos.has(stepId)
+  async function toggle(item: TrailStep) {
+    const jaConcluido = estaConcluido(item)
+    const setConcluidos = item.tipo === 'fluxo' ? setFluxosConcluidos : setPassosConcluidos
     setConcluidos((prev) => {
       const next = new Set(prev)
-      if (jaConcluido) next.delete(stepId)
-      else next.add(stepId)
+      if (jaConcluido) next.delete(item.id)
+      else next.add(item.id)
       return next
     })
     try {
-      if (jaConcluido) await desmarcarPasso(userId, stepId)
-      else await concluirPasso(userId, stepId)
+      if (item.tipo === 'fluxo') {
+        if (jaConcluido) await desmarcarFluxo(item.id)
+        else await concluirFluxo(item.id)
+      } else if (jaConcluido) {
+        await desmarcarPasso(userId, item.id)
+      } else {
+        await concluirPasso(userId, item.id)
+      }
     } catch {
       setConcluidos((prev) => {
         const next = new Set(prev)
-        if (jaConcluido) next.add(stepId)
-        else next.delete(stepId)
+        if (jaConcluido) next.add(item.id)
+        else next.delete(item.id)
         return next
       })
     }
   }
 
-  // Agrupa por fase preservando a ordem dos passos (o back já manda ordenado por Order).
+  // Agrupa por fase preservando a ordem (o back já manda ordenado: fases guiadas, depois os
+  // fluxos do squad, por fim o Primeiro Card).
   const fases = useMemo(() => {
     const grupos = new Map<string, TrailStep[]>()
-    for (const step of trail) {
-      const lista = grupos.get(step.phase) ?? []
-      lista.push(step)
-      grupos.set(step.phase, lista)
+    for (const item of trail) {
+      const lista = grupos.get(item.phase) ?? []
+      lista.push(item)
+      grupos.set(item.phase, lista)
     }
     return [...grupos.entries()]
   }, [trail])
 
   const total = trail.length
-  const feitos = trail.filter((step) => concluidos.has(step.id)).length
+  const feitos = trail.filter(estaConcluido).length
   const percent = total > 0 ? Math.round((feitos / total) * 100) : 0
   const completa = total > 0 && feitos === total
 
-  const proximo = trail.find((step) => !concluidos.has(step.id))
+  const proximo = trail.find((item) => !estaConcluido(item))
   const faseAtualIndex = proximo ? fases.findIndex(([fase]) => fase === proximo.phase) : fases.length - 1
 
+  const indiceFaseFinal = fases.findIndex(([fase]) => fase === FASE_FINAL)
+  const faseFinalLiberada =
+    indiceFaseFinal < 0 ||
+    fases
+      .slice(0, indiceFaseFinal)
+      .every(([, itens]) => itens.every(estaConcluido))
+
   // ---- Vista de UMA fase (entrou no card) ----
-  // Só entra se a fase da URL existe de fato (param inválido/velho → cai na home).
+  // Só entra se a fase da URL existe de fato (param inválido/velho → cai na home) e, se for a
+  // fase final, se já estiver liberada (senão volta pra home — o link direto não fura o gate).
   const faseEntry = faseSelecionada ? fases.find(([f]) => f === faseSelecionada) : undefined
-  if (faseEntry) {
-    const [faseNome, passos] = faseEntry
-    const feitosFase = passos.filter((s) => concluidos.has(s.id)).length
+  const podeEntrar = faseEntry && (faseEntry[0] !== FASE_FINAL || faseFinalLiberada)
+  if (podeEntrar) {
+    const [faseNome, itens] = faseEntry
+    const feitosFase = itens.filter(estaConcluido).length
     return (
       <div className="flex w-full max-w-2xl flex-col gap-5">
         <button
@@ -104,18 +130,18 @@ export function JornadaView({
           <div className="flex flex-col">
             <h2 className="text-xl font-bold text-neutral-100">{faseNome}</h2>
             <span className="text-sm text-neutral-500">
-              {feitosFase} de {passos.length} passos concluídos
+              {feitosFase} de {itens.length} itens concluídos
             </span>
           </div>
         </header>
         <ul className="flex flex-col gap-2">
-          {passos.map((step) => (
-            <PassoCard
-              key={step.id}
-              step={step}
-              concluido={concluidos.has(step.id)}
-              destaque={step.id === proximo?.id}
-              onToggle={() => toggle(step.id)}
+          {itens.map((item) => (
+            <TrailItemCard
+              key={item.id}
+              step={item}
+              concluido={estaConcluido(item)}
+              destaque={item.id === proximo?.id}
+              onToggle={() => toggle(item)}
             />
           ))}
         </ul>
@@ -134,7 +160,7 @@ export function JornadaView({
           <p className="text-sm text-neutral-400">Sua jornada</p>
           <h2 className="text-2xl font-bold text-neutral-100">Olá, {nome} 👋</h2>
           <p className="text-sm text-neutral-400">
-            {feitos} de {total} passos · Fase {Math.min(faseAtualIndex + 1, fases.length)} de{' '}
+            {feitos} de {total} itens · Fase {Math.min(faseAtualIndex + 1, fases.length)} de{' '}
             {fases.length}
           </p>
           {gestorNome && (
@@ -146,19 +172,26 @@ export function JornadaView({
       </header>
 
       {completa ? (
-        <section className="flex flex-col items-center gap-2 rounded-2xl border border-purple-500/40 bg-purple-500/10 p-6 text-center">
+        <section className="flex flex-col items-center gap-3 rounded-2xl border border-purple-500/40 bg-purple-500/10 p-6 text-center">
           <span className="text-4xl">🏆</span>
           <h3 className="text-lg font-semibold text-neutral-100">Jornada completa!</h3>
           <p className="text-sm text-neutral-400">
             Você foi do clone ao primeiro card. Bem-vindo(a) de verdade à Agilean.
           </p>
+          <p className="text-base font-medium text-purple-200">Agora é com você! 🚀</p>
+          <Link
+            to="/fluxos"
+            className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400"
+          >
+            Ir pro Guia pelo sistema
+          </Link>
         </section>
       ) : (
         proximo && (
           <section className="flex flex-col gap-3 rounded-2xl border border-purple-500/40 bg-purple-500/10 p-5">
             <div className="flex flex-col gap-1">
               <span className="text-xs font-medium uppercase tracking-wide text-purple-300">
-                ▶ Próximo passo · {proximo.phase}
+                ▶ Próximo · {proximo.phase}
               </span>
               <h3 className="text-lg font-semibold text-neutral-100">{proximo.title}</h3>
               <p className="text-sm text-neutral-400">{proximo.description}</p>
@@ -180,26 +213,34 @@ export function JornadaView({
           Fases da jornada
         </h3>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {fases.map(([fase, passos], i) => {
-            const feitosFase = passos.filter((step) => concluidos.has(step.id)).length
-            const pct = passos.length > 0 ? Math.round((feitosFase / passos.length) * 100) : 0
-            const faseCompleta = feitosFase === passos.length
+          {fases.map(([fase, itens], i) => {
+            const feitosFase = itens.filter(estaConcluido).length
+            const pct = itens.length > 0 ? Math.round((feitosFase / itens.length) * 100) : 0
+            const faseCompleta = feitosFase === itens.length
             const atual = proximo?.phase === fase
+            const bloqueada = fase === FASE_FINAL && !faseFinalLiberada
+
             return (
               <button
                 key={fase}
                 type="button"
+                disabled={bloqueada}
                 onClick={() => entrarFase(fase)}
                 className={cx(
-                  'flex flex-col gap-2 rounded-2xl border bg-neutral-900 p-5 text-left transition-all duration-200 hover:-translate-y-0.5',
-                  atual
+                  'flex flex-col gap-2 rounded-2xl border bg-neutral-900 p-5 text-left transition-all duration-200',
+                  bloqueada
+                    ? 'cursor-not-allowed border-neutral-800 opacity-50'
+                    : 'hover:-translate-y-0.5',
+                  !bloqueada && (atual
                     ? 'border-purple-500/60 hover:border-purple-500'
-                    : 'border-neutral-800 hover:border-purple-500/50',
+                    : 'border-neutral-800 hover:border-purple-500/50'),
                 )}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-2xl">{emojiDaFase(fase)}</span>
-                  {faseCompleta ? (
+                  {bloqueada ? (
+                    <span title="Complete as fases anteriores">🔒</span>
+                  ) : faseCompleta ? (
                     <span title="Fase concluída">🎖️</span>
                   ) : atual ? (
                     <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] font-medium text-purple-200">
@@ -216,12 +257,12 @@ export function JornadaView({
                   <h3 className="font-semibold text-neutral-100">{fase}</h3>
                 </div>
                 <span className="text-sm text-neutral-500">
-                  {feitosFase} de {passos.length} passos
+                  {bloqueada ? 'Apto após concluir o resto' : `${feitosFase} de ${itens.length} itens`}
                 </span>
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
                   <div
                     className="h-full rounded-full bg-purple-500 transition-all"
-                    style={{ width: `${pct}%` }}
+                    style={{ width: `${bloqueada ? 0 : pct}%` }}
                   />
                 </div>
               </button>
