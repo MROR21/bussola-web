@@ -161,11 +161,11 @@ export function PassosAdmin() {
 
       {form && (
         <div
-          className="anim-fade fixed inset-0 z-30 flex items-center justify-center overflow-y-auto bg-black/60 p-4"
+          className="anim-fade fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4"
           onClick={() => setForm(null)}
         >
           <div
-            className="anim-pop my-8 flex w-full max-w-3xl flex-col gap-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
+            className="anim-pop flex max-h-[90vh] w-full max-w-3xl flex-col gap-4 overflow-y-auto rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-neutral-100">
