@@ -33,19 +33,22 @@
   }
 }
 
-/* Entrada de página/conteúdo (sobe suave). */
+/* Entrada de página/conteúdo (sobe suave). Sem fill-mode: o keyframe final já é
+   idêntico ao estado normal (transform:none), então não precisa "segurar" — segurar
+   deixaria um transform ativo, e isso quebra position:fixed dos filhos (viram
+   relativos a este elemento em vez de à tela, ex. os modais). */
 .anim-page {
-  animation: bussola-fade-in-up 0.28s ease-out both;
+  animation: bussola-fade-in-up 0.28s ease-out;
 }
 
 /* Fade puro (backdrops, banners). */
 .anim-fade {
-  animation: bussola-fade-in 0.2s ease-out both;
+  animation: bussola-fade-in 0.2s ease-out;
 }
 
 /* Aparição com leve zoom (modais, dropdowns, toasts). */
 .anim-pop {
-  animation: bussola-pop-in 0.18s ease-out both;
+  animation: bussola-pop-in 0.18s ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
