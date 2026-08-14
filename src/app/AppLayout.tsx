@@ -34,6 +34,7 @@ const NAV: { to: string; label: string; icon: ReactNode; end: boolean; papel?: P
   { to: '/', label: 'Jornada', icon: <TrilhaIcon />, end: true, papel: 'colaborador' },
   { to: '/fluxos', label: 'Guias', icon: '📚', end: false },
   { to: '/chat', label: 'Assistente', icon: '💬', end: false },
+  { to: '/admin', label: 'Admin', icon: '🛠️', end: false, papel: 'gestor' },
   { to: '/perfil', label: 'Perfil', icon: '⚙️', end: false },
 ]
 

@@ -5,6 +5,7 @@ import { getUser } from '../features/auth/userService'
 import type { UsuarioLogado } from '../features/auth/types'
 import type { Perfil } from '../features/nivelamento/types'
 import { AppLayout } from './AppLayout'
+import { AdminPage } from '../pages/AdminPage'
 import { ChatPage } from '../pages/ChatPage'
 import { FluxoDetalhePage } from '../pages/FluxoDetalhePage'
 import { FluxosPage } from '../pages/FluxosPage'
@@ -114,6 +115,10 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
           <Route
             path="/supervisionado/:id"
             element={usuario.isGestor ? <SupervisionadoPage /> : <Navigate to="/" replace />}
+          />
+          <Route
+            path="/admin"
+            element={usuario.isGestor ? <AdminPage /> : <Navigate to="/" replace />}
           />
           <Route
             path="*"
