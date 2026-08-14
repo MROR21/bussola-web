@@ -22,10 +22,14 @@ export function FluxosPage() {
   const [busca, setBusca] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [moduloSelecionado, setModuloSelecionado] = useState<string | null>(null)
   const [tentativa, setTentativa] = useState(0)
-  const [params] = useSearchParams()
-  const destaqueParam = params.get('destaque')
+  // O módulo aberto vive na URL (?modulo=...) — mesmo padrão da Jornada: assim o "voltar" (do
+  // navegador ou ao sair de um fluxo) retorna pro módulo certo, não pro topo do guia.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const moduloSelecionado = searchParams.get('modulo')
+  const destaqueParam = searchParams.get('destaque')
+  const entrarModulo = (modulo: string) => setSearchParams({ modulo })
+  const sairModulo = () => setSearchParams({})
   const [destacado, setDestacado] = useState<string | null>(null)
 
   useEffect(() => {
@@ -54,10 +58,10 @@ export function FluxosPage() {
     if (!destaqueParam || loading) return
     const alvo = fluxos.find((f) => f.id === destaqueParam)
     if (alvo) {
-      setModuloSelecionado(alvo.modulo)
+      setSearchParams({ modulo: alvo.modulo })
       setDestacado(destaqueParam)
     }
-  }, [destaqueParam, loading, fluxos])
+  }, [destaqueParam, loading, fluxos, setSearchParams])
 
   // Depois de entrar no módulo, rola até o fluxo e pulsa a borda por alguns segundos.
   useEffect(() => {
@@ -156,7 +160,7 @@ export function FluxosPage() {
       <div className="flex w-full max-w-2xl flex-col gap-5">
         <button
           type="button"
-          onClick={() => setModuloSelecionado(null)}
+          onClick={sairModulo}
           className="self-start text-sm text-neutral-400 hover:text-neutral-200"
         >
           ← Voltar pros módulos
@@ -221,7 +225,7 @@ export function FluxosPage() {
               <button
                 key={modulo}
                 type="button"
-                onClick={() => setModuloSelecionado(modulo)}
+                onClick={() => entrarModulo(modulo)}
                 className="flex flex-col gap-2 rounded-2xl border border-neutral-800 bg-neutral-900 p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-500/50"
               >
                 <div className="flex items-center justify-between">
