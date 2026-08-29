@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
 import { Markdown } from '../components/Markdown'
+import { MarkdownEditor } from '../components/MarkdownEditor'
 import { cx } from '../utils/cx'
+import { useAuthStore } from '../features/auth/authStore'
+import { editarFluxo, listarFluxosAdmin } from '../features/admin/adminService'
+import type { FluxoAdmin, FluxoAdminInput } from '../features/admin/types'
 import {
   concluirFluxo,
   desmarcarFluxo,
@@ -31,11 +35,20 @@ function paraEmbed(url: string): string {
 export function FluxoDetalhePage() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
+  const isGestor = useAuthStore((s) => s.usuario?.isGestor ?? false)
   const [fluxo, setFluxo] = useState<Fluxo | null>(null)
   const [concluido, setConcluido] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [tentativa, setTentativa] = useState(0)
+
+  // Edição inline (só gestor) — evita ter que ir até o Admin só pra corrigir/melhorar o conteúdo.
+  const [editando, setEditando] = useState(false)
+  const [carregandoEdicao, setCarregandoEdicao] = useState(false)
+  const [base, setBase] = useState<FluxoAdmin | null>(null)
+  const [campos, setCampos] = useState<Pick<FluxoAdmin, 'categoria' | 'titulo' | 'descricao' | 'conteudo' | 'videoUrl'> | null>(null)
+  const [salvando, setSalvando] = useState(false)
+  const [erroEdicao, setErroEdicao] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelado = false
@@ -70,6 +83,53 @@ export function FluxoDetalhePage() {
     }
   }
 
+  // Busca a forma completa (moduloId/order/squad) só ao entrar em edição — o back exige o objeto
+  // inteiro no PUT, e a leitura pública não carrega esses campos estruturais.
+  async function abrirEdicao() {
+    setErroEdicao(null)
+    setCarregandoEdicao(true)
+    try {
+      const todos = await listarFluxosAdmin()
+      const atual = todos.find((f) => f.id === id)
+      if (!atual) throw new Error('Fluxo não encontrado no admin.')
+      setBase(atual)
+      setCampos({
+        categoria: atual.categoria,
+        titulo: atual.titulo,
+        descricao: atual.descricao,
+        conteudo: atual.conteudo,
+        videoUrl: atual.videoUrl,
+      })
+      setEditando(true)
+    } catch (e) {
+      setErroEdicao(e instanceof Error ? e.message : 'Erro ao carregar para edição')
+    } finally {
+      setCarregandoEdicao(false)
+    }
+  }
+
+  async function salvar() {
+    if (!base || !campos || !campos.titulo.trim()) return
+    setSalvando(true)
+    setErroEdicao(null)
+    try {
+      const req: FluxoAdminInput = {
+        order: base.order,
+        moduloId: base.moduloId,
+        squad: base.squad,
+        ...campos,
+        titulo: campos.titulo.trim(),
+      }
+      await editarFluxo(id, req)
+      setEditando(false)
+      setTentativa((t) => t + 1)
+    } catch (e) {
+      setErroEdicao(e instanceof Error ? e.message : 'Erro ao salvar')
+    } finally {
+      setSalvando(false)
+    }
+  }
+
   if (loading) return <p className="text-neutral-400">Carregando o fluxo...</p>
   if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
   if (!fluxo) return null
@@ -86,26 +146,109 @@ export function FluxoDetalhePage() {
         ← Voltar
       </button>
 
-      <header className="flex flex-col gap-1">
-        <span className="text-sm text-neutral-500">{fluxo.categoria}</span>
-        <h1 className="text-2xl font-bold text-neutral-100">{fluxo.titulo}</h1>
+      <header className="flex items-start justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <span className="text-sm text-neutral-500">{fluxo.categoria}</span>
+          <h1 className="text-2xl font-bold text-neutral-100">{fluxo.titulo}</h1>
+          {fluxo.descricao && <p className="text-sm text-neutral-400">{fluxo.descricao}</p>}
+        </div>
+        {isGestor && !editando && (
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <button
+              type="button"
+              onClick={abrirEdicao}
+              disabled={carregandoEdicao}
+              className="rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-purple-300 hover:border-purple-400 hover:text-purple-200 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {carregandoEdicao ? 'Carregando...' : '✏️ Editar'}
+            </button>
+            {erroEdicao && <p className="text-xs text-red-400">{erroEdicao}</p>}
+          </div>
+        )}
       </header>
 
-      {fluxo.videoUrl && (
-        <div className="aspect-video w-full overflow-hidden rounded-2xl border border-neutral-800">
-          <iframe
-            src={paraEmbed(fluxo.videoUrl)}
-            title={fluxo.titulo}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="size-full"
-          />
-        </div>
-      )}
+      {editando && campos ? (
+        <div className="flex flex-col gap-4 rounded-2xl border border-purple-500/30 bg-neutral-900 p-6">
+          <label className="flex flex-col gap-1 text-sm text-neutral-400">
+            Categoria
+            <input
+              value={campos.categoria}
+              onChange={(e) => setCampos({ ...campos, categoria: e.target.value })}
+              className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-sm text-neutral-400">
+            Título
+            <input
+              value={campos.titulo}
+              onChange={(e) => setCampos({ ...campos, titulo: e.target.value })}
+              className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-sm text-neutral-400">
+            Descrição
+            <textarea
+              value={campos.descricao}
+              onChange={(e) => setCampos({ ...campos, descricao: e.target.value })}
+              rows={2}
+              className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-sm text-neutral-400">
+            URL do vídeo
+            <input
+              value={campos.videoUrl}
+              onChange={(e) => setCampos({ ...campos, videoUrl: e.target.value })}
+              className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-sm text-neutral-400">
+            Conteúdo
+            <MarkdownEditor
+              value={campos.conteudo}
+              onChange={(v) => setCampos({ ...campos, conteudo: v })}
+            />
+          </label>
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-neutral-800 bg-neutral-900 p-6 leading-relaxed">
-        <Markdown>{fluxo.conteudo}</Markdown>
-      </div>
+          {erroEdicao && <p className="text-sm text-red-400">{erroEdicao}</p>}
+
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setEditando(false)}
+              className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={salvar}
+              disabled={!campos.titulo.trim() || salvando}
+              className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {salvando ? 'Salvando...' : 'Salvar'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          {fluxo.videoUrl && (
+            <div className="aspect-video w-full overflow-hidden rounded-2xl border border-neutral-800">
+              <iframe
+                src={paraEmbed(fluxo.videoUrl)}
+                title={fluxo.titulo}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="size-full"
+              />
+            </div>
+          )}
+
+          <div className="flex flex-col gap-3 rounded-2xl border border-neutral-800 bg-neutral-900 p-6 leading-relaxed">
+            <Markdown>{fluxo.conteudo}</Markdown>
+          </div>
+        </>
+      )}
 
       <button
         type="button"
