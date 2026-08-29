@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Avatar } from '../perfil/Avatar'
-import { getNotificacoes, marcarLidas } from './notificacoesService'
+import {
+  apagarNotificacao,
+  apagarTodasNotificacoes,
+  getNotificacoes,
+  marcarLidas,
+} from './notificacoesService'
 import type { Notificacao } from './types'
 
 // De quanto em quanto tempo o sino busca novidades (só enquanto a aba está visível).
@@ -14,6 +19,7 @@ export function NotificationBell() {
   const [itens, setItens] = useState<Notificacao[]>([])
   const [aberto, setAberto] = useState(false)
   const [toast, setToast] = useState(false)
+  const [confirmandoLimpar, setConfirmandoLimpar] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   // Ids que já dispararam toast — garante um aviso por notificação, sem repetir a cada poll.
   const jaAvisadasRef = useRef<Set<string>>(new Set())
@@ -72,6 +78,11 @@ export function NotificationBell() {
     }
   }, [])
 
+  // Fechar o dropdown desarma a confirmação de "limpar tudo" pendente.
+  useEffect(() => {
+    if (!aberto) setConfirmandoLimpar(false)
+  }, [aberto])
+
   // O toast some sozinho depois de alguns segundos.
   useEffect(() => {
     if (!toast) return
@@ -114,6 +125,25 @@ export function NotificationBell() {
     else abrir()
   }
 
+  async function apagarUma(id: string) {
+    setItens((prev) => prev.filter((n) => n.id !== id))
+    try {
+      await apagarNotificacao(id)
+    } catch {
+      // se falhar, o próximo carregar() da lista traz de volta — não vale a pena complicar aqui
+    }
+  }
+
+  async function confirmarLimparTudo() {
+    setConfirmandoLimpar(false)
+    setItens([])
+    try {
+      await apagarTodasNotificacoes()
+    } catch {
+      // idem
+    }
+  }
+
   return (
     <div ref={ref} className="relative">
       <button
@@ -132,9 +162,37 @@ export function NotificationBell() {
 
       {aberto && (
         <div className="anim-pop absolute right-0 z-10 mt-2 w-72 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 shadow-lg">
-          <p className="border-b border-neutral-800 px-4 py-2 text-sm font-medium text-neutral-200">
-            Notificações
-          </p>
+          <div className="flex items-center justify-between border-b border-neutral-800 px-4 py-2">
+            <p className="text-sm font-medium text-neutral-200">Notificações</p>
+            {itens.length > 0 &&
+              (confirmandoLimpar ? (
+                <span className="flex items-center gap-2 text-xs">
+                  <span className="text-neutral-400">Apagar tudo?</span>
+                  <button
+                    type="button"
+                    onClick={confirmarLimparTudo}
+                    className="font-medium text-red-400 hover:text-red-300"
+                  >
+                    Sim
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmandoLimpar(false)}
+                    className="text-neutral-400 hover:text-neutral-200"
+                  >
+                    Não
+                  </button>
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setConfirmandoLimpar(true)}
+                  className="text-xs text-neutral-500 hover:text-red-400"
+                >
+                  Limpar tudo
+                </button>
+              ))}
+          </div>
           {itens.length === 0 ? (
             <p className="px-4 py-6 text-center text-sm text-neutral-500">
               Nenhuma notificação por aqui.
@@ -142,12 +200,15 @@ export function NotificationBell() {
           ) : (
             <ul className="max-h-80 overflow-y-auto">
               {itens.map((n) => (
-                <li key={n.id} className="border-b border-neutral-800/60 last:border-0">
+                <li
+                  key={n.id}
+                  className="flex items-center gap-1 border-b border-neutral-800/60 last:border-0"
+                >
                   {n.link ? (
                     <button
                       type="button"
                       onClick={() => irPara(n.link)}
-                      className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-neutral-300 hover:bg-neutral-800"
+                      className="flex flex-1 items-center gap-2 px-4 py-3 text-left text-sm text-neutral-300 hover:bg-neutral-800"
                     >
                       {n.autorNome && (
                         <Avatar
@@ -160,7 +221,7 @@ export function NotificationBell() {
                       <span className="shrink-0 text-purple-300">→</span>
                     </button>
                   ) : (
-                    <div className="flex items-center gap-2 px-4 py-3 text-sm text-neutral-300">
+                    <div className="flex flex-1 items-center gap-2 px-4 py-3 text-sm text-neutral-300">
                       {n.autorNome && (
                         <Avatar
                           nome={n.autorNome}
@@ -171,6 +232,14 @@ export function NotificationBell() {
                       <span className="flex-1">{n.mensagem}</span>
                     </div>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => apagarUma(n.id)}
+                    aria-label="Apagar notificação"
+                    className="mr-2 shrink-0 text-neutral-700 hover:text-red-400"
+                  >
+                    ✕
+                  </button>
                 </li>
               ))}
             </ul>

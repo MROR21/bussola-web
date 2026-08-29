@@ -10,3 +10,13 @@ export function getNotificacoes(): Promise<Notificacao[]> {
 export function marcarLidas(): Promise<void> {
   return apiSend('POST', '/notificacoes/ler')
 }
+
+// Apaga uma notificação específica.
+export function apagarNotificacao(id: string): Promise<void> {
+  return apiSend('DELETE', `/notificacoes/${id}`)
+}
+
+// Apaga todas as notificações do usuário logado.
+export function apagarTodasNotificacoes(): Promise<void> {
+  return apiSend('DELETE', '/notificacoes')
+}
