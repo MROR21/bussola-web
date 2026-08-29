@@ -49,6 +49,7 @@ export function FluxoDetalhePage() {
   const [campos, setCampos] = useState<Pick<FluxoAdmin, 'categoria' | 'titulo' | 'descricao' | 'conteudo' | 'videoUrl'> | null>(null)
   const [salvando, setSalvando] = useState(false)
   const [erroEdicao, setErroEdicao] = useState<string | null>(null)
+  const [salvo, setSalvo] = useState(false)
 
   useEffect(() => {
     let cancelado = false
@@ -123,12 +124,19 @@ export function FluxoDetalhePage() {
       await editarFluxo(id, req)
       setEditando(false)
       setTentativa((t) => t + 1)
+      setSalvo(true)
     } catch (e) {
       setErroEdicao(e instanceof Error ? e.message : 'Erro ao salvar')
     } finally {
       setSalvando(false)
     }
   }
+
+  useEffect(() => {
+    if (!salvo) return
+    const t = setTimeout(() => setSalvo(false), 3000)
+    return () => clearTimeout(t)
+  }, [salvo])
 
   if (loading) return <p className="text-neutral-400">Carregando o fluxo...</p>
   if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
@@ -262,6 +270,12 @@ export function FluxoDetalhePage() {
       >
         {concluido ? '✓ Concluído · desmarcar' : 'Marcar como concluído'}
       </button>
+
+      {salvo && (
+        <div className="anim-pop fixed bottom-4 right-4 z-30 rounded-xl border border-green-500/40 bg-neutral-900 px-4 py-3 text-sm text-green-300 shadow-lg">
+          ✓ Salvo com sucesso
+        </div>
+      )}
     </article>
   )
 }

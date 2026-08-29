@@ -57,6 +57,7 @@ export function PassoDetalhePage() {
   const [camposConteudo, setCamposConteudo] = useState<Pick<PassoAdmin, 'title' | 'description' | 'conteudo'> | null>(null)
   const [salvandoConteudo, setSalvandoConteudo] = useState(false)
   const [erroEdicao, setErroEdicao] = useState<string | null>(null)
+  const [salvo, setSalvo] = useState(false)
 
   useEffect(() => {
     if (!usuario) return
@@ -148,12 +149,19 @@ export function PassoDetalhePage() {
       await editarPasso(id, req)
       setEditandoConteudo(false)
       setTentativa((t) => t + 1)
+      setSalvo(true)
     } catch (e) {
       setErroEdicao(e instanceof Error ? e.message : 'Erro ao salvar')
     } finally {
       setSalvandoConteudo(false)
     }
   }
+
+  useEffect(() => {
+    if (!salvo) return
+    const t = setTimeout(() => setSalvo(false), 3000)
+    return () => clearTimeout(t)
+  }, [salvo])
 
   if (loading) return <p className="text-neutral-400">Carregando o passo...</p>
   if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
@@ -326,6 +334,12 @@ export function PassoDetalhePage() {
             {salvando ? 'Salvando...' : 'Marcar como concluído'}
           </button>
         </section>
+      )}
+
+      {salvo && (
+        <div className="anim-pop fixed bottom-4 right-4 z-30 rounded-xl border border-green-500/40 bg-neutral-900 px-4 py-3 text-sm text-green-300 shadow-lg">
+          ✓ Salvo com sucesso
+        </div>
       )}
     </article>
   )
