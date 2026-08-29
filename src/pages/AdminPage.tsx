@@ -11,9 +11,22 @@ import {
   editarFase,
   editarModulo,
   listarFases,
+  listarFluxosAdmin,
   listarModulos,
+  listarPassosAdmin,
 } from '../features/admin/adminService'
 import { cx } from '../utils/cx'
+
+// Conta quantos itens de `lista` apontam pra cada valor retornado por `chaveDe` — usado pra
+// mostrar "N passos"/"N fluxos" ao lado de cada Fase/Módulo, sem precisar de endpoint novo.
+function contarPor<T>(lista: T[], chaveDe: (item: T) => string): Record<string, number> {
+  const contagem: Record<string, number> = {}
+  for (const item of lista) {
+    const valor = chaveDe(item)
+    contagem[valor] = (contagem[valor] ?? 0) + 1
+  }
+  return contagem
+}
 
 const ABAS = ['fases', 'modulos', 'passos', 'fluxos', 'usuarios'] as const
 type Aba = (typeof ABAS)[number]
@@ -63,10 +76,12 @@ export function AdminPage() {
           titulo="Fases"
           emoji="🧭"
           singular="fase"
+          labelFilhos="passos"
           listar={listarFases}
           criar={criarFase}
           editar={editarFase}
           apagar={apagarFase}
+          contarFilhos={async () => contarPor(await listarPassosAdmin(), (p) => p.faseId)}
         />
       )}
       {aba === 'modulos' && (
@@ -74,10 +89,12 @@ export function AdminPage() {
           titulo="Módulos"
           emoji="📦"
           singular="módulo"
+          labelFilhos="fluxos"
           listar={listarModulos}
           criar={criarModulo}
           editar={editarModulo}
           apagar={apagarModulo}
+          contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
         />
       )}
       {aba === 'passos' && <PassosAdmin />}

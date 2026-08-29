@@ -7,20 +7,25 @@ export function SimpleEntityCrud({
   titulo,
   emoji,
   singular,
+  labelFilhos,
   listar,
   criar,
   editar,
   apagar,
+  contarFilhos,
 }: {
   titulo: string
   emoji: string
   singular: string
+  labelFilhos?: string
   listar: () => Promise<EntidadeSimples[]>
   criar: (nome: string, order: number) => Promise<EntidadeSimples>
   editar: (id: string, nome: string, order: number) => Promise<void>
   apagar: (id: string) => Promise<void>
+  contarFilhos?: () => Promise<Record<string, number>>
 }) {
   const [itens, setItens] = useState<EntidadeSimples[]>([])
+  const [filhosPorId, setFilhosPorId] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [editando, setEditando] = useState<EntidadeSimples | 'novo' | null>(null)
@@ -28,18 +33,43 @@ export function SimpleEntityCrud({
   const [order, setOrder] = useState(1)
   const [salvando, setSalvando] = useState(false)
   const [apagando, setApagando] = useState<EntidadeSimples | null>(null)
+  const [movendo, setMovendo] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
 
   async function carregar() {
     setLoading(true)
     setError(null)
     try {
-      const dados = await listar()
+      const [dados, filhos] = await Promise.all([
+        listar(),
+        contarFilhos ? contarFilhos() : Promise.resolve({}),
+      ])
       setItens([...dados].sort((a, b) => a.order - b.order))
+      setFilhosPorId(filhos)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao carregar')
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Troca a ordem com o vizinho (cima/baixo) — dois PUTs simples, sem endpoint de reordenar novo.
+  async function mover(item: EntidadeSimples, direcao: -1 | 1) {
+    const indice = itens.findIndex((i) => i.id === item.id)
+    const vizinho = itens[indice + direcao]
+    if (!vizinho) return
+
+    setMovendo(item.id)
+    try {
+      await Promise.all([
+        editar(item.id, item.nome, vizinho.order),
+        editar(vizinho.id, vizinho.nome, item.order),
+      ])
+      await carregar()
+    } catch (e) {
+      setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao reordenar', ok: false })
+    } finally {
+      setMovendo(null)
     }
   }
 
@@ -115,14 +145,39 @@ export function SimpleEntityCrud({
       </div>
 
       <ul className="flex flex-col gap-2">
-        {itens.map((item) => (
+        {itens.map((item, indice) => (
           <li
             key={item.id}
             className="flex items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900 p-3"
           >
             <div className="flex items-center gap-3">
+              <div className="flex flex-col">
+                <button
+                  type="button"
+                  onClick={() => mover(item, -1)}
+                  disabled={indice === 0 || movendo !== null}
+                  className="leading-none text-neutral-500 hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
+                  aria-label="Mover pra cima"
+                >
+                  ▲
+                </button>
+                <button
+                  type="button"
+                  onClick={() => mover(item, 1)}
+                  disabled={indice === itens.length - 1 || movendo !== null}
+                  className="leading-none text-neutral-500 hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
+                  aria-label="Mover pra baixo"
+                >
+                  ▼
+                </button>
+              </div>
               <span className="text-xs text-neutral-500">#{item.order}</span>
               <span className="text-neutral-100">{item.nome}</span>
+              {contarFilhos && (
+                <span className="rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-400">
+                  {filhosPorId[item.id] ?? 0} {labelFilhos ?? 'itens'}
+                </span>
+              )}
             </div>
             <div className="flex gap-3">
               <button
