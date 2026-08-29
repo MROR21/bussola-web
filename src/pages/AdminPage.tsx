@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { FluxosAdmin } from '../features/admin/FluxosAdmin'
 import { PassosAdmin } from '../features/admin/PassosAdmin'
 import { SimpleEntityCrud } from '../features/admin/SimpleEntityCrud'
+import { UsuariosAdmin } from '../features/admin/UsuariosAdmin'
 import {
   apagarFase,
   apagarModulo,
@@ -14,7 +15,7 @@ import {
 } from '../features/admin/adminService'
 import { cx } from '../utils/cx'
 
-const ABAS = ['fases', 'modulos', 'passos', 'fluxos'] as const
+const ABAS = ['fases', 'modulos', 'passos', 'fluxos', 'usuarios'] as const
 type Aba = (typeof ABAS)[number]
 
 const LABEL: Record<Aba, string> = {
@@ -22,6 +23,7 @@ const LABEL: Record<Aba, string> = {
   modulos: 'Módulos',
   passos: 'Passos',
   fluxos: 'Fluxos',
+  usuarios: 'Usuários',
 }
 
 // Shell de administração: CRUD completo do conteúdo da Jornada e do Guia, direto no sistema
@@ -80,6 +82,7 @@ export function AdminPage() {
       )}
       {aba === 'passos' && <PassosAdmin />}
       {aba === 'fluxos' && <FluxosAdmin />}
+      {aba === 'usuarios' && <UsuariosAdmin />}
     </div>
   )
 }

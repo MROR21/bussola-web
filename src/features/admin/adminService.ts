@@ -7,6 +7,8 @@ import type {
   FluxoAdminInput,
   PassoAdmin,
   PassoAdminInput,
+  UsuarioAdmin,
+  EmailAutorizado,
 } from './types'
 
 // Fases
@@ -38,3 +40,16 @@ export const criarFluxo = (req: FluxoAdminInput) => apiPost<FluxoAdmin>('/admin/
 export const editarFluxo = (id: string, req: FluxoAdminInput) =>
   apiSend('PUT', `/admin/fluxos/${id}`, req)
 export const apagarFluxo = (id: string) => apiSend('DELETE', `/admin/fluxos/${id}`)
+
+// Usuários (promover/demover a gestor)
+export const listarUsuariosAdmin = () => apiGet<UsuarioAdmin[]>('/admin/usuarios')
+export const definirGestor = (id: string, isGestor: boolean) =>
+  apiSend('PUT', `/admin/usuarios/${id}/gestor`, { isGestor })
+
+// E-mails pré-autorizados a virar gestor no cadastro
+export const listarEmailsAutorizados = () =>
+  apiGet<EmailAutorizado[]>('/admin/emails-autorizados')
+export const criarEmailAutorizado = (email: string) =>
+  apiPost<EmailAutorizado>('/admin/emails-autorizados', { email })
+export const apagarEmailAutorizado = (id: string) =>
+  apiSend('DELETE', `/admin/emails-autorizados/${id}`)
