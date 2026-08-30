@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { CompassRose } from '../components/CompassRose'
 import { Icon } from '../components/Icon'
 import { MapCorners } from '../components/MapCorners'
 import { useTitulo } from '../hooks/useTitulo'
@@ -49,7 +50,8 @@ export function AdminPage() {
   const [aba, setAba] = useState<Aba>('fases')
 
   return (
-    <div className="flex w-full max-w-4xl flex-col gap-5">
+    <div className="relative flex w-full max-w-4xl flex-col gap-5">
+      <CompassRose className="pointer-events-none absolute -right-10 -top-8 -z-10 size-72 text-gold-500 opacity-[0.05]" />
       <div className="relative flex flex-col gap-1">
         <MapCorners tamanho={5} opacidade={25} />
         <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">

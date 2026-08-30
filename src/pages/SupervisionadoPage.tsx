@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { CompassRose } from '../components/CompassRose'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
 import { MapCorners } from '../components/MapCorners'
@@ -72,7 +73,8 @@ export function SupervisionadoPage() {
   const fluxosFeitos = fluxos.filter((f) => f.concluido).length
 
   return (
-    <div className="flex w-full max-w-2xl flex-col gap-5">
+    <div className="relative flex w-full max-w-2xl flex-col gap-5">
+      <CompassRose className="pointer-events-none absolute -right-10 -top-4 -z-10 size-64 text-gold-500 opacity-[0.05]" />
       <Link to="/gestor" className="flex items-center gap-1 text-sm text-neutral-400 hover:text-neutral-200">
         <Icon name="arrow_back" className="text-base" /> Voltar pros supervisionados
       </Link>

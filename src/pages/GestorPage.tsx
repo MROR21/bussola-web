@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { CompassRose } from '../components/CompassRose'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
 import { MapCorners } from '../components/MapCorners'
@@ -58,7 +59,8 @@ export function GestorPage() {
   if (error) return <EstadoErro onRetry={carregar} />
 
   return (
-    <div className="flex w-full max-w-2xl flex-col gap-6">
+    <div className="relative flex w-full max-w-2xl flex-col gap-6">
+      <CompassRose className="pointer-events-none absolute -right-10 -top-4 -z-10 size-64 text-gold-500 opacity-[0.05]" />
       <header className="relative flex flex-col gap-1">
         <MapCorners tamanho={5} opacidade={25} />
         <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { CompassRose } from '../components/CompassRose'
 import { Icon } from '../components/Icon'
 import { MapCorners } from '../components/MapCorners'
 import { Spinner } from '../components/Spinner'
@@ -122,6 +123,7 @@ export function PerfilPage() {
   return (
     <div className="relative flex w-full max-w-2xl flex-col gap-6">
       <MapCorners tamanho={5} opacidade={25} />
+      <CompassRose className="pointer-events-none absolute -bottom-16 -right-12 -z-10 size-72 text-gold-500 opacity-[0.05]" />
       <header className="flex flex-col gap-1">
         <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
           <Icon name="settings" className="text-2xl text-gold-400" /> Perfil
