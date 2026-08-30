@@ -1,11 +1,22 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../features/auth/authStore'
+import { listarFluxos } from '../features/fluxos/fluxosService'
 import { NotificationBell } from '../features/notificacoes/NotificationBell'
+import { listarSteps } from '../features/onboarding/onboardingService'
 import { Avatar } from '../features/perfil/Avatar'
 import { useApiStatus } from './useApiStatus'
 import { cx } from '../utils/cx'
+
+// Nomes distintos, na ordem de aparição (Set preserva ordem de inserção) — usado pra montar os
+// "galhos" da árvore (fases da Jornada, módulos do Guia) a partir do que o back já devolve
+// ordenado, sem precisar de endpoint novo só pra listar nomes.
+function distintosEmOrdem<T>(itens: T[], chaveDe: (item: T) => string): string[] {
+  const vistos = new Set<string>()
+  for (const item of itens) vistos.add(chaveDe(item))
+  return [...vistos]
+}
 
 // Ícone de trilha: uma linha ligando 4 pontos (etapas), herda a cor do link (currentColor).
 function TrilhaIcon() {
@@ -29,10 +40,12 @@ function TrilhaIcon() {
 }
 
 type Papel = 'gestor' | 'colaborador'
-const NAV: { to: string; label: string; icon: ReactNode; end: boolean; papel?: Papel }[] = [
+// `arvore` diz o nome do parâmetro de busca (?fase=/?modulo=) que os galhos dessa seção usam —
+// mesmo padrão que JornadaView/FluxosPage já usam pra guardar a seleção na URL.
+const NAV: { to: string; label: string; icon: ReactNode; end: boolean; papel?: Papel; arvore?: 'fase' | 'modulo' }[] = [
   { to: '/gestor', label: 'Supervisionados', icon: '👥', end: false, papel: 'gestor' },
-  { to: '/', label: 'Jornada', icon: <TrilhaIcon />, end: true, papel: 'colaborador' },
-  { to: '/fluxos', label: 'Guias', icon: '📚', end: false },
+  { to: '/', label: 'Jornada', icon: <TrilhaIcon />, end: true, papel: 'colaborador', arvore: 'fase' },
+  { to: '/fluxos', label: 'Guias', icon: '📚', end: false, arvore: 'modulo' },
   { to: '/chat', label: 'Assistente', icon: '💬', end: false },
   { to: '/admin', label: 'Admin', icon: '🛠️', end: false, papel: 'gestor' },
   { to: '/perfil', label: 'Perfil', icon: '⚙️', end: false },
@@ -47,10 +60,34 @@ export function AppLayout() {
   const [confirmandoSaida, setConfirmandoSaida] = useState(false)
   const status = useApiStatus()
   const location = useLocation()
+  const buscaAtual = new URLSearchParams(location.search)
 
   const itensMenu = NAV.filter(
     (item) => !item.papel || (item.papel === 'gestor' ? isGestor : !isGestor),
   )
+
+  // Galhos da árvore: nomes de fase/módulo, na ordem que o back já devolve — carregados uma vez,
+  // sem depender da página atual ter buscado isso (o menu é sempre visível).
+  const [fases, setFases] = useState<string[]>([])
+  const [modulos, setModulos] = useState<string[]>([])
+
+  useEffect(() => {
+    listarSteps()
+      .then((steps) => setFases(distintosEmOrdem(steps, (s) => s.phase)))
+      .catch(() => {})
+    listarFluxos()
+      .then((fluxos) => setModulos(distintosEmOrdem(fluxos, (f) => f.modulo)))
+      .catch(() => {})
+  }, [])
+
+  const [expandido, setExpandido] = useState<Record<string, boolean>>({})
+
+  // Expande sozinha a seção da rota atual (ex.: entrou direto num /fluxo/:id vindo de um link) —
+  // só liga, nunca fecha o que o usuário já abriu/fechou manualmente.
+  useEffect(() => {
+    if (location.pathname === '/') setExpandido((e) => ({ ...e, '/': true }))
+    if (location.pathname.startsWith('/fluxo')) setExpandido((e) => ({ ...e, '/fluxos': true }))
+  }, [location.pathname])
 
   return (
     <div className="flex h-screen overflow-hidden bg-neutral-950 text-neutral-100">
@@ -60,24 +97,67 @@ export function AppLayout() {
           <span className="text-lg font-bold">Bússola</span>
         </div>
         <nav className="flex flex-col gap-1">
-          {itensMenu.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) =>
-                cx(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
-                  isActive
-                    ? 'bg-purple-500/10 text-purple-300'
-                    : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200',
-                )
-              }
-            >
-              <span>{item.icon}</span>
-              {item.label}
-            </NavLink>
-          ))}
+          {itensMenu.map((item) => {
+            const galhos = item.arvore === 'fase' ? fases : item.arvore === 'modulo' ? modulos : []
+            const aberto = expandido[item.to] ?? false
+
+            return (
+              <div key={item.to}>
+                <div className="flex items-center gap-1">
+                  <NavLink
+                    to={item.to}
+                    end={item.end}
+                    className={({ isActive }) =>
+                      cx(
+                        'flex flex-1 items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+                        isActive
+                          ? 'bg-purple-500/10 text-purple-300'
+                          : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200',
+                      )
+                    }
+                  >
+                    <span>{item.icon}</span>
+                    {item.label}
+                  </NavLink>
+                  {galhos.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setExpandido((e) => ({ ...e, [item.to]: !aberto }))}
+                      aria-label={aberto ? 'Recolher' : 'Expandir'}
+                      className="px-2 text-neutral-600 hover:text-neutral-300"
+                    >
+                      {aberto ? '▾' : '▸'}
+                    </button>
+                  )}
+                </div>
+
+                {galhos.length > 0 && aberto && (
+                  <ul className="ml-4 flex flex-col gap-0.5 border-l border-neutral-800 py-1 pl-3">
+                    {galhos.map((nome) => {
+                      const linkTo = `${item.to}?${item.arvore}=${encodeURIComponent(nome)}`
+                      const ativo =
+                        location.pathname === item.to && buscaAtual.get(item.arvore!) === nome
+                      return (
+                        <li key={nome}>
+                          <Link
+                            to={linkTo}
+                            className={cx(
+                              'block truncate rounded-lg px-2 py-1 text-xs transition-colors',
+                              ativo
+                                ? 'text-purple-300'
+                                : 'text-neutral-500 hover:text-neutral-200',
+                            )}
+                          >
+                            {nome}
+                          </Link>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+              </div>
+            )
+          })}
         </nav>
       </aside>
 
