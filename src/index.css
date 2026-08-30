@@ -1,6 +1,21 @@
 @import "tailwindcss";
 @import "material-symbols/outlined.css";
 
+/* Paleta "carta de navegação" (navy + dourado) — a identidade visual do Bússola. Substitui
+   neutral-* (fundos/bordas) e purple-* (destaque) em todo o app; texto (neutral-300/400/500/600)
+   continua neutro de propósito, só o fundo e o acento mudam de matiz. */
+@theme {
+  --color-navy-900: #0a0f1a;
+  --color-navy-800: #111a2e;
+  --color-navy-700: #1f2b47;
+  --color-navy-600: #28314a;
+  --color-navy-500: #39456b;
+
+  --color-gold-500: #c9a227;
+  --color-gold-400: #d4af37;
+  --color-gold-300: #e8c968;
+}
+
 /* Animações sutis do Bússola. Classes próprias (o projeto não usa os tokens ads-* da Agilean).
    Tudo é desligado pra quem prefere menos movimento. */
 @keyframes bussola-fade-in-up {

@@ -80,7 +80,7 @@ export function LoginForm() {
             'Criar conta'
           ) : (
             <>
-              Bem-vindo(a) <Icon name="waving_hand" className="text-xl text-[#d4af37]" />
+              Bem-vindo(a) <Icon name="waving_hand" className="text-xl text-gold-400" />
             </>
           )}
         </h2>
@@ -97,7 +97,7 @@ export function LoginForm() {
             value={nome}
             onChange={(e) => setNome(e.target.value)}
             placeholder="Seu nome"
-            className="rounded-lg border border-[#28314a] bg-[#0a0f1a] px-3.5 py-2.5 text-neutral-100 outline-none focus:border-[#c9a227]"
+            className="rounded-lg border border-navy-600 bg-navy-900 px-3.5 py-2.5 text-neutral-100 outline-none focus:border-gold-500"
           />
         </label>
       )}
@@ -110,7 +110,7 @@ export function LoginForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="voce@agilean.com.br"
-          className="rounded-lg border border-[#28314a] bg-[#0a0f1a] px-3.5 py-2.5 text-neutral-100 outline-none focus:border-[#c9a227]"
+          className="rounded-lg border border-navy-600 bg-navy-900 px-3.5 py-2.5 text-neutral-100 outline-none focus:border-gold-500"
         />
       </label>
 
@@ -123,7 +123,7 @@ export function LoginForm() {
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
           placeholder={ehCadastro ? 'Ao menos 6 caracteres' : '••••••••'}
-          className="rounded-lg border border-[#28314a] bg-[#0a0f1a] px-3.5 py-2.5 text-neutral-100 outline-none focus:border-[#c9a227]"
+          className="rounded-lg border border-navy-600 bg-navy-900 px-3.5 py-2.5 text-neutral-100 outline-none focus:border-gold-500"
         />
       </label>
 
@@ -132,7 +132,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="flex items-center justify-center gap-1.5 rounded-lg bg-[#c9a227] px-4 py-2.5 text-sm font-medium text-[#0a0f1a] hover:bg-[#d4af37] disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex items-center justify-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2.5 text-sm font-medium text-navy-900 hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? (
           <>
@@ -148,16 +148,16 @@ export function LoginForm() {
       {msalHabilitado && (
         <>
           <div className="flex items-center gap-3 text-xs text-neutral-600">
-            <div className="h-px flex-1 bg-[#1f2b47]" aria-hidden="true" />
+            <div className="h-px flex-1 bg-navy-700" aria-hidden="true" />
             ou
-            <div className="h-px flex-1 bg-[#1f2b47]" aria-hidden="true" />
+            <div className="h-px flex-1 bg-navy-700" aria-hidden="true" />
           </div>
 
           <button
             type="button"
             onClick={handleMicrosoft}
             disabled={carregandoMicrosoft}
-            className="flex items-center justify-center gap-2 rounded-lg border border-[#28314a] bg-[#0a0f1a] px-4 py-2.5 text-sm font-medium text-neutral-100 hover:border-[#39456b] hover:bg-[#111a2e] disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center justify-center gap-2 rounded-lg border border-navy-600 bg-navy-900 px-4 py-2.5 text-sm font-medium text-neutral-100 hover:border-navy-500 hover:bg-navy-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {carregandoMicrosoft ? (
               <>
@@ -172,12 +172,18 @@ export function LoginForm() {
         </>
       )}
 
-      <button
-        type="button"
-        onClick={trocarModo}
-        className="text-sm text-[#d4af37] hover:text-[#e8c968]"
-      >
-        {ehCadastro ? 'Já tem conta? Entrar' : 'Não tem conta? Criar conta'}
+      <button type="button" onClick={trocarModo} className="text-sm text-neutral-400">
+        {ehCadastro ? (
+          <>
+            Já tem conta?{' '}
+            <span className="text-gold-400 hover:text-gold-300">Entrar</span>
+          </>
+        ) : (
+          <>
+            Não tem conta?{' '}
+            <span className="text-gold-400 hover:text-gold-300">Criar conta</span>
+          </>
+        )}
       </button>
     </form>
   )
