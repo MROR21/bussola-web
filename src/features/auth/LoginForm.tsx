@@ -89,33 +89,6 @@ export function LoginForm() {
         </p>
       </div>
 
-      {msalHabilitado && (
-        <>
-          <button
-            type="button"
-            onClick={handleMicrosoft}
-            disabled={carregandoMicrosoft}
-            className="flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-2.5 text-sm font-medium text-neutral-100 hover:border-neutral-600 hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {carregandoMicrosoft ? (
-              <>
-                <Spinner /> Aguarde...
-              </>
-            ) : (
-              <>
-                <MicrosoftLogo /> Entrar com Microsoft
-              </>
-            )}
-          </button>
-
-          <div className="flex items-center gap-3 text-xs text-neutral-600">
-            <div className="h-px flex-1 bg-neutral-800" aria-hidden="true" />
-            ou
-            <div className="h-px flex-1 bg-neutral-800" aria-hidden="true" />
-          </div>
-        </>
-      )}
-
       {ehCadastro && (
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="text-neutral-300">Nome</span>
@@ -171,6 +144,33 @@ export function LoginForm() {
           'Entrar'
         )}
       </button>
+
+      {msalHabilitado && (
+        <>
+          <div className="flex items-center gap-3 text-xs text-neutral-600">
+            <div className="h-px flex-1 bg-neutral-800" aria-hidden="true" />
+            ou
+            <div className="h-px flex-1 bg-neutral-800" aria-hidden="true" />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleMicrosoft}
+            disabled={carregandoMicrosoft}
+            className="flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-2.5 text-sm font-medium text-neutral-100 hover:border-neutral-600 hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {carregandoMicrosoft ? (
+              <>
+                <Spinner /> Aguarde...
+              </>
+            ) : (
+              <>
+                <MicrosoftLogo /> Entrar com Microsoft
+              </>
+            )}
+          </button>
+        </>
+      )}
 
       <button
         type="button"
