@@ -103,8 +103,23 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
               )
             }
           />
+          <Route
+            path="/fase/:nome"
+            element={
+              usuario.isGestor ? (
+                <Navigate to="/gestor" replace />
+              ) : (
+                <JornadaPage
+                  perfil={perfil!}
+                  gestorNome={gestorNome}
+                  onRefazer={() => setEstado('nivelar')}
+                />
+              )
+            }
+          />
           <Route path="/passo/:id" element={<PassoDetalhePage />} />
           <Route path="/fluxos" element={<FluxosPage />} />
+          <Route path="/fluxos/:modulo" element={<FluxosPage />} />
           <Route path="/fluxo/:id" element={<FluxoDetalhePage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/perfil" element={<PerfilPage />} />

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { cx } from '../../utils/cx'
 import { concluirFluxo, desmarcarFluxo, getFluxosConcluidos } from '../fluxos/fluxosService'
 import { TrailItemCard } from './TrailItemCard'
@@ -37,12 +37,13 @@ export function JornadaView({
 }) {
   const [passosConcluidos, setPassosConcluidos] = useState<Set<string>>(new Set())
   const [fluxosConcluidos, setFluxosConcluidos] = useState<Set<string>>(new Set())
-  // A fase aberta vive na URL (?fase=...) — assim o "voltar" do navegador sai da fase
-  // (em vez de sair da página), igual entrar/sair funcionasse por rota.
-  const [searchParams, setSearchParams] = useSearchParams()
-  const faseSelecionada = searchParams.get('fase')
-  const entrarFase = (fase: string) => setSearchParams({ fase })
-  const sairFase = () => setSearchParams({})
+  // A fase aberta vive no PATH (/fase/:nome) — assim o "voltar" do navegador sai da fase
+  // (em vez de sair da página), igual entrar/sair funcionasse por rota de verdade.
+  const { nome: faseParam } = useParams<{ nome?: string }>()
+  const faseSelecionada = faseParam ?? null
+  const navigate = useNavigate()
+  const entrarFase = (fase: string) => navigate(`/fase/${encodeURIComponent(fase)}`)
+  const sairFase = () => navigate('/')
 
   useEffect(() => {
     getProgresso(userId).then((ids) => setPassosConcluidos(new Set(ids))).catch(() => {})

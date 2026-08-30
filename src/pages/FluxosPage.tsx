@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
 import { getFluxosConcluidos, listarFluxos } from '../features/fluxos/fluxosService'
 import type { Fluxo } from '../features/fluxos/types'
@@ -23,13 +23,16 @@ export function FluxosPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [tentativa, setTentativa] = useState(0)
-  // O módulo aberto vive na URL (?modulo=...) — mesmo padrão da Jornada: assim o "voltar" (do
-  // navegador ou ao sair de um fluxo) retorna pro módulo certo, não pro topo do guia.
-  const [searchParams, setSearchParams] = useSearchParams()
-  const moduloSelecionado = searchParams.get('modulo')
+  // O módulo aberto vive no PATH (/fluxos/:modulo) — mesmo padrão da Jornada: assim o "voltar" (do
+  // navegador ou ao sair de um fluxo) retorna pro módulo certo, não pro topo do guia. `destaque`
+  // continua um parâmetro de busca (é um deep-link de notificação, não "onde" você está).
+  const { modulo: moduloParam } = useParams<{ modulo?: string }>()
+  const moduloSelecionado = moduloParam ?? null
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const destaqueParam = searchParams.get('destaque')
-  const entrarModulo = (modulo: string) => setSearchParams({ modulo })
-  const sairModulo = () => setSearchParams({})
+  const entrarModulo = (modulo: string) => navigate(`/fluxos/${encodeURIComponent(modulo)}`)
+  const sairModulo = () => navigate('/fluxos')
   const [destacado, setDestacado] = useState<string | null>(null)
 
   useEffect(() => {
@@ -53,15 +56,21 @@ export function FluxosPage() {
     }
   }, [tentativa])
 
-  // Notificação (?destaque=): entra no módulo do fluxo e marca ele pra pulsar.
+  // Notificação (?destaque=): entra no módulo do fluxo e marca ele pra pulsar. Se ainda não estiver
+  // no módulo certo, navega pra lá levando o `destaque` junto na URL nova — assim funciona igual
+  // independente de o componente remontar ou não nessa navegação.
   useEffect(() => {
     if (!destaqueParam || loading) return
     const alvo = fluxos.find((f) => f.id === destaqueParam)
-    if (alvo) {
-      setSearchParams({ modulo: alvo.modulo })
-      setDestacado(destaqueParam)
+    if (!alvo) return
+    if (moduloSelecionado !== alvo.modulo) {
+      navigate(`/fluxos/${encodeURIComponent(alvo.modulo)}?destaque=${destaqueParam}`, {
+        replace: true,
+      })
+      return
     }
-  }, [destaqueParam, loading, fluxos, setSearchParams])
+    setDestacado(destaqueParam)
+  }, [destaqueParam, loading, fluxos, moduloSelecionado, navigate])
 
   // Depois de entrar no módulo, rola até o fluxo e pulsa a borda por alguns segundos.
   useEffect(() => {

@@ -40,8 +40,8 @@ function TrilhaIcon() {
 }
 
 type Papel = 'gestor' | 'colaborador'
-// `arvore` diz o nome do parâmetro de busca (?fase=/?modulo=) que os galhos dessa seção usam —
-// mesmo padrão que JornadaView/FluxosPage já usam pra guardar a seleção na URL.
+// `arvore` diz que tipo de galho essa seção tem (fase ou módulo) — usado só pra escolher a lista
+// certa (`fases`/`modulos`) e a base do path (/fase ou /fluxos) na hora de montar o link.
 const NAV: { to: string; label: string; icon: ReactNode; end: boolean; papel?: Papel; arvore?: 'fase' | 'modulo' }[] = [
   { to: '/gestor', label: 'Supervisionados', icon: '👥', end: false, papel: 'gestor' },
   { to: '/', label: 'Jornada', icon: <TrilhaIcon />, end: true, papel: 'colaborador', arvore: 'fase' },
@@ -60,7 +60,6 @@ export function AppLayout() {
   const [confirmandoSaida, setConfirmandoSaida] = useState(false)
   const status = useApiStatus()
   const location = useLocation()
-  const buscaAtual = new URLSearchParams(location.search)
 
   const itensMenu = NAV.filter(
     (item) => !item.papel || (item.papel === 'gestor' ? isGestor : !isGestor),
@@ -85,7 +84,8 @@ export function AppLayout() {
   // Expande sozinha a seção da rota atual (ex.: entrou direto num /fluxo/:id vindo de um link) —
   // só liga, nunca fecha o que o usuário já abriu/fechou manualmente.
   useEffect(() => {
-    if (location.pathname === '/') setExpandido((e) => ({ ...e, '/': true }))
+    if (location.pathname === '/' || location.pathname.startsWith('/fase'))
+      setExpandido((e) => ({ ...e, '/': true }))
     if (location.pathname.startsWith('/fluxo')) setExpandido((e) => ({ ...e, '/fluxos': true }))
   }, [location.pathname])
 
@@ -134,9 +134,11 @@ export function AppLayout() {
                 {galhos.length > 0 && aberto && (
                   <ul className="ml-4 flex flex-col gap-0.5 border-l border-neutral-800 py-1 pl-3">
                     {galhos.map((nome) => {
-                      const linkTo = `${item.to}?${item.arvore}=${encodeURIComponent(nome)}`
-                      const ativo =
-                        location.pathname === item.to && buscaAtual.get(item.arvore!) === nome
+                      // Fase e Módulo têm bases de path diferentes (fase vive fora da Jornada,
+                      // módulo é sub-rota do próprio Guia) — não dá pra derivar só de `item.to`.
+                      const base = item.arvore === 'fase' ? '/fase' : '/fluxos'
+                      const linkTo = `${base}/${encodeURIComponent(nome)}`
+                      const ativo = location.pathname === linkTo
                       return (
                         <li key={nome}>
                           <Link
