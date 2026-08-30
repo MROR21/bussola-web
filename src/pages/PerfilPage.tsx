@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Icon } from '../components/Icon'
 import { useAuthStore } from '../features/auth/authStore'
 import { Avatar } from '../features/perfil/Avatar'
 import { lerImagemReduzida } from '../features/perfil/imagem'
@@ -117,7 +118,9 @@ export function PerfilPage() {
   return (
     <div className="flex w-full max-w-2xl flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-neutral-100">⚙️ Perfil</h1>
+        <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
+          <Icon name="settings" className="text-2xl text-purple-300" /> Perfil
+        </h1>
         <p className="text-sm text-neutral-400">Sua conta, foto e senha.</p>
       </header>
 
@@ -226,11 +229,11 @@ export function PerfilPage() {
       {feedback && (
         <div
           className={
-            'anim-pop fixed bottom-4 right-4 z-30 rounded-xl border bg-neutral-900 px-4 py-3 text-sm shadow-lg ' +
+            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-neutral-900 px-4 py-3 text-sm shadow-lg ' +
             (feedback.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300')
           }
         >
-          {feedback.ok ? '✓ ' : '⚠ '}
+          <Icon name={feedback.ok ? 'check_circle' : 'warning'} className="text-base" />
           {feedback.texto}
         </div>
       )}

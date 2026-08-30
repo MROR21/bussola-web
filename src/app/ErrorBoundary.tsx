@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from 'react'
+import { Icon } from '../components/Icon'
 
 // Rede de segurança: qualquer erro de render não tratado cai aqui, em vez de tela branca.
 // Mostra uma saída amigável com "Recarregar" (que costuma resolver estado corrompido).
@@ -18,7 +19,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { erro: bo
 
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-neutral-950 px-4 text-center text-neutral-100">
-        <span className="text-5xl">🧭</span>
+        <Icon name="explore" className="text-5xl text-neutral-600" />
         <h1 className="text-xl font-semibold">Algo saiu do rumo</h1>
         <p className="max-w-sm text-sm text-neutral-400">
           Encontramos um erro inesperado. Recarregar a página costuma resolver.

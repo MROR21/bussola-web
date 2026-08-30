@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { Icon } from '../../components/Icon'
 import { cx } from '../../utils/cx'
 import type { TrailStep } from './types'
 
@@ -81,8 +82,11 @@ export function TrailItemCard({
 
           <p className="text-sm text-neutral-400">{step.description}</p>
 
-          <Link to={href} className="self-start text-sm text-purple-300 hover:text-purple-200">
-            Ver {isFluxo ? 'fluxo' : 'passo'} →
+          <Link
+            to={href}
+            className="flex items-center gap-1 self-start text-sm text-purple-300 hover:text-purple-200"
+          >
+            Ver {isFluxo ? 'fluxo' : 'passo'} <Icon name="arrow_forward" className="text-sm" />
           </Link>
         </div>
       </div>

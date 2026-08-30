@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
+import { Icon } from '../components/Icon'
 import {
   adicionarSupervisionado,
   getDisponiveis,
@@ -55,7 +56,9 @@ export function GestorPage() {
   return (
     <div className="flex w-full max-w-2xl flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-neutral-100">📊 Painel do gestor</h1>
+        <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
+          <Icon name="dashboard" className="text-2xl text-purple-300" /> Painel do gestor
+        </h1>
         <p className="text-sm text-neutral-400">
           Progresso dos seus supervisionados ({usuarios.length}{' '}
           {usuarios.length === 1 ? 'pessoa' : 'pessoas'}).
@@ -126,9 +129,15 @@ export function GestorPage() {
         <button
           type="button"
           onClick={() => setAdicionando((v) => !v)}
-          className="self-start rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400"
+          className="flex items-center gap-1 self-start rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400"
         >
-          {adicionando ? 'Fechar' : '+ Adicionar supervisionado'}
+          {adicionando ? (
+            'Fechar'
+          ) : (
+            <>
+              <Icon name="add" className="text-base" /> Adicionar supervisionado
+            </>
+          )}
         </button>
 
         {adicionando && (

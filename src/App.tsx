@@ -1,4 +1,5 @@
 import { SessaoAutenticada } from './app/SessaoAutenticada'
+import { Icon } from './components/Icon'
 import { LoginForm } from './features/auth/LoginForm'
 import { useAuthStore } from './features/auth/authStore'
 
@@ -11,7 +12,9 @@ function App() {
       <main className="flex min-h-screen flex-col items-center justify-center bg-neutral-950 px-4 text-neutral-100">
         <div className="anim-page flex flex-col items-center gap-6">
           <div className="flex flex-col items-center gap-2">
-            <h1 className="text-4xl font-bold tracking-tight">🧭 Bússola</h1>
+            <h1 className="flex items-center gap-2 text-4xl font-bold tracking-tight">
+              <Icon name="explore" className="text-4xl text-purple-400" /> Bússola
+            </h1>
             <p className="text-neutral-400">Onboarding técnico</p>
           </div>
           <LoginForm />
