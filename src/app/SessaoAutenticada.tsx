@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
+import { Carregando } from '../components/Spinner'
 import { getUser } from '../features/auth/userService'
 import type { UsuarioLogado } from '../features/auth/types'
 import type { Perfil } from '../features/nivelamento/types'
@@ -70,7 +71,7 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
     )
   }
   if (estado === 'carregando') {
-    return <TelaCheia><p className="text-neutral-400">Carregando sua jornada...</p></TelaCheia>
+    return <TelaCheia><Carregando texto="Carregando sua jornada..." /></TelaCheia>
   }
   if (estado === 'nivelar') {
     return (

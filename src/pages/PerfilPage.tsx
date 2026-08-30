@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Icon } from '../components/Icon'
+import { Spinner } from '../components/Spinner'
 import { useAuthStore } from '../features/auth/authStore'
 import { Avatar } from '../features/perfil/Avatar'
 import { lerImagemReduzida } from '../features/perfil/imagem'
@@ -112,7 +113,7 @@ export function PerfilPage() {
   const inputCls =
     'rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400 disabled:opacity-50'
   const salvarCls =
-    'self-start rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-40'
+    'flex items-center gap-1.5 self-start rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-40'
   const cardCls = 'flex flex-col gap-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-6'
 
   return (
@@ -187,7 +188,13 @@ export function PerfilPage() {
           className={inputCls}
         />
         <button type="submit" disabled={!emailMudou || salvandoEmail} className={salvarCls}>
-          {salvandoEmail ? 'Salvando...' : 'Salvar e-mail'}
+          {salvandoEmail ? (
+            <>
+              <Spinner /> Salvando...
+            </>
+          ) : (
+            'Salvar e-mail'
+          )}
         </button>
       </form>
 
@@ -222,7 +229,13 @@ export function PerfilPage() {
           <span className="text-xs text-red-400">As senhas não conferem.</span>
         )}
         <button type="submit" disabled={!senhaValida || salvandoSenha} className={salvarCls}>
-          {salvandoSenha ? 'Salvando...' : 'Trocar senha'}
+          {salvandoSenha ? (
+            <>
+              <Spinner /> Salvando...
+            </>
+          ) : (
+            'Trocar senha'
+          )}
         </button>
       </form>
 

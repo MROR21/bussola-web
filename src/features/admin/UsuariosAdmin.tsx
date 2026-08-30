@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../../components/Icon'
+import { Carregando } from '../../components/Spinner'
 import {
   apagarEmailAutorizado,
   criarEmailAutorizado,
@@ -61,7 +62,7 @@ function ListaUsuarios() {
     }
   }
 
-  if (loading) return <p className="text-neutral-400">Carregando...</p>
+  if (loading) return <Carregando texto="Carregando..." />
   if (error) return <p className="text-red-400">Erro: {error}</p>
 
   return (
@@ -172,7 +173,7 @@ function ListaEmailsAutorizados() {
     }
   }
 
-  if (loading) return <p className="text-neutral-400">Carregando...</p>
+  if (loading) return <Carregando texto="Carregando..." />
   if (error) return <p className="text-red-400">Erro: {error}</p>
 
   return (

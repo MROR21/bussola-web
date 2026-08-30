@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
+import { Carregando } from '../components/Spinner'
 import { getFluxosConcluidos, listarFluxos } from '../features/fluxos/fluxosService'
 import type { Fluxo } from '../features/fluxos/types'
 
@@ -146,7 +147,7 @@ export function FluxosPage() {
     )
   }
 
-  if (loading) return <p className="text-neutral-400">Carregando o guia...</p>
+  if (loading) return <Carregando texto="Carregando o guia..." />
   if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
 
   // ---- Dentro de um módulo ----

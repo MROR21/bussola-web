@@ -4,6 +4,7 @@ import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
 import { Markdown } from '../components/Markdown'
 import { MarkdownEditor } from '../components/MarkdownEditor'
+import { Carregando, Spinner } from '../components/Spinner'
 import { cx } from '../utils/cx'
 import { useAuthStore } from '../features/auth/authStore'
 import { editarFluxo, listarFluxosAdmin } from '../features/admin/adminService'
@@ -139,7 +140,7 @@ export function FluxoDetalhePage() {
     return () => clearTimeout(t)
   }, [salvo])
 
-  if (loading) return <p className="text-neutral-400">Carregando o fluxo...</p>
+  if (loading) return <Carregando texto="Carregando o fluxo..." />
   if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
   if (!fluxo) return null
 
@@ -170,7 +171,9 @@ export function FluxoDetalhePage() {
               className="flex items-center gap-1 rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-purple-300 hover:border-purple-400 hover:text-purple-200 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {carregandoEdicao ? (
-                'Carregando...'
+                <>
+                  <Spinner /> Carregando...
+                </>
               ) : (
                 <>
                   <Icon name="edit" className="text-base" /> Editar
@@ -239,9 +242,15 @@ export function FluxoDetalhePage() {
               type="button"
               onClick={salvar}
               disabled={!campos.titulo.trim() || salvando}
-              className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center gap-1.5 rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {salvando ? 'Salvando...' : 'Salvar'}
+              {salvando ? (
+                <>
+                  <Spinner /> Salvando...
+                </>
+              ) : (
+                'Salvar'
+              )}
             </button>
           </div>
         </div>

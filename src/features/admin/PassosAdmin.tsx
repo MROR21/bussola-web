@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../../components/Icon'
 import { MarkdownEditor } from '../../components/MarkdownEditor'
+import { Carregando, Spinner } from '../../components/Spinner'
 import type { SkillArea } from '../onboarding/types'
 import {
   apagarPasso,
@@ -111,7 +112,7 @@ export function PassosAdmin() {
 
   const nomeDaFase = (faseId: string) => fases.find((f) => f.id === faseId)?.nome ?? '?'
 
-  if (loading) return <p className="text-neutral-400">Carregando...</p>
+  if (loading) return <Carregando texto="Carregando..." />
   if (error) return <p className="text-red-400">Erro: {error}</p>
 
   return (
@@ -264,9 +265,15 @@ export function PassosAdmin() {
                 type="button"
                 onClick={salvar}
                 disabled={!form.title.trim() || salvando}
-                className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex items-center gap-1.5 rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {salvando ? 'Salvando...' : 'Salvar'}
+                {salvando ? (
+                  <>
+                    <Spinner /> Salvando...
+                  </>
+                ) : (
+                  'Salvar'
+                )}
               </button>
             </div>
           </div>

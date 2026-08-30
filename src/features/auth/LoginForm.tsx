@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Icon } from '../../components/Icon'
+import { Spinner } from '../../components/Spinner'
 import { login, register } from './authService'
 import { useAuthStore } from './authStore'
 
@@ -101,9 +102,17 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="rounded-lg bg-purple-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex items-center justify-center gap-1.5 rounded-lg bg-purple-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {loading ? 'Aguarde...' : ehCadastro ? 'Criar conta' : 'Entrar'}
+        {loading ? (
+          <>
+            <Spinner /> Aguarde...
+          </>
+        ) : ehCadastro ? (
+          'Criar conta'
+        ) : (
+          'Entrar'
+        )}
       </button>
 
       <button

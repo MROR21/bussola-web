@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
+import { Carregando } from '../components/Spinner'
 import { cx } from '../utils/cx'
 import { getFluxosSupervisionado, getProgressoDetalhado } from '../features/gestor/gestorService'
 import type { FluxoProgresso, ProgressoSupervisionado } from '../features/gestor/types'
@@ -59,7 +60,7 @@ export function SupervisionadoPage() {
     )
   }, [fluxos])
 
-  if (loading) return <p className="text-neutral-400">Carregando o progresso...</p>
+  if (loading) return <Carregando texto="Carregando o progresso..." />
   if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
   if (!dados) return null
 

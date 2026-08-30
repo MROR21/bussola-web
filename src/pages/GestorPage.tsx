@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
+import { Carregando } from '../components/Spinner'
 import {
   adicionarSupervisionado,
   getDisponiveis,
@@ -50,7 +51,7 @@ export function GestorPage() {
     await carregar()
   }
 
-  if (loading) return <p className="text-neutral-400">Carregando o painel...</p>
+  if (loading) return <Carregando texto="Carregando o painel..." />
   if (error) return <EstadoErro onRetry={carregar} />
 
   return (

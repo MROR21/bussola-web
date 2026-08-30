@@ -4,6 +4,7 @@ import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
 import { Markdown } from '../components/Markdown'
 import { MarkdownEditor } from '../components/MarkdownEditor'
+import { Carregando, Spinner } from '../components/Spinner'
 import { useAuthStore } from '../features/auth/authStore'
 import { editarPasso, listarPassosAdmin } from '../features/admin/adminService'
 import type { PassoAdmin, PassoAdminInput } from '../features/admin/types'
@@ -164,7 +165,7 @@ export function PassoDetalhePage() {
     return () => clearTimeout(t)
   }, [salvo])
 
-  if (loading) return <p className="text-neutral-400">Carregando o passo...</p>
+  if (loading) return <Carregando texto="Carregando o passo..." />
   if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
   if (!step) return null
 
@@ -191,7 +192,9 @@ export function PassoDetalhePage() {
               className="flex items-center gap-1 rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-purple-300 hover:border-purple-400 hover:text-purple-200 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {carregandoEdicao ? (
-                'Carregando...'
+                <>
+                  <Spinner /> Carregando...
+                </>
               ) : (
                 <>
                   <Icon name="edit" className="text-base" /> Editar
@@ -244,9 +247,15 @@ export function PassoDetalhePage() {
               type="button"
               onClick={salvarConteudo}
               disabled={!camposConteudo.title.trim() || salvandoConteudo}
-              className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center gap-1.5 rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {salvandoConteudo ? 'Salvando...' : 'Salvar'}
+              {salvandoConteudo ? (
+                <>
+                  <Spinner /> Salvando...
+                </>
+              ) : (
+                'Salvar'
+              )}
             </button>
           </div>
         </div>
@@ -276,9 +285,15 @@ export function PassoDetalhePage() {
                   type="button"
                   onClick={concluir}
                   disabled={salvando}
-                  className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:opacity-50"
                 >
-                  {salvando ? 'Salvando...' : 'Salvar comprovação'}
+                  {salvando ? (
+                    <>
+                      <Spinner /> Salvando...
+                    </>
+                  ) : (
+                    'Salvar comprovação'
+                  )}
                 </button>
                 <button
                   type="button"
@@ -336,9 +351,15 @@ export function PassoDetalhePage() {
             type="button"
             onClick={concluir}
             disabled={salvando}
-            className="self-start rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:opacity-50"
+            className="flex items-center gap-1.5 self-start rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:opacity-50"
           >
-            {salvando ? 'Salvando...' : 'Marcar como concluído'}
+            {salvando ? (
+              <>
+                <Spinner /> Salvando...
+              </>
+            ) : (
+              'Marcar como concluído'
+            )}
           </button>
         </section>
       )}

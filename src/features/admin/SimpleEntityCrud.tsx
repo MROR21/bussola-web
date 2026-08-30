@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../../components/Icon'
+import { Carregando, Spinner } from '../../components/Spinner'
 import type { EntidadeSimples } from './types'
 
 // CRUD de Fase ou Módulo — a mesma forma (nome+ordem) serve pros dois, só troca os services e os
@@ -127,7 +128,7 @@ export function SimpleEntityCrud({
     }
   }
 
-  if (loading) return <p className="text-neutral-400">Carregando...</p>
+  if (loading) return <Carregando texto="Carregando..." />
   if (error) return <p className="text-red-400">Erro: {error}</p>
 
   return (
@@ -243,9 +244,15 @@ export function SimpleEntityCrud({
                 type="button"
                 onClick={salvar}
                 disabled={!nome.trim() || salvando}
-                className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex items-center gap-1.5 rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {salvando ? 'Salvando...' : 'Salvar'}
+                {salvando ? (
+                  <>
+                    <Spinner /> Salvando...
+                  </>
+                ) : (
+                  'Salvar'
+                )}
               </button>
             </div>
           </div>
