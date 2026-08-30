@@ -172,16 +172,16 @@ export function LoginForm() {
         </>
       )}
 
-      <button type="button" onClick={trocarModo} className="text-sm text-neutral-400">
+      <button type="button" onClick={trocarModo} className="text-sm text-gold-400">
         {ehCadastro ? (
           <>
             Já tem conta?{' '}
-            <span className="text-gold-400 hover:text-gold-300">Entrar</span>
+            <span className="text-gold-500 hover:text-gold-300">Entrar</span>
           </>
         ) : (
           <>
             Não tem conta?{' '}
-            <span className="text-gold-400 hover:text-gold-300">Criar conta</span>
+            <span className="text-gold-500 hover:text-gold-300">Criar conta</span>
           </>
         )}
       </button>
