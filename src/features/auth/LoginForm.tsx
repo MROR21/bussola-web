@@ -41,15 +41,15 @@ export function LoginForm() {
         e.preventDefault()
         handleSubmit()
       }}
-      className="flex w-full max-w-sm flex-col gap-4 rounded-xl border border-neutral-800 bg-neutral-900 p-6"
+      className="flex flex-col gap-5"
     >
       <div className="flex flex-col gap-1">
-        <h2 className="flex items-center gap-1.5 text-lg font-semibold">
+        <h2 className="flex items-center gap-1.5 text-xl font-semibold">
           {ehCadastro ? (
             'Criar conta'
           ) : (
             <>
-              Bem-vindo(a) <Icon name="waving_hand" className="text-lg text-purple-300" />
+              Bem-vindo(a) <Icon name="waving_hand" className="text-xl text-purple-300" />
             </>
           )}
         </h2>
@@ -59,19 +59,19 @@ export function LoginForm() {
       </div>
 
       {ehCadastro && (
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="flex flex-col gap-1.5 text-sm">
           <span className="text-neutral-300">Nome</span>
           <input
             required
             value={nome}
             onChange={(e) => setNome(e.target.value)}
             placeholder="Seu nome"
-            className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+            className="rounded-lg border border-neutral-700 bg-neutral-950 px-3.5 py-2.5 text-neutral-100 outline-none focus:border-purple-400"
           />
         </label>
       )}
 
-      <label className="flex flex-col gap-1 text-sm">
+      <label className="flex flex-col gap-1.5 text-sm">
         <span className="text-neutral-300">E-mail</span>
         <input
           required
@@ -79,11 +79,11 @@ export function LoginForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="voce@agilean.com.br"
-          className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+          className="rounded-lg border border-neutral-700 bg-neutral-950 px-3.5 py-2.5 text-neutral-100 outline-none focus:border-purple-400"
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-sm">
+      <label className="flex flex-col gap-1.5 text-sm">
         <span className="text-neutral-300">Senha</span>
         <input
           required
@@ -92,7 +92,7 @@ export function LoginForm() {
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
           placeholder={ehCadastro ? 'Ao menos 6 caracteres' : '••••••••'}
-          className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+          className="rounded-lg border border-neutral-700 bg-neutral-950 px-3.5 py-2.5 text-neutral-100 outline-none focus:border-purple-400"
         />
       </label>
 
@@ -101,7 +101,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-50"
+        className="rounded-lg bg-purple-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? 'Aguarde...' : ehCadastro ? 'Criar conta' : 'Entrar'}
       </button>
