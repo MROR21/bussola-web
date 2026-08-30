@@ -147,7 +147,7 @@ export function AppLayout() {
             disponível em vez de crescer) — o `<aside>` em si não tem overflow-y, senão a marca
             d'água decorativa (que sangra além da borda de propósito) contava como conteúdo
             "fora da área visível" e fazia o navegador desenhar uma barra de rolagem à toa. */}
-        <nav className="flex w-full min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
+        <nav className="flex w-full min-h-0 flex-1 flex-col gap-1 overflow-y-auto overflow-x-hidden">
           {itensMenu.map((item) => {
             const galhos = item.arvore === 'fase' ? fases : item.arvore === 'modulo' ? modulos : []
             const aberto = expandido[item.to] ?? false
@@ -293,7 +293,11 @@ export function AppLayout() {
           </div>
         )}
 
-        <main className="flex-1 overflow-y-auto p-6">
+        {/* overflow-x-hidden explícito: só `overflow-y-auto` faz o navegador computar o eixo X
+            como auto sozinho (regra da especificação do CSS) — qualquer marca d'água decorativa
+            que sangre um pouco pra fora da coluna central acabaria desenhando uma barra de
+            rolagem horizontal à toa (mesma causa do bug das setinhas no menu lateral). */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-6">
           <div key={location.pathname} className="anim-page flex w-full justify-center">
             <Outlet />
           </div>

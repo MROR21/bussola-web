@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
 import { MapCorners } from '../components/MapCorners'
+import { MapIllustration } from '../components/MapIllustration'
 import { Markdown } from '../components/Markdown'
 import { MarkdownEditor } from '../components/MarkdownEditor'
 import { Carregando, Spinner } from '../components/Spinner'
@@ -288,8 +289,9 @@ export function PassoDetalhePage() {
           </div>
         </div>
       ) : (
-        <div className="relative flex flex-col gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed">
+        <div className="relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed">
           <MapCorners tamanho={5} opacidade={25} />
+          <MapIllustration className="pointer-events-none absolute -bottom-4 -right-6 -z-10 w-56 text-gold-500 opacity-[0.06]" />
           <Markdown>{step.conteudo}</Markdown>
         </div>
       )}

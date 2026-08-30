@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { CompassRose } from '../../components/CompassRose'
 import { Icon } from '../../components/Icon'
 import { MapCorners } from '../../components/MapCorners'
+import { MapIllustration } from '../../components/MapIllustration'
 import { TrailDivider } from '../../components/TrailDivider'
 import { useTitulo } from '../../hooks/useTitulo'
 import { cx } from '../../utils/cx'
@@ -196,10 +197,13 @@ export function JornadaView({
           irmãos "opacos", sem z-index negativo): um `position:fixed` com z negativo parecia
           funcionar, mas quebrou quando o `AppLayout` ganhou `position:relative` lá em cima (o
           fixed passou a ficar preso na stacking context do layout, atrás do próprio fundo do
-          app). absolute+DOM-order não tem essa armadilha. Canto oposto ao do hero, maior e mais
-          difusa, pra não duplicar o mesmo ponto. */}
+          app). absolute+DOM-order não tem essa armadilha. Dois motivos, cantos opostos, pra dar
+          mais vida (rosa dos ventos em cima, mapa embaixo) sem competir com a do hero. */}
       <CompassRose
-        className="pointer-events-none absolute -right-16 -top-10 size-[520px] text-gold-500 opacity-[0.05]"
+        className="pointer-events-none absolute -right-16 -top-10 size-[520px] text-gold-500 opacity-[0.06]"
+      />
+      <MapIllustration
+        className="pointer-events-none absolute -bottom-10 -left-20 w-[420px] text-gold-500 opacity-[0.07]"
       />
       {/* Hero — anel de progresso + próximo passo num único cartão (antes eram duas caixas soltas
           empilhadas; agora lê como um bloco só, com o glow sutil atrás do anel). */}
