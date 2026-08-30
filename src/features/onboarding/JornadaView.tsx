@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Icon } from '../../components/Icon'
 import { cx } from '../../utils/cx'
 import { concluirFluxo, desmarcarFluxo, getFluxosConcluidos } from '../fluxos/fluxosService'
 import { TrailItemCard } from './TrailItemCard'
@@ -7,15 +8,15 @@ import { ProgressRing } from './ProgressRing'
 import { concluirPasso, desmarcarPasso, getProgresso } from './progressService'
 import type { TrailStep } from './types'
 
-// Emoji por fase (fallback genérico se aparecer uma fase nova).
-const FASE_EMOJI: Record<string, string> = {
-  Ambientação: '👋',
-  'Ambiente técnico': '💻',
-  Padrões: '📐',
-  'Conheça o sistema': '🖥️',
-  'Primeiro Card': '🏆',
+// Ícone por fase (fallback genérico se aparecer uma fase nova).
+const FASE_ICONE: Record<string, string> = {
+  Ambientação: 'waving_hand',
+  'Ambiente técnico': 'computer',
+  Padrões: 'square_foot',
+  'Conheça o sistema': 'hub',
+  'Primeiro Card': 'emoji_events',
 }
-const emojiDaFase = (fase: string) => FASE_EMOJI[fase] ?? '📍'
+const iconeDaFase = (fase: string) => FASE_ICONE[fase] ?? 'flag'
 
 // Só a fase final espera todo o resto pronto antes de liberar — as demais seguem no gate suave
 // (visitável a qualquer momento).
@@ -122,12 +123,12 @@ export function JornadaView({
         <button
           type="button"
           onClick={sairFase}
-          className="self-start text-sm text-neutral-400 hover:text-neutral-200"
+          className="flex items-center gap-1 self-start text-sm text-neutral-400 hover:text-neutral-200"
         >
-          ← Voltar pra jornada
+          <Icon name="arrow_back" className="text-base" /> Voltar pra jornada
         </button>
         <header className="flex items-center gap-3">
-          <span className="text-3xl">{emojiDaFase(faseNome)}</span>
+          <Icon name={iconeDaFase(faseNome)} className="text-3xl text-purple-300" />
           <div className="flex flex-col">
             <h2 className="text-xl font-bold text-neutral-100">{faseNome}</h2>
             <span className="text-sm text-neutral-500">
@@ -159,7 +160,9 @@ export function JornadaView({
         </ProgressRing>
         <div className="flex flex-col gap-1">
           <p className="text-sm text-neutral-400">Sua jornada</p>
-          <h2 className="text-2xl font-bold text-neutral-100">Olá, {nome} 👋</h2>
+          <h2 className="flex items-center gap-1.5 text-2xl font-bold text-neutral-100">
+            Olá, {nome} <Icon name="waving_hand" className="text-xl text-purple-300" />
+          </h2>
           <p className="text-sm text-neutral-400">
             {feitos} de {total} itens · Fase {Math.min(faseAtualIndex + 1, fases.length)} de{' '}
             {fases.length}
@@ -174,12 +177,14 @@ export function JornadaView({
 
       {completa ? (
         <section className="flex flex-col items-center gap-3 rounded-2xl border border-purple-500/40 bg-purple-500/10 p-6 text-center">
-          <span className="text-4xl">🏆</span>
+          <Icon name="emoji_events" className="text-4xl text-purple-300" fill />
           <h3 className="text-lg font-semibold text-neutral-100">Jornada completa!</h3>
           <p className="text-sm text-neutral-400">
             Você foi do clone ao primeiro card. Bem-vindo(a) de verdade à Agilean.
           </p>
-          <p className="text-base font-medium text-purple-200">Agora é com você! 🚀</p>
+          <p className="flex items-center justify-center gap-1.5 text-base font-medium text-purple-200">
+            Agora é com você! <Icon name="rocket_launch" className="text-lg" />
+          </p>
           <Link
             to="/fluxos"
             className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400"
@@ -191,8 +196,8 @@ export function JornadaView({
         proximo && (
           <section className="flex flex-col gap-3 rounded-2xl border border-purple-500/40 bg-purple-500/10 p-5">
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-medium uppercase tracking-wide text-purple-300">
-                ▶ Próximo · {proximo.phase}
+              <span className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-purple-300">
+                <Icon name="play_arrow" className="text-sm" /> Próximo · {proximo.phase}
               </span>
               <h3 className="text-lg font-semibold text-neutral-100">{proximo.title}</h3>
               <p className="text-sm text-neutral-400">{proximo.description}</p>
@@ -238,17 +243,17 @@ export function JornadaView({
                 )}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-2xl">{emojiDaFase(fase)}</span>
+                  <Icon name={iconeDaFase(fase)} className="text-2xl text-purple-300" />
                   {bloqueada ? (
-                    <span title="Complete as fases anteriores">🔒</span>
+                    <Icon name="lock" className="text-neutral-500" title="Complete as fases anteriores" />
                   ) : faseCompleta ? (
-                    <span title="Fase concluída">🎖️</span>
+                    <Icon name="military_tech" className="text-amber-400" fill title="Fase concluída" />
                   ) : atual ? (
                     <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] font-medium text-purple-200">
                       Você está aqui
                     </span>
                   ) : (
-                    <span className="text-neutral-600">›</span>
+                    <Icon name="chevron_right" className="text-neutral-600" />
                   )}
                 </div>
                 <div className="flex flex-col">

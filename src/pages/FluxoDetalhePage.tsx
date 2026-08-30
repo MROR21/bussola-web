@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
+import { Icon } from '../components/Icon'
 import { Markdown } from '../components/Markdown'
 import { MarkdownEditor } from '../components/MarkdownEditor'
 import { cx } from '../utils/cx'
@@ -149,9 +150,9 @@ export function FluxoDetalhePage() {
       <button
         type="button"
         onClick={() => navigate(-1)}
-        className="self-start text-sm text-neutral-400 hover:text-neutral-200"
+        className="flex items-center gap-1 self-start text-sm text-neutral-400 hover:text-neutral-200"
       >
-        ← Voltar
+        <Icon name="arrow_back" className="text-base" /> Voltar
       </button>
 
       <header className="flex items-start justify-between gap-3">
@@ -166,9 +167,15 @@ export function FluxoDetalhePage() {
               type="button"
               onClick={abrirEdicao}
               disabled={carregandoEdicao}
-              className="rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-purple-300 hover:border-purple-400 hover:text-purple-200 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center gap-1 rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-purple-300 hover:border-purple-400 hover:text-purple-200 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {carregandoEdicao ? 'Carregando...' : '✏️ Editar'}
+              {carregandoEdicao ? (
+                'Carregando...'
+              ) : (
+                <>
+                  <Icon name="edit" className="text-base" /> Editar
+                </>
+              )}
             </button>
             {erroEdicao && <p className="text-xs text-red-400">{erroEdicao}</p>}
           </div>
@@ -262,18 +269,24 @@ export function FluxoDetalhePage() {
         type="button"
         onClick={toggle}
         className={cx(
-          'self-start rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+          'flex items-center gap-1.5 self-start rounded-lg px-4 py-2 text-sm font-medium transition-colors',
           concluido
             ? 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
             : 'bg-purple-500 text-white hover:bg-purple-400',
         )}
       >
-        {concluido ? '✓ Concluído · desmarcar' : 'Marcar como concluído'}
+        {concluido ? (
+          <>
+            <Icon name="check" className="text-base" /> Concluído · desmarcar
+          </>
+        ) : (
+          'Marcar como concluído'
+        )}
       </button>
 
       {salvo && (
-        <div className="anim-pop fixed bottom-4 right-4 z-30 rounded-xl border border-green-500/40 bg-neutral-900 px-4 py-3 text-sm text-green-300 shadow-lg">
-          ✓ Salvo com sucesso
+        <div className="anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border border-green-500/40 bg-neutral-900 px-4 py-3 text-sm text-green-300 shadow-lg">
+          <Icon name="check_circle" className="text-base" /> Salvo com sucesso
         </div>
       )}
     </article>

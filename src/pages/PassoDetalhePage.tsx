@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
+import { Icon } from '../components/Icon'
 import { Markdown } from '../components/Markdown'
 import { MarkdownEditor } from '../components/MarkdownEditor'
 import { useAuthStore } from '../features/auth/authStore'
@@ -169,8 +170,8 @@ export function PassoDetalhePage() {
 
   return (
     <article className="flex w-full max-w-2xl flex-col gap-5">
-      <Link to="/" className="text-sm text-neutral-400 hover:text-neutral-200">
-        ← Voltar pra jornada
+      <Link to="/" className="flex items-center gap-1 text-sm text-neutral-400 hover:text-neutral-200">
+        <Icon name="arrow_back" className="text-base" /> Voltar pra jornada
       </Link>
 
       <header className="flex items-start justify-between gap-3">
@@ -187,9 +188,15 @@ export function PassoDetalhePage() {
               type="button"
               onClick={abrirEdicaoConteudo}
               disabled={carregandoEdicao}
-              className="rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-purple-300 hover:border-purple-400 hover:text-purple-200 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center gap-1 rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-purple-300 hover:border-purple-400 hover:text-purple-200 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {carregandoEdicao ? 'Carregando...' : '✏️ Editar'}
+              {carregandoEdicao ? (
+                'Carregando...'
+              ) : (
+                <>
+                  <Icon name="edit" className="text-base" /> Editar
+                </>
+              )}
             </button>
             {erroEdicao && <p className="text-xs text-red-400">{erroEdicao}</p>}
           </div>
@@ -251,8 +258,8 @@ export function PassoDetalhePage() {
 
       {concluido ? (
         <section className="flex flex-col gap-3 rounded-2xl border border-green-500/30 bg-neutral-900 p-5">
-          <span className="self-start rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
-            ✓ Concluído
+          <span className="flex items-center gap-1 self-start rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
+            <Icon name="check" className="text-sm" /> Concluído
           </span>
 
           {editando ? (
@@ -337,8 +344,8 @@ export function PassoDetalhePage() {
       )}
 
       {salvo && (
-        <div className="anim-pop fixed bottom-4 right-4 z-30 rounded-xl border border-green-500/40 bg-neutral-900 px-4 py-3 text-sm text-green-300 shadow-lg">
-          ✓ Salvo com sucesso
+        <div className="anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border border-green-500/40 bg-neutral-900 px-4 py-3 text-sm text-green-300 shadow-lg">
+          <Icon name="check_circle" className="text-base" /> Salvo com sucesso
         </div>
       )}
     </article>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Icon } from '../../components/Icon'
 import { Avatar } from '../perfil/Avatar'
 import {
   apagarNotificacao,
@@ -150,9 +151,9 @@ export function NotificationBell() {
         type="button"
         onClick={alternar}
         aria-label="Notificações"
-        className="relative text-lg text-neutral-300 hover:text-neutral-100"
+        className="relative text-neutral-300 hover:text-neutral-100"
       >
-        🔔
+        <Icon name="notifications" />
         {naoLidas > 0 && (
           <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-purple-500 text-[10px] font-medium text-white">
             {naoLidas}
@@ -238,7 +239,7 @@ export function NotificationBell() {
                     aria-label="Apagar notificação"
                     className="mr-2 shrink-0 text-neutral-700 hover:text-red-400"
                   >
-                    ✕
+                    <Icon name="close" className="text-base" />
                   </button>
                 </li>
               ))}
@@ -253,7 +254,8 @@ export function NotificationBell() {
           onClick={abrir}
           className="anim-pop absolute right-full top-0 z-50 mr-3 flex w-max items-center gap-2 rounded-xl border border-purple-500/40 bg-neutral-900 px-4 py-3 text-sm text-neutral-100 shadow-lg"
         >
-          🔔 Você tem {naoLidas} {naoLidas === 1 ? 'nova notificação' : 'novas notificações'}
+          <Icon name="notifications" className="text-base" /> Você tem {naoLidas}{' '}
+          {naoLidas === 1 ? 'nova notificação' : 'novas notificações'}
           <span className="absolute -right-1 top-1/2 size-2 -translate-y-1/2 rotate-45 border-r border-t border-purple-500/40 bg-neutral-900" />
         </button>
       )}

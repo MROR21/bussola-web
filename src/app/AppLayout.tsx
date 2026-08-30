@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Icon } from '../components/Icon'
 import { useAuthStore } from '../features/auth/authStore'
 import { listarFluxos } from '../features/fluxos/fluxosService'
 import { NotificationBell } from '../features/notificacoes/NotificationBell'
@@ -43,12 +44,12 @@ type Papel = 'gestor' | 'colaborador'
 // `arvore` diz que tipo de galho essa seção tem (fase ou módulo) — usado só pra escolher a lista
 // certa (`fases`/`modulos`) e a base do path (/fase ou /fluxos) na hora de montar o link.
 const NAV: { to: string; label: string; icon: ReactNode; end: boolean; papel?: Papel; arvore?: 'fase' | 'modulo' }[] = [
-  { to: '/gestor', label: 'Supervisionados', icon: '👥', end: false, papel: 'gestor' },
+  { to: '/gestor', label: 'Supervisionados', icon: <Icon name="group" className="text-[18px]" />, end: false, papel: 'gestor' },
   { to: '/', label: 'Jornada', icon: <TrilhaIcon />, end: true, papel: 'colaborador', arvore: 'fase' },
-  { to: '/fluxos', label: 'Guias', icon: '📚', end: false, arvore: 'modulo' },
-  { to: '/chat', label: 'Assistente', icon: '💬', end: false },
-  { to: '/admin', label: 'Admin', icon: '🛠️', end: false, papel: 'gestor' },
-  { to: '/perfil', label: 'Perfil', icon: '⚙️', end: false },
+  { to: '/fluxos', label: 'Guias', icon: <Icon name="menu_book" className="text-[18px]" />, end: false, arvore: 'modulo' },
+  { to: '/chat', label: 'Assistente', icon: <Icon name="chat" className="text-[18px]" />, end: false },
+  { to: '/admin', label: 'Admin', icon: <Icon name="build" className="text-[18px]" />, end: false, papel: 'gestor' },
+  { to: '/perfil', label: 'Perfil', icon: <Icon name="settings" className="text-[18px]" />, end: false },
 ]
 
 // Casca do app (logado): menu lateral fixo + header + área de conteúdo que troca por rota.
@@ -93,7 +94,7 @@ export function AppLayout() {
     <div className="flex h-screen overflow-hidden bg-neutral-950 text-neutral-100">
       <aside className="flex w-60 shrink-0 flex-col gap-4 overflow-y-auto border-r border-neutral-800 bg-neutral-900 p-4">
         <div className="flex items-center gap-2 px-2 py-1">
-          <span className="text-2xl">🧭</span>
+          <Icon name="explore" className="text-2xl text-purple-400" />
           <span className="text-lg font-bold">Bússola</span>
         </div>
         <nav className="flex flex-col gap-1">
@@ -126,7 +127,7 @@ export function AppLayout() {
                       aria-label={aberto ? 'Recolher' : 'Expandir'}
                       className="px-2 text-neutral-600 hover:text-neutral-300"
                     >
-                      {aberto ? '▾' : '▸'}
+                      <Icon name={aberto ? 'expand_more' : 'chevron_right'} className="text-base" />
                     </button>
                   )}
                 </div>
@@ -198,7 +199,8 @@ export function AppLayout() {
 
         {status === 'offline' && (
           <div className="anim-fade flex items-center justify-center gap-2 bg-red-500/15 px-4 py-1.5 text-center text-xs text-red-300">
-            ⚠ Sem conexão com o servidor. Tentando reconectar…
+            <Icon name="warning" className="text-sm" />
+            Sem conexão com o servidor. Tentando reconectar…
           </div>
         )}
 

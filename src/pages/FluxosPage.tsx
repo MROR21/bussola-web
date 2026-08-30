@@ -1,17 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
+import { Icon } from '../components/Icon'
 import { getFluxosConcluidos, listarFluxos } from '../features/fluxos/fluxosService'
 import type { Fluxo } from '../features/fluxos/types'
 
-// Emoji por módulo (fallback 🧩 = "peça/módulo") — dá mais cara de módulo que uma pastinha.
-const MODULO_EMOJI: Record<string, string> = {
-  'Mão de Obra': '👷',
-  'Básico do dev': '🛠️',
-  'Quiz Quality': '🔍',
-  'Agilean (desktop)': '🖥️',
+// Ícone por módulo (fallback "extension" = peça/módulo genérico).
+const MODULO_ICONE: Record<string, string> = {
+  'Mão de Obra': 'engineering',
+  'Básico do dev': 'handyman',
+  'Quiz Quality': 'quiz',
+  'Agilean (desktop)': 'desktop_windows',
 }
-const emojiDoModulo = (m: string) => MODULO_EMOJI[m] ?? '🧩'
+const iconeDoModulo = (m: string) => MODULO_ICONE[m] ?? 'extension'
 
 // Guia pelo sistema (referência viva): módulos em cards → entra → fluxos dentro (+ busca global).
 // Aberto a qualquer colaborador logado, gestor ou não — não há mais atribuição individual: o
@@ -125,10 +126,12 @@ export function FluxosPage() {
         >
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-medium text-neutral-100">{fluxo.titulo}</span>
-            {fluxo.videoUrl && <span title="Tem vídeo">🎬</span>}
+            {fluxo.videoUrl && (
+              <Icon name="smart_display" className="text-base text-neutral-400" title="Tem vídeo" />
+            )}
             {concluidos.has(fluxo.id) && (
-              <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
-                ✓ Concluído
+              <span className="flex items-center gap-1 rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
+                <Icon name="check" className="text-sm" /> Concluído
               </span>
             )}
             {!ocultarTag && fluxo.categoria && (
@@ -170,9 +173,9 @@ export function FluxosPage() {
         <button
           type="button"
           onClick={sairModulo}
-          className="self-start text-sm text-neutral-400 hover:text-neutral-200"
+          className="flex items-center gap-1 self-start text-sm text-neutral-400 hover:text-neutral-200"
         >
-          ← Voltar pros módulos
+          <Icon name="arrow_back" className="text-base" /> Voltar pros módulos
         </button>
         <h1 className="text-2xl font-bold text-neutral-100">{moduloSelecionado}</h1>
         {grupos.length > 1 ? (
@@ -201,7 +204,9 @@ export function FluxosPage() {
   return (
     <div className="flex w-full max-w-2xl flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-neutral-100">🖥️ Guia pelo sistema</h1>
+        <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
+          <Icon name="menu_book" className="text-2xl text-purple-300" /> Guia pelo sistema
+        </h1>
         <p className="text-sm text-neutral-400">
           Consulte qualquer fluxo do sistema, de qualquer squad, quando precisar.
         </p>
@@ -238,8 +243,8 @@ export function FluxosPage() {
                 className="flex flex-col gap-2 rounded-2xl border border-neutral-800 bg-neutral-900 p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-500/50"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-2xl">{emojiDoModulo(modulo)}</span>
-                  <span className="text-neutral-600">›</span>
+                  <Icon name={iconeDoModulo(modulo)} className="text-2xl text-purple-300" />
+                  <Icon name="chevron_right" className="text-neutral-600" />
                 </div>
                 <h3 className="font-semibold text-neutral-100">{modulo}</h3>
                 <span className="text-sm text-neutral-500">

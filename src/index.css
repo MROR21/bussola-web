@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "material-symbols/outlined.css";
 
 /* Animações sutis do Bússola. Classes próprias (o projeto não usa os tokens ads-* da Agilean).
    Tudo é desligado pra quem prefere menos movimento. */
