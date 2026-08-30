@@ -1,10 +1,25 @@
 import { useState } from 'react'
 import { Icon } from '../../components/Icon'
 import { Spinner } from '../../components/Spinner'
-import { login, register } from './authService'
+import { login, loginComMicrosoft, register } from './authService'
 import { useAuthStore } from './authStore'
+import { entrarComMicrosoft, msalHabilitado } from './msal'
 
-// "Quem é você" — dois modos: entrar (e-mail + senha) e criar conta (nome + e-mail + senha).
+// As 4 cores oficiais da marca Microsoft — é literalmente a marca exigida nas guidelines de
+// "Entrar com a Microsoft", não um ícone genérico.
+function MicrosoftLogo() {
+  return (
+    <svg viewBox="0 0 21 21" className="size-4 shrink-0" aria-hidden="true">
+      <rect x="1" y="1" width="9" height="9" fill="#F25022" />
+      <rect x="11" y="1" width="9" height="9" fill="#7FBA00" />
+      <rect x="1" y="11" width="9" height="9" fill="#00A4EF" />
+      <rect x="11" y="11" width="9" height="9" fill="#FFB900" />
+    </svg>
+  )
+}
+
+// "Quem é você" — dois modos: entrar (e-mail + senha) e criar conta (nome + e-mail + senha) — mais
+// "Entrar com Microsoft" (workspace da própria Agilean), que serve pros dois: get-or-create sem senha.
 export function LoginForm() {
   const entrar = useAuthStore((state) => state.login)
   const [modo, setModo] = useState<'login' | 'cadastro'>('login')
@@ -12,6 +27,7 @@ export function LoginForm() {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [loading, setLoading] = useState(false)
+  const [carregandoMicrosoft, setCarregandoMicrosoft] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const ehCadastro = modo === 'cadastro'
@@ -28,6 +44,20 @@ export function LoginForm() {
       setError(e instanceof Error ? e.message : 'Erro ao entrar')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleMicrosoft() {
+    setError(null)
+    setCarregandoMicrosoft(true)
+    try {
+      const accessToken = await entrarComMicrosoft()
+      const resposta = await loginComMicrosoft(accessToken)
+      entrar(resposta.usuario, resposta.token)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erro ao entrar com a Microsoft')
+    } finally {
+      setCarregandoMicrosoft(false)
     }
   }
 
@@ -58,6 +88,33 @@ export function LoginForm() {
           {ehCadastro ? 'Crie sua conta pra começar.' : 'Entre pra continuar sua jornada.'}
         </p>
       </div>
+
+      {msalHabilitado && (
+        <>
+          <button
+            type="button"
+            onClick={handleMicrosoft}
+            disabled={carregandoMicrosoft}
+            className="flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-2.5 text-sm font-medium text-neutral-100 hover:border-neutral-600 hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {carregandoMicrosoft ? (
+              <>
+                <Spinner /> Aguarde...
+              </>
+            ) : (
+              <>
+                <MicrosoftLogo /> Entrar com Microsoft
+              </>
+            )}
+          </button>
+
+          <div className="flex items-center gap-3 text-xs text-neutral-600">
+            <div className="h-px flex-1 bg-neutral-800" aria-hidden="true" />
+            ou
+            <div className="h-px flex-1 bg-neutral-800" aria-hidden="true" />
+          </div>
+        </>
+      )}
 
       {ehCadastro && (
         <label className="flex flex-col gap-1.5 text-sm">

@@ -16,3 +16,9 @@ export function login(email: string, senha: string): Promise<LoginResponse> {
 export function register(nome: string, email: string, senha: string): Promise<LoginResponse> {
   return apiPost<LoginResponse>('/auth/register', { nome, email, senha })
 }
+
+// Login via Microsoft: o front já autenticou com MSAL e manda o access token do Graph pro back
+// validar (get-or-create da conta na primeira vez, sem senha).
+export function loginComMicrosoft(accessToken: string): Promise<LoginResponse> {
+  return apiPost<LoginResponse>('/auth/microsoft', { accessToken })
+}
