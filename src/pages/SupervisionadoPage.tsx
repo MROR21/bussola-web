@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
+import { Icon } from '../components/Icon'
 import { cx } from '../utils/cx'
 import { getFluxosSupervisionado, getProgressoDetalhado } from '../features/gestor/gestorService'
 import type { FluxoProgresso, ProgressoSupervisionado } from '../features/gestor/types'
@@ -68,8 +69,8 @@ export function SupervisionadoPage() {
 
   return (
     <div className="flex w-full max-w-2xl flex-col gap-5">
-      <Link to="/gestor" className="text-sm text-neutral-400 hover:text-neutral-200">
-        ← Voltar pros supervisionados
+      <Link to="/gestor" className="flex items-center gap-1 text-sm text-neutral-400 hover:text-neutral-200">
+        <Icon name="arrow_back" className="text-base" /> Voltar pros supervisionados
       </Link>
 
       <h1 className="text-2xl font-bold text-neutral-100">{dados.nome}</h1>
@@ -103,16 +104,18 @@ export function SupervisionadoPage() {
                 {itens.map((p) => (
                   <li key={p.id} className="flex flex-col gap-1 text-sm">
                     <div className="flex items-center gap-2">
-                      <span className={p.concluido ? 'text-purple-400' : 'text-neutral-600'}>
-                        {p.concluido ? '✓' : '○'}
-                      </span>
+                      <Icon
+                        name={p.concluido ? 'check_circle' : 'radio_button_unchecked'}
+                        className={cx('text-base', p.concluido ? 'text-purple-400' : 'text-neutral-600')}
+                        fill={p.concluido}
+                      />
                       <span className={p.concluido ? 'text-neutral-300' : 'text-neutral-500'}>
                         {p.title}
                       </span>
                     </div>
                     {p.concluido && p.evidencia && (
                       <div className="ml-6 flex items-start gap-1.5 text-xs">
-                        <span className="text-neutral-600">📎</span>
+                        <Icon name="attach_file" className="text-sm text-neutral-600" />
                         {/^https?:\/\//i.test(p.evidencia.trim()) ? (
                           <a
                             href={p.evidencia}
@@ -146,9 +149,11 @@ export function SupervisionadoPage() {
               <ul className="flex flex-col gap-1">
                 {itens.map((f) => (
                   <li key={f.id} className="flex items-center gap-2 text-sm">
-                    <span className={f.concluido ? 'text-purple-400' : 'text-neutral-600'}>
-                      {f.concluido ? '✓' : '○'}
-                    </span>
+                    <Icon
+                      name={f.concluido ? 'check_circle' : 'radio_button_unchecked'}
+                      className={cx('text-base', f.concluido ? 'text-purple-400' : 'text-neutral-600')}
+                      fill={f.concluido}
+                    />
                     <span className={f.concluido ? 'text-neutral-300' : 'text-neutral-500'}>
                       {f.titulo}
                     </span>

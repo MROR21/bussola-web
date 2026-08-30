@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Icon } from '../../components/Icon'
 import {
   apagarEmailAutorizado,
   criarEmailAutorizado,
@@ -65,7 +66,9 @@ function ListaUsuarios() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-lg font-semibold text-neutral-100">👤 Usuários</h2>
+      <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
+        <Icon name="person" className="text-xl text-purple-300" /> Usuários
+      </h2>
 
       <ul className="flex flex-col gap-2">
         {itens.map((usuario) => (
@@ -100,11 +103,11 @@ function ListaUsuarios() {
       {feedback && (
         <div
           className={
-            'anim-pop fixed bottom-4 right-4 z-30 rounded-xl border bg-neutral-900 px-4 py-3 text-sm shadow-lg ' +
+            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-neutral-900 px-4 py-3 text-sm shadow-lg ' +
             (feedback.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300')
           }
         >
-          {feedback.ok ? '✓ ' : '⚠ '}
+          <Icon name={feedback.ok ? 'check_circle' : 'warning'} className="text-base" />
           {feedback.texto}
         </div>
       )}
@@ -175,7 +178,9 @@ function ListaEmailsAutorizados() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-semibold text-neutral-100">✉️ E-mails pré-autorizados</h2>
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
+          <Icon name="mail" className="text-xl text-purple-300" /> E-mails pré-autorizados
+        </h2>
         <p className="text-sm text-neutral-500">
           Quem se cadastrar com um desses e-mails já nasce supervisor, sem precisar de promoção depois.
         </p>
@@ -254,11 +259,11 @@ function ListaEmailsAutorizados() {
       {feedback && (
         <div
           className={
-            'anim-pop fixed bottom-4 right-4 z-30 rounded-xl border bg-neutral-900 px-4 py-3 text-sm shadow-lg ' +
+            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-neutral-900 px-4 py-3 text-sm shadow-lg ' +
             (feedback.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300')
           }
         >
-          {feedback.ok ? '✓ ' : '⚠ '}
+          <Icon name={feedback.ok ? 'check_circle' : 'warning'} className="text-base" />
           {feedback.texto}
         </div>
       )}

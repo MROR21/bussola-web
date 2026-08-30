@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Icon } from '../../components/Icon'
 import { MarkdownEditor } from '../../components/MarkdownEditor'
 import type { Squad } from '../nivelamento/types'
 import {
@@ -118,7 +119,9 @@ export function FluxosAdmin() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-neutral-100">🖥️ Fluxos</h2>
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
+          <Icon name="menu_book" className="text-xl text-purple-300" /> Fluxos
+        </h2>
         <button
           type="button"
           onClick={abrirNovo}
@@ -324,11 +327,11 @@ export function FluxosAdmin() {
       {feedback && (
         <div
           className={
-            'anim-pop fixed bottom-4 right-4 z-30 rounded-xl border bg-neutral-900 px-4 py-3 text-sm shadow-lg ' +
+            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-neutral-900 px-4 py-3 text-sm shadow-lg ' +
             (feedback.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300')
           }
         >
-          {feedback.ok ? '✓ ' : '⚠ '}
+          <Icon name={feedback.ok ? 'check_circle' : 'warning'} className="text-base" />
           {feedback.texto}
         </div>
       )}

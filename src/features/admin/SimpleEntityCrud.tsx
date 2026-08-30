@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
+import { Icon } from '../../components/Icon'
 import type { EntidadeSimples } from './types'
 
 // CRUD de Fase ou Módulo — a mesma forma (nome+ordem) serve pros dois, só troca os services e os
 // textos. Cria/edita num modal; apaga com confirmação (o back já bloqueia se houver vínculo).
 export function SimpleEntityCrud({
   titulo,
-  emoji,
+  icone,
   singular,
   labelFilhos,
   listar,
@@ -15,7 +16,7 @@ export function SimpleEntityCrud({
   contarFilhos,
 }: {
   titulo: string
-  emoji: string
+  icone: string
   singular: string
   labelFilhos?: string
   listar: () => Promise<EntidadeSimples[]>
@@ -132,8 +133,8 @@ export function SimpleEntityCrud({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-neutral-100">
-          {emoji} {titulo}
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
+          <Icon name={icone} className="text-xl text-purple-300" /> {titulo}
         </h2>
         <button
           type="button"
@@ -159,16 +160,16 @@ export function SimpleEntityCrud({
                   className="leading-none text-neutral-500 hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
                   aria-label="Mover pra cima"
                 >
-                  ▲
+                  <Icon name="arrow_drop_up" className="text-lg" />
                 </button>
                 <button
                   type="button"
                   onClick={() => mover(item, 1)}
                   disabled={indice === itens.length - 1 || movendo !== null}
-                  className="leading-none text-neutral-500 hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
+                  className="-mt-2 leading-none text-neutral-500 hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
                   aria-label="Mover pra baixo"
                 >
-                  ▼
+                  <Icon name="arrow_drop_down" className="text-lg" />
                 </button>
               </div>
               <span className="text-xs text-neutral-500">#{item.order}</span>
@@ -287,11 +288,11 @@ export function SimpleEntityCrud({
       {feedback && (
         <div
           className={
-            'anim-pop fixed bottom-4 right-4 z-30 rounded-xl border bg-neutral-900 px-4 py-3 text-sm shadow-lg ' +
+            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-neutral-900 px-4 py-3 text-sm shadow-lg ' +
             (feedback.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300')
           }
         >
-          {feedback.ok ? '✓ ' : '⚠ '}
+          <Icon name={feedback.ok ? 'check_circle' : 'warning'} className="text-base" />
           {feedback.texto}
         </div>
       )}

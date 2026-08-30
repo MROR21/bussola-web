@@ -219,7 +219,7 @@ export function NotificationBell() {
                         />
                       )}
                       <span className="flex-1">{n.mensagem}</span>
-                      <span className="shrink-0 text-purple-300">→</span>
+                      <Icon name="arrow_forward" className="shrink-0 text-purple-300" />
                     </button>
                   ) : (
                     <div className="flex flex-1 items-center gap-2 px-4 py-3 text-sm text-neutral-300">

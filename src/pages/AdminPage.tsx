@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Icon } from '../components/Icon'
 import { FluxosAdmin } from '../features/admin/FluxosAdmin'
 import { PassosAdmin } from '../features/admin/PassosAdmin'
 import { SimpleEntityCrud } from '../features/admin/SimpleEntityCrud'
@@ -47,7 +48,9 @@ export function AdminPage() {
   return (
     <div className="flex w-full max-w-4xl flex-col gap-5">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-neutral-100">🛠️ Administração</h1>
+        <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
+          <Icon name="build" className="text-2xl text-purple-300" /> Administração
+        </h1>
         <p className="text-sm text-neutral-500">
           Edite o conteúdo da Jornada e do Guia pelo sistema.
         </p>
@@ -74,7 +77,7 @@ export function AdminPage() {
       {aba === 'fases' && (
         <SimpleEntityCrud
           titulo="Fases"
-          emoji="🧭"
+          icone="route"
           singular="fase"
           labelFilhos="passos"
           listar={listarFases}
@@ -87,7 +90,7 @@ export function AdminPage() {
       {aba === 'modulos' && (
         <SimpleEntityCrud
           titulo="Módulos"
-          emoji="📦"
+          icone="inventory_2"
           singular="módulo"
           labelFilhos="fluxos"
           listar={listarModulos}
