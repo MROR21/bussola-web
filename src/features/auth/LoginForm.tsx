@@ -80,7 +80,7 @@ export function LoginForm() {
             'Criar conta'
           ) : (
             <>
-              Bem-vindo(a) <Icon name="waving_hand" className="text-xl text-purple-300" />
+              Bem-vindo(a) <Icon name="waving_hand" className="text-xl text-[#d4af37]" />
             </>
           )}
         </h2>
@@ -97,7 +97,7 @@ export function LoginForm() {
             value={nome}
             onChange={(e) => setNome(e.target.value)}
             placeholder="Seu nome"
-            className="rounded-lg border border-neutral-700 bg-neutral-950 px-3.5 py-2.5 text-neutral-100 outline-none focus:border-purple-400"
+            className="rounded-lg border border-[#28314a] bg-[#0a0f1a] px-3.5 py-2.5 text-neutral-100 outline-none focus:border-[#c9a227]"
           />
         </label>
       )}
@@ -110,7 +110,7 @@ export function LoginForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="voce@agilean.com.br"
-          className="rounded-lg border border-neutral-700 bg-neutral-950 px-3.5 py-2.5 text-neutral-100 outline-none focus:border-purple-400"
+          className="rounded-lg border border-[#28314a] bg-[#0a0f1a] px-3.5 py-2.5 text-neutral-100 outline-none focus:border-[#c9a227]"
         />
       </label>
 
@@ -123,7 +123,7 @@ export function LoginForm() {
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
           placeholder={ehCadastro ? 'Ao menos 6 caracteres' : '••••••••'}
-          className="rounded-lg border border-neutral-700 bg-neutral-950 px-3.5 py-2.5 text-neutral-100 outline-none focus:border-purple-400"
+          className="rounded-lg border border-[#28314a] bg-[#0a0f1a] px-3.5 py-2.5 text-neutral-100 outline-none focus:border-[#c9a227]"
         />
       </label>
 
@@ -132,7 +132,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="flex items-center justify-center gap-1.5 rounded-lg bg-purple-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex items-center justify-center gap-1.5 rounded-lg bg-[#c9a227] px-4 py-2.5 text-sm font-medium text-[#0a0f1a] hover:bg-[#d4af37] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? (
           <>
@@ -148,16 +148,16 @@ export function LoginForm() {
       {msalHabilitado && (
         <>
           <div className="flex items-center gap-3 text-xs text-neutral-600">
-            <div className="h-px flex-1 bg-neutral-800" aria-hidden="true" />
+            <div className="h-px flex-1 bg-[#1f2b47]" aria-hidden="true" />
             ou
-            <div className="h-px flex-1 bg-neutral-800" aria-hidden="true" />
+            <div className="h-px flex-1 bg-[#1f2b47]" aria-hidden="true" />
           </div>
 
           <button
             type="button"
             onClick={handleMicrosoft}
             disabled={carregandoMicrosoft}
-            className="flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-2.5 text-sm font-medium text-neutral-100 hover:border-neutral-600 hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center justify-center gap-2 rounded-lg border border-[#28314a] bg-[#0a0f1a] px-4 py-2.5 text-sm font-medium text-neutral-100 hover:border-[#39456b] hover:bg-[#111a2e] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {carregandoMicrosoft ? (
               <>
@@ -175,7 +175,7 @@ export function LoginForm() {
       <button
         type="button"
         onClick={trocarModo}
-        className="text-sm text-purple-300 hover:text-purple-200"
+        className="text-sm text-[#d4af37] hover:text-[#e8c968]"
       >
         {ehCadastro ? 'Já tem conta? Entrar' : 'Não tem conta? Criar conta'}
       </button>
