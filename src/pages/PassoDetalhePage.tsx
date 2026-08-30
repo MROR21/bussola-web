@@ -70,15 +70,20 @@ export function PassoDetalhePage() {
     setError(null)
     listarSteps()
       .then((todos) => {
-        const passo = todos.find((s) => s.title === tituloParam)
-        if (!passo) throw new Error('Passo não encontrado.')
-        return getComprovacao(usuario.id, passo.id).then((comp) => ({ passo, comp }))
-      })
-      .then(({ passo, comp }) => {
         if (cancelado) return
-        setStep(passo)
-        setConcluido(comp.concluido)
-        setEvidencia(comp.evidencia)
+        const passo = todos.find((s) => s.title === tituloParam)
+        // Título sem correspondência (link velho de antes da rota virar por nome, ou digitado
+        // errado) — volta pra Jornada em vez de travar numa tela de erro que nunca vai "resolver".
+        if (!passo) {
+          navigate('/', { replace: true })
+          return
+        }
+        return getComprovacao(usuario.id, passo.id).then((comp) => {
+          if (cancelado) return
+          setStep(passo)
+          setConcluido(comp.concluido)
+          setEvidencia(comp.evidencia)
+        })
       })
       .catch((e) => {
         if (!cancelado) setError(e instanceof Error ? e.message : 'Erro ao carregar o passo')
@@ -89,7 +94,7 @@ export function PassoDetalhePage() {
     return () => {
       cancelado = true
     }
-  }, [tituloParam, usuario, tentativa])
+  }, [tituloParam, usuario, tentativa, navigate])
 
   useTitulo(step?.title)
 

@@ -62,7 +62,12 @@ export function FluxoDetalhePage() {
       .then(([todos, concluidos]) => {
         if (cancelado) return
         const f = todos.find((x) => x.titulo === tituloParam)
-        if (!f) throw new Error('Fluxo não encontrado.')
+        // Título sem correspondência (link velho de antes da rota virar por nome, ou digitado
+        // errado) — volta pra Jornada em vez de travar numa tela de erro que nunca vai "resolver".
+        if (!f) {
+          navigate('/', { replace: true })
+          return
+        }
         setFluxo(f)
         setConcluido(concluidos.includes(f.id))
       })
@@ -75,7 +80,7 @@ export function FluxoDetalhePage() {
     return () => {
       cancelado = true
     }
-  }, [tituloParam, tentativa])
+  }, [tituloParam, tentativa, navigate])
 
   useTitulo(fluxo?.titulo)
 
