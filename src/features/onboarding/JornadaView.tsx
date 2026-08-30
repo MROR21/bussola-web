@@ -186,64 +186,78 @@ export function JornadaView({
   // ---- Home: hero + próximo passo + cards das fases ----
   return (
     <div className="flex w-full max-w-2xl flex-col gap-8">
-      <header className="flex items-center gap-5 rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
-        <ProgressRing percent={percent}>
-          <span className="text-xl font-bold text-neutral-100">{percent}%</span>
-        </ProgressRing>
-        <div className="flex flex-col gap-1">
-          <p className="text-sm text-neutral-400">Sua jornada</p>
-          <h2 className="flex items-center gap-1.5 text-2xl font-bold text-neutral-100">
-            Olá, {nome} <Icon name="waving_hand" className="text-xl text-purple-300" />
-          </h2>
-          <p className="text-sm text-neutral-400">
-            {feitos} de {total} itens · Fase {Math.min(faseAtualIndex + 1, fases.length)} de{' '}
-            {fases.length}
-          </p>
-          {gestorNome && (
-            <p className="text-xs text-neutral-500">
-              Seu gestor: <span className="text-neutral-400">{gestorNome}</span>
-            </p>
-          )}
-        </div>
-      </header>
+      {/* Hero — anel de progresso + próximo passo num único cartão (antes eram duas caixas soltas
+          empilhadas; agora lê como um bloco só, com o glow sutil atrás do anel). */}
+      <div className="relative overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900 shadow-xl shadow-black/20">
+        <div
+          className="pointer-events-none absolute -left-12 -top-16 size-56 rounded-full bg-purple-500/10 blur-3xl"
+          aria-hidden="true"
+        />
 
-      {completa ? (
-        <section className="flex flex-col items-center gap-3 rounded-2xl border border-purple-500/40 bg-purple-500/10 p-6 text-center">
-          <Icon name="emoji_events" className="text-4xl text-purple-300" fill />
-          <h3 className="text-lg font-semibold text-neutral-100">Jornada completa!</h3>
-          <p className="text-sm text-neutral-400">
-            Você foi do clone ao primeiro card. Bem-vindo(a) de verdade à Agilean.
-          </p>
-          <p className="flex items-center justify-center gap-1.5 text-base font-medium text-purple-200">
-            Agora é com você! <Icon name="rocket_launch" className="text-lg" />
-          </p>
-          <Link
-            to="/fluxos"
-            className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400"
-          >
-            Ir pro Guia pelo sistema
-          </Link>
-        </section>
-      ) : (
-        proximo && (
-          <section className="flex flex-col gap-3 rounded-2xl border border-purple-500/40 bg-purple-500/10 p-5">
-            <div className="flex flex-col gap-1">
-              <span className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-purple-300">
-                <Icon name="play_arrow" className="text-sm" /> Próximo · {proximo.phase}
-              </span>
-              <h3 className="text-lg font-semibold text-neutral-100">{proximo.title}</h3>
-              <p className="text-sm text-neutral-400">{proximo.description}</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => entrarFase(proximo.phase)}
-              className="self-start rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400"
+        <div className="relative flex items-center gap-5 p-6">
+          <ProgressRing percent={percent} size={96}>
+            <span className="text-xl font-bold text-neutral-100">{percent}%</span>
+          </ProgressRing>
+          <div className="flex flex-col gap-1">
+            <p className="text-sm text-neutral-400">Sua jornada</p>
+            <h2 className="flex items-center gap-1.5 text-2xl font-bold text-neutral-100">
+              Olá, {nome} <Icon name="waving_hand" className="text-xl text-purple-300" />
+            </h2>
+            <p className="text-sm text-neutral-400">
+              {feitos} de {total} itens · Fase {Math.min(faseAtualIndex + 1, fases.length)} de{' '}
+              {fases.length}
+            </p>
+            {gestorNome && (
+              <p className="text-xs text-neutral-500">
+                Seu gestor: <span className="text-neutral-400">{gestorNome}</span>
+              </p>
+            )}
+          </div>
+        </div>
+
+        {completa ? (
+          <div className="relative flex flex-col items-center gap-3 border-t border-neutral-800 bg-purple-500/10 p-6 text-center">
+            <Icon name="emoji_events" className="text-4xl text-purple-300" fill />
+            <h3 className="text-lg font-semibold text-neutral-100">Jornada completa!</h3>
+            <p className="text-sm text-neutral-400">
+              Você foi do clone ao primeiro card. Bem-vindo(a) de verdade à Agilean.
+            </p>
+            <p className="flex items-center justify-center gap-1.5 text-base font-medium text-purple-200">
+              Agora é com você! <Icon name="rocket_launch" className="text-lg" />
+            </p>
+            <Link
+              to="/fluxos"
+              className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400"
             >
-              Ir para o passo
-            </button>
-          </section>
-        )
-      )}
+              Ir pro Guia pelo sistema
+            </Link>
+          </div>
+        ) : (
+          proximo && (
+            <div className="relative flex flex-col gap-3 border-t border-neutral-800 bg-purple-500/10 p-5">
+              <div className="flex items-start gap-3">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-purple-400/50 bg-neutral-900 text-purple-300">
+                  <Icon name={iconeDaFase(proximo.phase)} className="text-lg" />
+                </span>
+                <div className="flex flex-col gap-1">
+                  <span className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-purple-300">
+                    <Icon name="play_arrow" className="text-sm" /> Próximo · {proximo.phase}
+                  </span>
+                  <h3 className="text-lg font-semibold text-neutral-100">{proximo.title}</h3>
+                  <p className="text-sm text-neutral-400">{proximo.description}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => entrarFase(proximo.phase)}
+                className="self-start rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400"
+              >
+                Ir para o passo
+              </button>
+            </div>
+          )
+        )}
+      </div>
 
       {/* Trilha central — um caminho sinuoso ligando as fases, marco por marco (em vez de um
           grid de cards): o pedido foi um sentido de trilha literal, não uma lista disfarçada. */}
