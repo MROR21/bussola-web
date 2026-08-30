@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
 import { Carregando } from '../components/Spinner'
+import { useTitulo } from '../hooks/useTitulo'
 import { getFluxosConcluidos, listarFluxos } from '../features/fluxos/fluxosService'
 import type { Fluxo } from '../features/fluxos/types'
 
@@ -36,6 +37,8 @@ export function FluxosPage() {
   const entrarModulo = (modulo: string) => navigate(`/fluxos/${encodeURIComponent(modulo)}`)
   const sairModulo = () => navigate('/fluxos')
   const [destacado, setDestacado] = useState<string | null>(null)
+
+  useTitulo(moduloSelecionado ?? 'Guia pelo sistema')
 
   useEffect(() => {
     let cancelado = false
@@ -119,7 +122,7 @@ export function FluxosPage() {
     return (
       <li key={fluxo.id} id={`fluxo-${fluxo.id}`}>
         <Link
-          to={`/fluxo/${fluxo.id}`}
+          to={`/fluxo/${encodeURIComponent(fluxo.titulo)}`}
           className={
             'flex flex-col gap-1 rounded-xl border border-navy-700 bg-navy-800 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-500/50' +
             (destacado === fluxo.id ? ' animate-pulse ring-2 ring-gold-400' : '')

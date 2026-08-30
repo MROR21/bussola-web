@@ -7,13 +7,14 @@ import { MarkdownEditor } from '../components/MarkdownEditor'
 import { Carregando, Spinner } from '../components/Spinner'
 import { cx } from '../utils/cx'
 import { useAuthStore } from '../features/auth/authStore'
+import { useTitulo } from '../hooks/useTitulo'
 import { editarFluxo, listarFluxosAdmin } from '../features/admin/adminService'
 import type { FluxoAdmin, FluxoAdminInput } from '../features/admin/types'
 import {
   concluirFluxo,
   desmarcarFluxo,
-  getFluxo,
   getFluxosConcluidos,
+  listarFluxos,
 } from '../features/fluxos/fluxosService'
 import type { Fluxo } from '../features/fluxos/types'
 
@@ -33,9 +34,9 @@ function paraEmbed(url: string): string {
   }
 }
 
-// Página de um fluxo (rota /fluxo/:id): o conteúdo em Markdown, consulta pura.
+// Página de um fluxo (rota /fluxo/:titulo): o conteúdo em Markdown, consulta pura.
 export function FluxoDetalhePage() {
-  const { id = '' } = useParams()
+  const { titulo: tituloParam = '' } = useParams()
   const navigate = useNavigate()
   const isGestor = useAuthStore((s) => s.usuario?.isGestor ?? false)
   const [fluxo, setFluxo] = useState<Fluxo | null>(null)
@@ -57,11 +58,13 @@ export function FluxoDetalhePage() {
     let cancelado = false
     setLoading(true)
     setError(null)
-    Promise.all([getFluxo(id), getFluxosConcluidos()])
-      .then(([f, concluidos]) => {
+    Promise.all([listarFluxos(), getFluxosConcluidos()])
+      .then(([todos, concluidos]) => {
         if (cancelado) return
+        const f = todos.find((x) => x.titulo === tituloParam)
+        if (!f) throw new Error('Fluxo não encontrado.')
         setFluxo(f)
-        setConcluido(concluidos.includes(id))
+        setConcluido(concluidos.includes(f.id))
       })
       .catch((e) => {
         if (!cancelado) setError(e instanceof Error ? e.message : 'Erro ao carregar o fluxo')
@@ -72,15 +75,18 @@ export function FluxoDetalhePage() {
     return () => {
       cancelado = true
     }
-  }, [id, tentativa])
+  }, [tituloParam, tentativa])
+
+  useTitulo(fluxo?.titulo)
 
   // Alterna concluído de forma otimista (desfaz se o back falhar).
   async function toggle() {
+    if (!fluxo) return
     const antes = concluido
     setConcluido(!antes)
     try {
-      if (antes) await desmarcarFluxo(id)
-      else await concluirFluxo(id)
+      if (antes) await desmarcarFluxo(fluxo.id)
+      else await concluirFluxo(fluxo.id)
     } catch {
       setConcluido(antes)
     }
@@ -89,11 +95,12 @@ export function FluxoDetalhePage() {
   // Busca a forma completa (moduloId/order/squad) só ao entrar em edição — o back exige o objeto
   // inteiro no PUT, e a leitura pública não carrega esses campos estruturais.
   async function abrirEdicao() {
+    if (!fluxo) return
     setErroEdicao(null)
     setCarregandoEdicao(true)
     try {
       const todos = await listarFluxosAdmin()
-      const atual = todos.find((f) => f.id === id)
+      const atual = todos.find((f) => f.id === fluxo.id)
       if (!atual) throw new Error('Fluxo não encontrado no admin.')
       setBase(atual)
       setCampos({
@@ -112,7 +119,7 @@ export function FluxoDetalhePage() {
   }
 
   async function salvar() {
-    if (!base || !campos || !campos.titulo.trim()) return
+    if (!fluxo || !base || !campos || !campos.titulo.trim()) return
     setSalvando(true)
     setErroEdicao(null)
     try {
@@ -123,8 +130,13 @@ export function FluxoDetalhePage() {
         ...campos,
         titulo: campos.titulo.trim(),
       }
-      await editarFluxo(id, req)
+      await editarFluxo(fluxo.id, req)
       setEditando(false)
+      // A URL é pelo título — se o título mudou na edição, a rota precisa acompanhar (senão o
+      // refetch abaixo procura pelo título velho e não acha mais o fluxo).
+      if (req.titulo !== tituloParam) {
+        navigate(`/fluxo/${encodeURIComponent(req.titulo)}`, { replace: true })
+      }
       setTentativa((t) => t + 1)
       setSalvo(true)
     } catch (e) {

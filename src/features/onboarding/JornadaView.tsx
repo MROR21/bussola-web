@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Icon } from '../../components/Icon'
+import { useTitulo } from '../../hooks/useTitulo'
 import { cx } from '../../utils/cx'
 import { concluirFluxo, desmarcarFluxo, getFluxosConcluidos } from '../fluxos/fluxosService'
 import { TrailItemCard } from './TrailItemCard'
@@ -52,6 +53,8 @@ export function JornadaView({
   const navigate = useNavigate()
   const entrarFase = (fase: string) => navigate(`/fase/${encodeURIComponent(fase)}`)
   const sairFase = () => navigate('/')
+
+  useTitulo(faseSelecionada ?? 'Jornada')
 
   useEffect(() => {
     getProgresso(userId).then((ids) => setPassosConcluidos(new Set(ids))).catch(() => {})

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Icon } from '../components/Icon'
+import { useTitulo } from '../hooks/useTitulo'
 import { FluxosAdmin } from '../features/admin/FluxosAdmin'
 import { PassosAdmin } from '../features/admin/PassosAdmin'
 import { SimpleEntityCrud } from '../features/admin/SimpleEntityCrud'
@@ -43,6 +44,7 @@ const LABEL: Record<Aba, string> = {
 // Shell de administração: CRUD completo do conteúdo da Jornada e do Guia, direto no sistema
 // (sem depender de alteração de código pra editar texto, ordem ou estrutura).
 export function AdminPage() {
+  useTitulo('Admin')
   const [aba, setAba] = useState<Aba>('fases')
 
   return (

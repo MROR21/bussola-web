@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Icon } from '../components/Icon'
 import { Spinner } from '../components/Spinner'
 import { useAuthStore } from '../features/auth/authStore'
+import { useTitulo } from '../hooks/useTitulo'
 import { Avatar } from '../features/perfil/Avatar'
 import { lerImagemReduzida } from '../features/perfil/imagem'
 import { trocarEmail, trocarFoto, trocarSenha } from '../features/perfil/perfilService'
@@ -19,6 +20,7 @@ const CARGO_LABEL: Record<Cargo, string> = {
 }
 
 export function PerfilPage() {
+  useTitulo('Perfil')
   const usuario = useAuthStore((s) => s.usuario)
   const atualizarUsuario = useAuthStore((s) => s.atualizarUsuario)
 

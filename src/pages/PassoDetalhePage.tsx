@@ -6,9 +6,10 @@ import { Markdown } from '../components/Markdown'
 import { MarkdownEditor } from '../components/MarkdownEditor'
 import { Carregando, Spinner } from '../components/Spinner'
 import { useAuthStore } from '../features/auth/authStore'
+import { useTitulo } from '../hooks/useTitulo'
 import { editarPasso, listarPassosAdmin } from '../features/admin/adminService'
 import type { PassoAdmin, PassoAdminInput } from '../features/admin/types'
-import { getStep } from '../features/onboarding/onboardingService'
+import { listarSteps } from '../features/onboarding/onboardingService'
 import {
   concluirPasso,
   desmarcarPasso,
@@ -36,9 +37,9 @@ function Comprovacao({ texto }: { texto: string }) {
   return <span className="whitespace-pre-wrap break-words text-neutral-300">{texto}</span>
 }
 
-// Página de um passo (rota /passo/:id): conteúdo em Markdown + concluir com comprovação opcional.
+// Página de um passo (rota /passo/:titulo): conteúdo em Markdown + concluir com comprovação opcional.
 export function PassoDetalhePage() {
-  const { id = '' } = useParams()
+  const { titulo: tituloParam = '' } = useParams()
   const navigate = useNavigate()
   const usuario = useAuthStore((state) => state.usuario)
   const isGestor = usuario?.isGestor ?? false
@@ -67,8 +68,13 @@ export function PassoDetalhePage() {
     let cancelado = false
     setLoading(true)
     setError(null)
-    Promise.all([getStep(id), getComprovacao(usuario.id, id)])
-      .then(([passo, comp]) => {
+    listarSteps()
+      .then((todos) => {
+        const passo = todos.find((s) => s.title === tituloParam)
+        if (!passo) throw new Error('Passo não encontrado.')
+        return getComprovacao(usuario.id, passo.id).then((comp) => ({ passo, comp }))
+      })
+      .then(({ passo, comp }) => {
         if (cancelado) return
         setStep(passo)
         setConcluido(comp.concluido)
@@ -83,13 +89,15 @@ export function PassoDetalhePage() {
     return () => {
       cancelado = true
     }
-  }, [id, usuario, tentativa])
+  }, [tituloParam, usuario, tentativa])
+
+  useTitulo(step?.title)
 
   async function concluir() {
-    if (!usuario) return
+    if (!usuario || !step) return
     setSalvando(true)
     try {
-      await concluirPasso(usuario.id, id, evidencia)
+      await concluirPasso(usuario.id, step.id, evidencia)
       setConcluido(true)
       setEditando(false)
     } catch {
@@ -100,10 +108,10 @@ export function PassoDetalhePage() {
   }
 
   async function desmarcar() {
-    if (!usuario) return
+    if (!usuario || !step) return
     setSalvando(true)
     try {
-      await desmarcarPasso(usuario.id, id)
+      await desmarcarPasso(usuario.id, step.id)
       setConcluido(false)
       setEditando(false)
     } catch {
@@ -116,11 +124,12 @@ export function PassoDetalhePage() {
   // Busca a forma completa (faseId/order/isCompanySpecific/skillArea) só ao entrar em edição — o
   // back exige o objeto inteiro no PUT, e a leitura pública não carrega esses campos estruturais.
   async function abrirEdicaoConteudo() {
+    if (!step) return
     setErroEdicao(null)
     setCarregandoEdicao(true)
     try {
       const todos = await listarPassosAdmin()
-      const atual = todos.find((p) => p.id === id)
+      const atual = todos.find((p) => p.id === step.id)
       if (!atual) throw new Error('Passo não encontrado no admin.')
       setBaseAdmin(atual)
       setCamposConteudo({
@@ -137,7 +146,7 @@ export function PassoDetalhePage() {
   }
 
   async function salvarConteudo() {
-    if (!baseAdmin || !camposConteudo || !camposConteudo.title.trim()) return
+    if (!step || !baseAdmin || !camposConteudo || !camposConteudo.title.trim()) return
     setSalvandoConteudo(true)
     setErroEdicao(null)
     try {
@@ -149,8 +158,13 @@ export function PassoDetalhePage() {
         ...camposConteudo,
         title: camposConteudo.title.trim(),
       }
-      await editarPasso(id, req)
+      await editarPasso(step.id, req)
       setEditandoConteudo(false)
+      // A URL é pelo título — se o título mudou na edição, a rota precisa acompanhar (senão o
+      // refetch abaixo procura pelo título velho e não acha mais o passo).
+      if (req.title !== tituloParam) {
+        navigate(`/passo/${encodeURIComponent(req.title)}`, { replace: true })
+      }
       setTentativa((t) => t + 1)
       setSalvo(true)
     } catch (e) {

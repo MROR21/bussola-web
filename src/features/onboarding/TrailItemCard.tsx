@@ -18,7 +18,9 @@ export function TrailItemCard({
   onToggle: () => void
 }) {
   const isFluxo = step.tipo === 'fluxo'
-  const href = isFluxo ? `/fluxo/${step.id}` : `/passo/${step.id}`
+  const href = isFluxo
+    ? `/fluxo/${encodeURIComponent(step.title)}`
+    : `/passo/${encodeURIComponent(step.title)}`
   const isResumo = !isFluxo && step.recommendedDepth === 'Resumo'
 
   return (

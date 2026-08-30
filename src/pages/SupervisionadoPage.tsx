@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
 import { Carregando } from '../components/Spinner'
+import { useTitulo } from '../hooks/useTitulo'
 import { cx } from '../utils/cx'
 import { getFluxosSupervisionado, getProgressoDetalhado } from '../features/gestor/gestorService'
 import type { FluxoProgresso, ProgressoSupervisionado } from '../features/gestor/types'
@@ -11,6 +12,7 @@ import type { FluxoProgresso, ProgressoSupervisionado } from '../features/gestor
 export function SupervisionadoPage() {
   const { id = '' } = useParams()
   const [dados, setDados] = useState<ProgressoSupervisionado | null>(null)
+  useTitulo(dados?.nome)
   const [fluxos, setFluxos] = useState<FluxoProgresso[]>([])
   const [aba, setAba] = useState<'passos' | 'fluxos'>('passos')
   const [loading, setLoading] = useState(true)

@@ -17,7 +17,7 @@ export interface OnboardingStep {
 export type StepDepth = 'Essencial' | 'Resumo'
 
 // Um item da trilha: um passo de onboarding OU um fluxo do squad (o back unifica os dois no mesmo
-// formato). `tipo` diz pra onde navegar (/passo/:id ou /fluxo/:id) e onde marcar a conclusão.
+// formato). `tipo` diz pra onde navegar (/passo/:titulo ou /fluxo/:titulo) e onde marcar a conclusão.
 export interface TrailStep extends OnboardingStep {
   recommendedDepth: StepDepth
   tipo: 'passo' | 'fluxo'

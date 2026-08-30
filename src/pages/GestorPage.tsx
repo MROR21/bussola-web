@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
 import { Carregando } from '../components/Spinner'
+import { useTitulo } from '../hooks/useTitulo'
 import {
   adicionarSupervisionado,
   getDisponiveis,
@@ -13,6 +14,7 @@ import type { UsuarioDisponivel, UsuarioProgresso } from '../features/gestor/typ
 
 // Painel do gestor: progresso dos supervisionados + adicionar/remover supervisionados.
 export function GestorPage() {
+  useTitulo('Supervisionados')
   const [usuarios, setUsuarios] = useState<UsuarioProgresso[]>([])
   const [disponiveis, setDisponiveis] = useState<UsuarioDisponivel[]>([])
   const [loading, setLoading] = useState(true)

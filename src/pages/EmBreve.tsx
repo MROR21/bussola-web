@@ -1,4 +1,5 @@
 import { Icon } from '../components/Icon'
+import { useTitulo } from '../hooks/useTitulo'
 
 // Placeholder de seção ainda não construída — mantém a moldura navegável.
 export function EmBreve({
@@ -10,6 +11,8 @@ export function EmBreve({
   titulo: string
   descricao: string
 }) {
+  useTitulo(titulo)
+
   return (
     <div className="flex max-w-md flex-col items-center gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-10 text-center">
       <Icon name={icone} className="text-4xl text-neutral-500" />

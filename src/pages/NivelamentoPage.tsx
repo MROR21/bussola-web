@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Icon } from '../components/Icon'
 import { useAuthStore } from '../features/auth/authStore'
+import { useTitulo } from '../hooks/useTitulo'
 import { NivelamentoForm } from '../features/nivelamento/NivelamentoForm'
 import { salvarPerfil } from '../features/nivelamento/nivelamentoService'
 import { perfilPadrao } from '../features/nivelamento/types'
@@ -16,6 +17,7 @@ export function NivelamentoPage({
   usuario: UsuarioLogado
   onConcluir: (perfil: Perfil) => void
 }) {
+  useTitulo('Nivelamento')
   const [erro, setErro] = useState<string | null>(null)
   const atualizarUsuario = useAuthStore((s) => s.atualizarUsuario)
 
