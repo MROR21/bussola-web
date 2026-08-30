@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../../components/Icon'
 import { Carregando, Spinner } from '../../components/Spinner'
+import { cx } from '../../utils/cx'
 import type { EntidadeSimples } from './types'
 
 // CRUD de Fase ou Módulo — a mesma forma (nome+ordem) serve pros dois, só troca os services e os
@@ -150,29 +151,36 @@ export function SimpleEntityCrud({
         {itens.map((item, indice) => (
           <li
             key={item.id}
-            className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
+            className={cx(
+              'flex items-center justify-between gap-3 rounded-xl border p-3 transition-colors',
+              movendo === item.id ? 'border-gold-500/50 bg-navy-700' : 'border-navy-700 bg-navy-800',
+            )}
           >
             <div className="flex items-center gap-3">
-              <div className="flex flex-col">
-                <button
-                  type="button"
-                  onClick={() => mover(item, -1)}
-                  disabled={indice === 0 || movendo !== null}
-                  className="leading-none text-neutral-500 transition-all hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
-                  aria-label="Mover pra cima"
-                >
-                  <Icon name="arrow_drop_up" className="text-lg" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => mover(item, 1)}
-                  disabled={indice === itens.length - 1 || movendo !== null}
-                  className="-mt-2 leading-none text-neutral-500 transition-all hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
-                  aria-label="Mover pra baixo"
-                >
-                  <Icon name="arrow_drop_down" className="text-lg" />
-                </button>
-              </div>
+              {movendo === item.id ? (
+                <Spinner className="text-gold-400" />
+              ) : (
+                <div className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={() => mover(item, -1)}
+                    disabled={indice === 0 || movendo !== null}
+                    className="leading-none text-neutral-500 transition-all hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
+                    aria-label="Mover pra cima"
+                  >
+                    <Icon name="arrow_drop_up" className="text-lg" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => mover(item, 1)}
+                    disabled={indice === itens.length - 1 || movendo !== null}
+                    className="-mt-2 leading-none text-neutral-500 transition-all hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
+                    aria-label="Mover pra baixo"
+                  >
+                    <Icon name="arrow_drop_down" className="text-lg" />
+                  </button>
+                </div>
+              )}
               <span className="text-xs text-neutral-500">#{item.order}</span>
               <span className="text-neutral-100">{item.nome}</span>
               {contarFilhos && (

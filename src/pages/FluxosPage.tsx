@@ -187,7 +187,7 @@ export function FluxosPage() {
         </button>
         <div className="relative overflow-hidden rounded-2xl border border-navy-700 bg-navy-800 p-5">
           <MapCorners tamanho={5} opacidade={30} />
-          <MapIllustration className="pointer-events-none absolute -bottom-6 -right-4 -z-10 w-40 text-gold-500 opacity-[0.06]" />
+          <MapIllustration className="pointer-events-none absolute -bottom-6 -right-4 w-40 text-gold-500 opacity-[0.06]" />
           <div className="relative flex items-center gap-3">
             <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gold-500/10 text-gold-400">
               <Icon name={iconeDoModulo(moduloSelecionado)} className="text-2xl" />
@@ -223,9 +223,9 @@ export function FluxosPage() {
       <header className="relative overflow-hidden rounded-3xl border border-navy-700 bg-navy-800 p-6 shadow-xl shadow-black/20">
         <MapCorners />
         <CompassRose
-          className="pointer-events-none absolute -bottom-8 -right-8 -z-10 size-32 text-gold-500 opacity-[0.06]"
+          className="pointer-events-none absolute -bottom-8 -right-8 size-32 text-gold-500 opacity-[0.06]"
         />
-        <MapIllustration className="pointer-events-none absolute -left-8 -top-6 -z-10 w-48 text-gold-500 opacity-[0.05]" />
+        <MapIllustration className="pointer-events-none absolute -left-8 -top-6 w-48 text-gold-500 opacity-[0.05]" />
         <div className="relative flex flex-col gap-1">
           <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
             <Icon name="menu_book" className="text-2xl text-gold-400" /> Guia pelo sistema

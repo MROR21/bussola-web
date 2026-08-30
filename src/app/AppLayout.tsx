@@ -130,7 +130,7 @@ export function AppLayout() {
         )}
       >
         <CompassRose
-          className="pointer-events-none absolute bottom-0 left-0 -z-10 size-56 text-gold-500 opacity-[0.05]"
+          className="pointer-events-none absolute bottom-0 left-0 size-56 text-gold-500 opacity-[0.05]"
         />
 
         <div
@@ -164,10 +164,18 @@ export function AppLayout() {
                         ? () => setExpandido((e) => ({ ...e, [item.to]: !aberto }))
                         : undefined
                     }
+                    onDoubleClick={
+                      colapsado
+                        ? () => {
+                            setColapsado(false)
+                            if (galhos.length > 0) setExpandido((e) => ({ ...e, [item.to]: true }))
+                          }
+                        : undefined
+                    }
                     className={({ isActive }) =>
                       cx(
-                        'flex flex-1 items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
-                        colapsado && 'justify-center px-0',
+                        'flex items-center gap-3 rounded-lg text-sm transition-colors',
+                        colapsado ? 'size-10 shrink-0 justify-center' : 'flex-1 px-3 py-2',
                         isActive
                           ? 'bg-gold-500/10 text-gold-400'
                           : 'text-neutral-400 hover:bg-navy-700 hover:text-neutral-200',
@@ -245,7 +253,7 @@ export function AppLayout() {
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="relative flex h-16 shrink-0 items-center justify-between overflow-hidden border-b border-navy-700 bg-gradient-to-r from-navy-800 via-navy-800/70 to-navy-900 px-6">
           <CompassRose
-            className="pointer-events-none absolute -right-6 -top-10 -z-10 size-32 text-gold-500 opacity-[0.07]"
+            className="pointer-events-none absolute -right-6 -top-10 size-32 text-gold-500 opacity-[0.07]"
           />
           <div
             className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gold-500/50 to-transparent"

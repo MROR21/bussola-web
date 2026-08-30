@@ -4,6 +4,7 @@ import { CompassRose } from '../components/CompassRose'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
 import { MapCorners } from '../components/MapCorners'
+import { MapIllustration } from '../components/MapIllustration'
 import { Carregando } from '../components/Spinner'
 import { useTitulo } from '../hooks/useTitulo'
 import { cx } from '../utils/cx'
@@ -74,12 +75,13 @@ export function SupervisionadoPage() {
 
   return (
     <div className="relative flex w-full max-w-2xl flex-col gap-5">
-      <CompassRose className="pointer-events-none absolute -right-10 -top-4 -z-10 size-64 text-gold-500 opacity-[0.05]" />
+      <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.06]" />
+      <MapIllustration className="pointer-events-none absolute -bottom-10 -left-8 w-56 text-gold-500 opacity-[0.06]" />
       <Link to="/gestor" className="flex items-center gap-1 text-sm text-neutral-400 transition-colors hover:text-neutral-200">
         <Icon name="arrow_back" className="text-base" /> Voltar pros supervisionados
       </Link>
 
-      <div className="relative">
+      <div className="relative self-start">
         <MapCorners tamanho={5} opacidade={25} />
         <h1 className="text-2xl font-bold text-neutral-100">{dados.nome}</h1>
       </div>

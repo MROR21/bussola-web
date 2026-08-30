@@ -22,7 +22,7 @@ function TelaLogin() {
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-navy-900 px-4 py-10 text-neutral-100">
       <CompassRose
-        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 size-[900px] -translate-x-1/2 -translate-y-1/2 text-gold-500 opacity-[0.05]"
+        className="pointer-events-none absolute left-1/2 top-1/2 size-[900px] -translate-x-1/2 -translate-y-1/2 text-gold-500 opacity-[0.05]"
       />
 
       <div className="anim-page relative w-full max-w-lg rounded-3xl border border-navy-700 bg-navy-800 p-10 shadow-2xl shadow-black/40">
