@@ -72,7 +72,7 @@ export function LoginForm() {
         e.preventDefault()
         handleSubmit()
       }}
-      className="flex flex-col gap-5"
+      className="flex flex-col gap-6"
     >
       <div className="flex flex-col gap-1">
         <h2 className="flex items-center gap-1.5 text-xl font-semibold">

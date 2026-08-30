@@ -11,7 +11,7 @@ function App() {
   if (!usuario) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-neutral-950 px-4 py-10 text-neutral-100">
-        <div className="anim-page w-full max-w-md rounded-3xl border border-neutral-800 bg-neutral-900 p-10 shadow-2xl shadow-black/40">
+        <div className="anim-page w-full max-w-lg rounded-3xl border border-neutral-800 bg-neutral-900 p-10 shadow-2xl shadow-black/40">
           <div className="mb-8 flex flex-col items-center gap-2 text-center">
             <div className="flex size-14 items-center justify-center rounded-2xl bg-purple-500/10">
               <Icon name="explore" className="text-3xl text-purple-400" />
