@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
 import { Markdown } from '../components/Markdown'
@@ -39,6 +39,7 @@ function Comprovacao({ texto }: { texto: string }) {
 // Página de um passo (rota /passo/:id): conteúdo em Markdown + concluir com comprovação opcional.
 export function PassoDetalhePage() {
   const { id = '' } = useParams()
+  const navigate = useNavigate()
   const usuario = useAuthStore((state) => state.usuario)
   const isGestor = usuario?.isGestor ?? false
 
@@ -171,9 +172,16 @@ export function PassoDetalhePage() {
 
   return (
     <article className="flex w-full max-w-2xl flex-col gap-5">
-      <Link to="/" className="flex items-center gap-1 text-sm text-neutral-400 hover:text-neutral-200">
-        <Icon name="arrow_back" className="text-base" /> Voltar pra jornada
-      </Link>
+      {/* Volta no histórico (não um destino fixo) — quem entrou por uma fase da Jornada retorna
+          pra ela, em vez de sempre cair na home (era o bug que o Miguel reportou: link fixo pra
+          "/", igual ao que já tinha sido corrigido no Fluxo). */}
+      <button
+        type="button"
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-1 self-start text-sm text-neutral-400 hover:text-neutral-200"
+      >
+        <Icon name="arrow_back" className="text-base" /> Voltar
+      </button>
 
       <header className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">

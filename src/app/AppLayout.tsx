@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { Icon } from '../components/Icon'
@@ -82,12 +82,24 @@ export function AppLayout() {
 
   const [expandido, setExpandido] = useState<Record<string, boolean>>({})
 
-  // Expande sozinha a seção da rota atual (ex.: entrou direto num /fluxo/:id vindo de um link) —
-  // só liga, nunca fecha o que o usuário já abriu/fechou manualmente.
+  // A que seção da árvore uma rota pertence (ou nenhuma). Usado só pra saber quando o usuário
+  // ENTROU numa seção vindo de fora — não a cada navegação dentro dela.
+  const regiaoDe = (pathname: string): string | null => {
+    if (pathname === '/' || pathname.startsWith('/fase')) return '/'
+    if (pathname.startsWith('/fluxo')) return '/fluxos'
+    return null
+  }
+  const regiaoAnterior = useRef<string | null>(null)
+
+  // Expande sozinha a seção da rota atual, mas só na TROCA de seção (deep link, ou veio de outra
+  // aba) — enquanto o usuário navega dentro da mesma seção, não briga com um toggle manual (senão
+  // fechar a árvore e clicar de novo na aba nunca "pegava", ficava sempre reaberta sozinha).
   useEffect(() => {
-    if (location.pathname === '/' || location.pathname.startsWith('/fase'))
-      setExpandido((e) => ({ ...e, '/': true }))
-    if (location.pathname.startsWith('/fluxo')) setExpandido((e) => ({ ...e, '/fluxos': true }))
+    const atual = regiaoDe(location.pathname)
+    if (atual && atual !== regiaoAnterior.current) {
+      setExpandido((e) => ({ ...e, [atual]: true }))
+    }
+    regiaoAnterior.current = atual
   }, [location.pathname])
 
   return (
@@ -108,6 +120,11 @@ export function AppLayout() {
                   <NavLink
                     to={item.to}
                     end={item.end}
+                    onClick={
+                      galhos.length > 0
+                        ? () => setExpandido((e) => ({ ...e, [item.to]: !aberto }))
+                        : undefined
+                    }
                     className={({ isActive }) =>
                       cx(
                         'flex flex-1 items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
