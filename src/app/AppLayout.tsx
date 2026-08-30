@@ -122,15 +122,15 @@ export function AppLayout() {
   }, [location.pathname])
 
   return (
-    <div className="flex h-screen overflow-hidden bg-navy-900 text-neutral-100">
+    <div className="relative flex h-screen overflow-hidden bg-navy-900 text-neutral-100">
       <aside
         className={cx(
-          'relative flex shrink-0 flex-col gap-4 overflow-y-auto border-r border-navy-700 bg-navy-800 p-4 transition-[width] duration-200',
+          'relative flex shrink-0 flex-col gap-4 overflow-hidden border-r border-navy-700 bg-navy-800 p-4 transition-[width] duration-200',
           colapsado ? 'w-[72px] items-center' : 'w-60',
         )}
       >
         <CompassRose
-          className="pointer-events-none absolute -bottom-14 -left-14 -z-10 size-56 text-gold-500 opacity-[0.05]"
+          className="pointer-events-none absolute bottom-0 left-0 -z-10 size-56 text-gold-500 opacity-[0.05]"
         />
 
         <div className={cx('flex items-center gap-2 px-2 py-1', colapsado && 'px-0')}>
@@ -138,7 +138,11 @@ export function AppLayout() {
           {!colapsado && <span className="text-lg font-bold">Bússola</span>}
         </div>
 
-        <nav className="flex w-full flex-col gap-1">
+        {/* Só a lista de navegação rola (min-h-0 é o que deixa o flex-1 respeitar o espaço
+            disponível em vez de crescer) — o `<aside>` em si não tem overflow-y, senão a marca
+            d'água decorativa (que sangra além da borda de propósito) contava como conteúdo
+            "fora da área visível" e fazia o navegador desenhar uma barra de rolagem à toa. */}
+        <nav className="flex w-full min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
           {itensMenu.map((item) => {
             const galhos = item.arvore === 'fase' ? fases : item.arvore === 'modulo' ? modulos : []
             const aberto = expandido[item.to] ?? false
@@ -211,19 +215,21 @@ export function AppLayout() {
           })}
         </nav>
 
-        <button
-          type="button"
-          onClick={() => setColapsado((v) => !v)}
-          title={colapsado ? 'Expandir menu' : 'Recolher menu'}
-          className={cx(
-            'mt-auto flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-neutral-500 hover:bg-navy-700 hover:text-neutral-200',
-            colapsado && 'justify-center px-0',
-          )}
-        >
-          <Icon name={colapsado ? 'chevron_right' : 'chevron_left'} className="text-base" />
-          {!colapsado && 'Recolher menu'}
-        </button>
       </aside>
+
+      {/* Botão de recolher na própria borda entre o menu e o conteúdo — meio da tela, discreto,
+          igual o do Explorer do VSCode — em vez de um botão de texto ocupando linha lá embaixo. */}
+      <button
+        type="button"
+        onClick={() => setColapsado((v) => !v)}
+        title={colapsado ? 'Expandir menu' : 'Recolher menu'}
+        className={cx(
+          'absolute top-1/2 z-10 flex size-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-navy-600 bg-navy-800 text-neutral-400 shadow-md transition-[left] duration-200 hover:border-gold-500/50 hover:text-gold-400',
+          colapsado ? 'left-[72px]' : 'left-60',
+        )}
+      >
+        <Icon name={colapsado ? 'chevron_right' : 'chevron_left'} className="text-sm" />
+      </button>
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="relative flex h-16 shrink-0 items-center justify-between border-b border-navy-700 bg-gradient-to-r from-navy-800/60 to-navy-900 px-6">
