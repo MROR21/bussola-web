@@ -182,9 +182,12 @@ export function AppLayout() {
                       type="button"
                       onClick={() => setExpandido((e) => ({ ...e, [item.to]: !aberto }))}
                       aria-label={aberto ? 'Recolher' : 'Expandir'}
-                      className="px-2 text-neutral-600 hover:text-neutral-300"
+                      className="px-2 text-neutral-600 transition-colors hover:text-neutral-300"
                     >
-                      <Icon name={aberto ? 'expand_more' : 'chevron_right'} className="text-base" />
+                      <Icon
+                        name="chevron_right"
+                        className={cx('text-base transition-transform duration-200', aberto && 'rotate-90')}
+                      />
                     </button>
                   )}
                 </div>
@@ -229,11 +232,14 @@ export function AppLayout() {
         onClick={() => setColapsado((v) => !v)}
         title={colapsado ? 'Expandir menu' : 'Recolher menu'}
         className={cx(
-          'absolute top-1/2 z-10 flex size-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-navy-600 bg-navy-800 text-neutral-400 shadow-md transition-[left] duration-200 hover:border-gold-500/50 hover:text-gold-400',
+          'absolute top-1/2 z-10 flex size-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-navy-600 bg-navy-800 text-neutral-400 shadow-md transition-[left,color,border-color] duration-200 hover:border-gold-500/50 hover:text-gold-400',
           colapsado ? 'left-[72px]' : 'left-60',
         )}
       >
-        <Icon name={colapsado ? 'chevron_right' : 'chevron_left'} className="text-sm" />
+        <Icon
+          name="chevron_left"
+          className={cx('text-sm transition-transform duration-200', colapsado && 'rotate-180')}
+        />
       </button>
 
       <div className="flex flex-1 flex-col overflow-hidden">
