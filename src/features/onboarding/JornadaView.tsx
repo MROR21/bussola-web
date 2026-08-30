@@ -191,12 +191,15 @@ export function JornadaView({
 
   // ---- Home: hero + próximo passo + cards das fases ----
   return (
-    <div className="flex w-full max-w-2xl flex-col gap-8">
-      {/* Atmosfera da página inteira — `fixed` escapa da coluna centralizada (e do próprio scroll
-          da área de conteúdo) e cobre a viewport toda atrás de tudo, só enquanto essa tela existe.
-          Distinta da marca d'água do hero (canto oposto, maior, mais difusa) pra não duplicar. */}
+    <div className="relative flex w-full max-w-2xl flex-col gap-8">
+      {/* Atmosfera da página inteira — igual à técnica do hero (absoluto + DOM antes dos
+          irmãos "opacos", sem z-index negativo): um `position:fixed` com z negativo parecia
+          funcionar, mas quebrou quando o `AppLayout` ganhou `position:relative` lá em cima (o
+          fixed passou a ficar preso na stacking context do layout, atrás do próprio fundo do
+          app). absolute+DOM-order não tem essa armadilha. Canto oposto ao do hero, maior e mais
+          difusa, pra não duplicar o mesmo ponto. */}
       <CompassRose
-        className="pointer-events-none fixed -right-24 -top-24 -z-10 size-[560px] text-gold-500 opacity-[0.04]"
+        className="pointer-events-none absolute -right-16 -top-10 size-[520px] text-gold-500 opacity-[0.05]"
       />
       {/* Hero — anel de progresso + próximo passo num único cartão (antes eram duas caixas soltas
           empilhadas; agora lê como um bloco só, com o glow sutil atrás do anel). */}

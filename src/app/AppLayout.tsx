@@ -133,7 +133,12 @@ export function AppLayout() {
           className="pointer-events-none absolute bottom-0 left-0 -z-10 size-56 text-gold-500 opacity-[0.05]"
         />
 
-        <div className={cx('flex items-center gap-2 px-2 py-1', colapsado && 'px-0')}>
+        <div
+          className={cx(
+            'flex items-center gap-2 border-b border-navy-700 px-2 pb-4 pt-1',
+            colapsado && 'px-0',
+          )}
+        >
           <CompassRose className="size-6 shrink-0 text-gold-400" />
           {!colapsado && <span className="text-lg font-bold">Bússola</span>}
         </div>
@@ -232,7 +237,14 @@ export function AppLayout() {
       </button>
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="relative flex h-16 shrink-0 items-center justify-between border-b border-navy-700 bg-gradient-to-r from-navy-800/60 to-navy-900 px-6">
+        <header className="relative flex h-16 shrink-0 items-center justify-between overflow-hidden border-b border-navy-700 bg-gradient-to-r from-navy-800 via-navy-800/70 to-navy-900 px-6">
+          <CompassRose
+            className="pointer-events-none absolute -right-6 -top-10 -z-10 size-32 text-gold-500 opacity-[0.07]"
+          />
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gold-500/50 to-transparent"
+            aria-hidden="true"
+          />
           <span className="flex items-center gap-1.5 rounded-full border border-navy-700 bg-navy-800 px-3 py-1 text-xs text-neutral-500">
             <span
               className={cx(
