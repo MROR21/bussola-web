@@ -1,9 +1,9 @@
 import { PublicClientApplication } from '@azure/msal-browser'
 
-// App registrado no Azure (Entra ID) como multi-tenant — qualquer conta @agilean.com.br consegue
-// entrar sem precisar ser convidada no tenant de quem registrou o app. O Client ID é por ambiente
-// (variável VITE_MSAL_CLIENT_ID, em .env.local — nunca commitado). Sem ela, o botão "Entrar com
-// Microsoft" fica escondido em vez de quebrar.
+// App registrado DENTRO do próprio locatário (tenant) da Agilean no Entra ID — não multi-tenant,
+// então a authority aponta pro domínio da empresa em vez do endpoint genérico "common". O Client ID
+// é por ambiente (variável VITE_MSAL_CLIENT_ID, em .env.local — nunca commitado). Sem ela, o botão
+// "Entrar com Microsoft" fica escondido em vez de quebrar.
 const clientId = import.meta.env.VITE_MSAL_CLIENT_ID
 
 export const msalHabilitado = Boolean(clientId)
@@ -11,7 +11,7 @@ export const msalHabilitado = Boolean(clientId)
 const msalInstance = new PublicClientApplication({
   auth: {
     clientId: clientId ?? '',
-    authority: 'https://login.microsoftonline.com/common',
+    authority: 'https://login.microsoftonline.com/agilean.com.br',
     redirectUri: window.location.origin,
   },
   cache: {
