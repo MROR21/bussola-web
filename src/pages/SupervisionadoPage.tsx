@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
+import { MapCorners } from '../components/MapCorners'
 import { Carregando } from '../components/Spinner'
 import { useTitulo } from '../hooks/useTitulo'
 import { cx } from '../utils/cx'
@@ -76,7 +77,10 @@ export function SupervisionadoPage() {
         <Icon name="arrow_back" className="text-base" /> Voltar pros supervisionados
       </Link>
 
-      <h1 className="text-2xl font-bold text-neutral-100">{dados.nome}</h1>
+      <div className="relative">
+        <MapCorners tamanho={5} opacidade={25} />
+        <h1 className="text-2xl font-bold text-neutral-100">{dados.nome}</h1>
+      </div>
 
       <div className="flex gap-2">
         {(['passos', 'fluxos'] as const).map((chave) => (

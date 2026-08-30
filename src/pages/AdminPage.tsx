@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Icon } from '../components/Icon'
+import { MapCorners } from '../components/MapCorners'
 import { useTitulo } from '../hooks/useTitulo'
 import { FluxosAdmin } from '../features/admin/FluxosAdmin'
 import { PassosAdmin } from '../features/admin/PassosAdmin'
@@ -49,7 +50,8 @@ export function AdminPage() {
 
   return (
     <div className="flex w-full max-w-4xl flex-col gap-5">
-      <div className="flex flex-col gap-1">
+      <div className="relative flex flex-col gap-1">
+        <MapCorners tamanho={5} opacidade={25} />
         <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
           <Icon name="build" className="text-2xl text-gold-400" /> Administração
         </h1>

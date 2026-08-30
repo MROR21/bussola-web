@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
+import { MapCorners } from '../components/MapCorners'
 import { Carregando } from '../components/Spinner'
 import { useTitulo } from '../hooks/useTitulo'
 import {
@@ -58,7 +59,8 @@ export function GestorPage() {
 
   return (
     <div className="flex w-full max-w-2xl flex-col gap-6">
-      <header className="flex flex-col gap-1">
+      <header className="relative flex flex-col gap-1">
+        <MapCorners tamanho={5} opacidade={25} />
         <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
           <Icon name="dashboard" className="text-2xl text-gold-400" /> Painel do gestor
         </h1>

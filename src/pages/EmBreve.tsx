@@ -1,4 +1,5 @@
 import { Icon } from '../components/Icon'
+import { MapCorners } from '../components/MapCorners'
 import { useTitulo } from '../hooks/useTitulo'
 
 // Placeholder de seção ainda não construída — mantém a moldura navegável.
@@ -14,7 +15,8 @@ export function EmBreve({
   useTitulo(titulo)
 
   return (
-    <div className="flex max-w-md flex-col items-center gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-10 text-center">
+    <div className="relative flex max-w-md flex-col items-center gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-10 text-center">
+      <MapCorners tamanho={5} opacidade={25} />
       <Icon name={icone} className="text-4xl text-neutral-500" />
       <h2 className="text-xl font-semibold text-neutral-100">{titulo}</h2>
       <p className="text-sm text-neutral-400">{descricao}</p>
