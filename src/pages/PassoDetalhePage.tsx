@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
+import { MapCorners } from '../components/MapCorners'
 import { Markdown } from '../components/Markdown'
 import { MarkdownEditor } from '../components/MarkdownEditor'
 import { Carregando, Spinner } from '../components/Spinner'
@@ -287,7 +288,8 @@ export function PassoDetalhePage() {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed">
+        <div className="relative flex flex-col gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed">
+          <MapCorners tamanho={5} opacidade={25} />
           <Markdown>{step.conteudo}</Markdown>
         </div>
       )}

@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { CompassRose } from '../../components/CompassRose'
 import { Icon } from '../../components/Icon'
+import { MapCorners } from '../../components/MapCorners'
+import { TrailDivider } from '../../components/TrailDivider'
 import { useTitulo } from '../../hooks/useTitulo'
 import { cx } from '../../utils/cx'
 import { concluirFluxo, desmarcarFluxo, getFluxosConcluidos } from '../fluxos/fluxosService'
@@ -192,6 +195,10 @@ export function JornadaView({
       {/* Hero — anel de progresso + próximo passo num único cartão (antes eram duas caixas soltas
           empilhadas; agora lê como um bloco só, com o glow sutil atrás do anel). */}
       <div className="relative overflow-hidden rounded-3xl border border-navy-700 bg-navy-800 shadow-xl shadow-black/20">
+        <MapCorners />
+        <CompassRose
+          className="pointer-events-none absolute -bottom-10 -right-10 size-40 text-gold-500 opacity-[0.06]"
+        />
         <div
           className="pointer-events-none absolute -left-12 -top-16 size-56 rounded-full bg-gold-500/10 blur-3xl"
           aria-hidden="true"
@@ -225,6 +232,7 @@ export function JornadaView({
             <p className="text-sm text-neutral-400">
               Você foi do clone ao primeiro card. Bem-vindo(a) de verdade à Agilean.
             </p>
+            <TrailDivider className="w-40" />
             <p className="flex items-center justify-center gap-1.5 text-base font-medium text-gold-300">
               Agora é com você! <Icon name="rocket_launch" className="text-lg" />
             </p>
