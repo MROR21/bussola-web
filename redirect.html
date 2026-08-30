@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Autenticando…</title>
+  </head>
+  <body>
+    <p>Autenticando…</p>
+    <script type="module">
+      import { broadcastResponseToMainFrame } from '@azure/msal-browser/redirect-bridge'
+
+      broadcastResponseToMainFrame().catch((error) => {
+        console.error('Erro ao repassar a resposta de login pro app principal:', error)
+      })
+    </script>
+  </body>
+</html>

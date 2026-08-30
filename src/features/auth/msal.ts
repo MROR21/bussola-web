@@ -12,11 +12,13 @@ const msalInstance = new PublicClientApplication({
   auth: {
     clientId: clientId ?? '',
     authority: 'https://login.microsoftonline.com/agilean.com.br',
-    // Página em branco dedicada (sem React/router) — se o redirect voltar pro app de verdade, o
-    // React Router monta e "come" o hash da resposta antes do MSAL (que roda no popup, monitorado
-    // pela janela que abriu) conseguir lê-lo, e o popup nunca fecha sozinho (fica mostrando o app
-    // dentro dele mesmo). É o hash_empty_error/monitor_window_timeout documentado do MSAL.
-    redirectUri: `${window.location.origin}/blank.html`,
+    // Página-ponte dedicada (`redirect.html` na raiz do projeto, ver vite.config.ts) — se o
+    // redirect voltar pro app de verdade, o React/router monta e "come" o hash da resposta antes
+    // do MSAL conseguir lê-lo, e o popup nunca fecha sozinho (fica mostrando o app dentro dele
+    // mesmo — era o "timed_out"/hash_empty_error que o Miguel bateu). No MSAL v5 essa página
+    // precisa rodar o script de `@azure/msal-browser/redirect-bridge` — não basta ser uma página
+    // em branco (mudou de v4 pra v5, ver docs/redirect-bridge.md do msal-browser).
+    redirectUri: `${window.location.origin}/redirect.html`,
   },
   cache: {
     cacheLocation: 'sessionStorage',
