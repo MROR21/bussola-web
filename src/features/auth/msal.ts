@@ -12,7 +12,11 @@ const msalInstance = new PublicClientApplication({
   auth: {
     clientId: clientId ?? '',
     authority: 'https://login.microsoftonline.com/agilean.com.br',
-    redirectUri: window.location.origin,
+    // Página em branco dedicada (sem React/router) — se o redirect voltar pro app de verdade, o
+    // React Router monta e "come" o hash da resposta antes do MSAL (que roda no popup, monitorado
+    // pela janela que abriu) conseguir lê-lo, e o popup nunca fecha sozinho (fica mostrando o app
+    // dentro dele mesmo). É o hash_empty_error/monitor_window_timeout documentado do MSAL.
+    redirectUri: `${window.location.origin}/blank.html`,
   },
   cache: {
     cacheLocation: 'sessionStorage',
