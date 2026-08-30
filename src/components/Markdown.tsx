@@ -16,7 +16,7 @@ export function Markdown({ children }: { children: string }) {
           <ol className="ml-5 list-decimal space-y-1 text-neutral-300">{children}</ol>
         ),
         a: ({ children, href }) => (
-          <a href={href} className="text-gold-400 hover:text-gold-300">
+          <a href={href} className="text-gold-400 transition-colors hover:text-gold-300">
             {children}
           </a>
         ),

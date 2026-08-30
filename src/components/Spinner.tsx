@@ -11,7 +11,7 @@ export function Spinner({ className = '' }: { className?: string }) {
 // Estado de carregamento de página inteira: spinner + texto, no lugar do `<p>` estático de antes.
 export function Carregando({ texto }: { texto: string }) {
   return (
-    <p className="flex items-center gap-2 text-neutral-400">
+    <p className="anim-fade flex items-center gap-2 text-neutral-400">
       <Spinner />
       {texto}
     </p>

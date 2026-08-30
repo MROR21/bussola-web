@@ -170,7 +170,7 @@ export function FluxoDetalhePage() {
       <button
         type="button"
         onClick={() => navigate(-1)}
-        className="flex items-center gap-1 self-start text-sm text-neutral-400 hover:text-neutral-200"
+        className="flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
       >
         <Icon name="arrow_back" className="text-base" /> Voltar
       </button>
@@ -182,12 +182,12 @@ export function FluxoDetalhePage() {
           {fluxo.descricao && <p className="text-sm text-neutral-400">{fluxo.descricao}</p>}
         </div>
         {isGestor && !editando && (
-          <div className="flex shrink-0 flex-col items-end gap-1">
+          <div className="anim-fade flex shrink-0 flex-col items-end gap-1">
             <button
               type="button"
               onClick={abrirEdicao}
               disabled={carregandoEdicao}
-              className="flex items-center gap-1 rounded-lg border border-navy-600 px-3 py-1.5 text-sm text-gold-400 hover:border-gold-400 hover:text-gold-300 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center gap-1 rounded-lg border border-navy-600 px-3 py-1.5 text-sm text-gold-400 transition-all hover:border-gold-400 hover:text-gold-300 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {carregandoEdicao ? (
                 <>
@@ -205,13 +205,13 @@ export function FluxoDetalhePage() {
       </header>
 
       {editando && campos ? (
-        <div className="flex flex-col gap-4 rounded-2xl border border-gold-500/30 bg-navy-800 p-6">
+        <div className="anim-fade flex flex-col gap-4 rounded-2xl border border-gold-500/30 bg-navy-800 p-6">
           <label className="flex flex-col gap-1 text-sm text-neutral-400">
             Categoria
             <input
               value={campos.categoria}
               onChange={(e) => setCampos({ ...campos, categoria: e.target.value })}
-              className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+              className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm text-neutral-400">
@@ -219,7 +219,7 @@ export function FluxoDetalhePage() {
             <input
               value={campos.titulo}
               onChange={(e) => setCampos({ ...campos, titulo: e.target.value })}
-              className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+              className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm text-neutral-400">
@@ -228,7 +228,7 @@ export function FluxoDetalhePage() {
               value={campos.descricao}
               onChange={(e) => setCampos({ ...campos, descricao: e.target.value })}
               rows={2}
-              className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+              className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm text-neutral-400">
@@ -236,7 +236,7 @@ export function FluxoDetalhePage() {
             <input
               value={campos.videoUrl}
               onChange={(e) => setCampos({ ...campos, videoUrl: e.target.value })}
-              className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+              className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm text-neutral-400">
@@ -253,7 +253,7 @@ export function FluxoDetalhePage() {
             <button
               type="button"
               onClick={() => setEditando(false)}
-              className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
+              className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
             >
               Cancelar
             </button>
@@ -261,7 +261,7 @@ export function FluxoDetalhePage() {
               type="button"
               onClick={salvar}
               disabled={!campos.titulo.trim() || salvando}
-              className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {salvando ? (
                 <>
@@ -274,7 +274,7 @@ export function FluxoDetalhePage() {
           </div>
         </div>
       ) : (
-        <>
+        <div className="anim-fade flex flex-col gap-5">
           {fluxo.videoUrl && (
             <div className="aspect-video w-full overflow-hidden rounded-2xl border border-navy-700">
               <iframe
@@ -292,7 +292,7 @@ export function FluxoDetalhePage() {
             <MapIllustration className="pointer-events-none absolute -bottom-4 -right-6 -z-10 w-56 text-gold-500 opacity-[0.06]" />
             <Markdown>{fluxo.conteudo}</Markdown>
           </div>
-        </>
+        </div>
       )}
 
       <button

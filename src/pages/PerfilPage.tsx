@@ -115,9 +115,9 @@ export function PerfilPage() {
     senhaAtual !== '' && novaSenha.length >= 6 && novaSenha === confirmar
 
   const inputCls =
-    'rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500 disabled:opacity-50'
+    'rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500 disabled:opacity-50'
   const salvarCls =
-    'flex items-center gap-1.5 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40'
+    'flex items-center gap-1.5 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40'
   const cardCls = 'flex flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6'
 
   return (
@@ -175,7 +175,7 @@ export function PerfilPage() {
               type="button"
               onClick={onRemoverFoto}
               disabled={salvandoFoto}
-              className="self-start rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700 disabled:opacity-40"
+              className="anim-fade self-start rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700 disabled:opacity-40"
             >
               Remover
             </button>
@@ -232,7 +232,7 @@ export function PerfilPage() {
           className={inputCls}
         />
         {confirmar !== '' && novaSenha !== confirmar && (
-          <span className="text-xs text-red-400">As senhas não conferem.</span>
+          <span className="anim-fade text-xs text-red-400">As senhas não conferem.</span>
         )}
         <button type="submit" disabled={!senhaValida || salvandoSenha} className={salvarCls}>
           {salvandoSenha ? (

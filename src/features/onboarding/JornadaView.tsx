@@ -162,7 +162,7 @@ export function JornadaView({
         <button
           type="button"
           onClick={sairFase}
-          className="flex items-center gap-1 self-start text-sm text-neutral-400 hover:text-neutral-200"
+          className="flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
         >
           <Icon name="arrow_back" className="text-base" /> Voltar pra jornada
         </button>
@@ -239,7 +239,7 @@ export function JornadaView({
         </div>
 
         {completa ? (
-          <div className="relative flex flex-col items-center gap-3 border-t border-navy-700 bg-gold-500/10 p-6 text-center">
+          <div className="anim-fade relative flex flex-col items-center gap-3 border-t border-navy-700 bg-gold-500/10 p-6 text-center">
             <Icon name="emoji_events" className="text-4xl text-gold-400" fill />
             <h3 className="text-lg font-semibold text-neutral-100">Jornada completa!</h3>
             <p className="text-sm text-neutral-400">
@@ -251,14 +251,14 @@ export function JornadaView({
             </p>
             <Link
               to="/fluxos"
-              className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400"
+              className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
             >
               Ir pro Guia pelo sistema
             </Link>
           </div>
         ) : (
           proximo && (
-            <div className="relative flex flex-col gap-3 border-t border-navy-700 bg-gold-500/10 p-5">
+            <div className="anim-fade relative flex flex-col gap-3 border-t border-navy-700 bg-gold-500/10 p-5">
               <div className="flex items-start gap-3">
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-gold-400/50 bg-navy-800 text-gold-400">
                   <Icon name={iconeDaFase(proximo.phase)} className="text-lg" />
@@ -274,7 +274,7 @@ export function JornadaView({
               <button
                 type="button"
                 onClick={() => entrarFase(proximo.phase)}
-                className="self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400"
+                className="self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
               >
                 Ir para o passo
               </button>
@@ -350,7 +350,7 @@ export function JornadaView({
                   </span>
                   <span className="text-xs font-semibold leading-tight text-neutral-100">{fase}</span>
                   {atual && !bloqueada && (
-                    <span className="rounded-full bg-gold-500/20 px-2 py-0.5 text-[10px] font-medium text-gold-300">
+                    <span className="anim-pop rounded-full bg-gold-500/20 px-2 py-0.5 text-[10px] font-medium text-gold-300">
                       Você está aqui
                     </span>
                   )}
@@ -373,7 +373,7 @@ export function JornadaView({
       <button
         type="button"
         onClick={onRestart}
-        className="self-center text-sm text-neutral-500 hover:text-neutral-300"
+        className="self-center text-sm text-neutral-500 transition-colors hover:text-neutral-300"
       >
         Refazer nivelamento
       </button>

@@ -43,7 +43,7 @@ export function NivelamentoPage({
         </h1>
         <p className="text-sm text-neutral-400">Responda rápido pra personalizar sua jornada.</p>
       </div>
-      {erro && <p className="relative text-sm text-red-400">{erro}</p>}
+      {erro && <p className="anim-fade relative text-sm text-red-400">{erro}</p>}
       <NivelamentoForm onSubmit={concluir} onSkip={(squad) => concluir(perfilPadrao, squad)} />
     </main>
   )

@@ -21,7 +21,7 @@ type Estado = 'carregando' | 'nivelar' | 'pronto'
 
 function TelaCheia({ children }: { children: React.ReactNode }) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-navy-900 px-4 text-neutral-100">
+    <main className="anim-fade flex min-h-screen items-center justify-center bg-navy-900 px-4 text-neutral-100">
       {children}
     </main>
   )

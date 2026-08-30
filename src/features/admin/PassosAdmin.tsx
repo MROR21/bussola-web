@@ -116,7 +116,7 @@ export function PassosAdmin() {
   if (error) return <p className="text-red-400">Erro: {error}</p>
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="anim-fade flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
           <Icon name="route" className="text-xl text-gold-400" /> Passos
@@ -124,7 +124,7 @@ export function PassosAdmin() {
         <button
           type="button"
           onClick={abrirNovo}
-          className="rounded-lg bg-gold-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-gold-400"
+          className="rounded-lg bg-gold-500 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gold-400"
         >
           + Novo passo
         </button>
@@ -146,21 +146,21 @@ export function PassosAdmin() {
               <button
                 type="button"
                 onClick={() => abrirEdicao(p)}
-                className="text-sm text-gold-400 hover:text-gold-300"
+                className="text-sm text-gold-400 transition-colors hover:text-gold-300"
               >
                 Editar
               </button>
               <button
                 type="button"
                 onClick={() => setApagando(p)}
-                className="text-sm text-red-400 hover:text-red-300"
+                className="text-sm text-red-400 transition-colors hover:text-red-300"
               >
                 Apagar
               </button>
             </div>
           </li>
         ))}
-        {passos.length === 0 && <p className="text-sm text-neutral-500">Nenhum passo cadastrado.</p>}
+        {passos.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nenhum passo cadastrado.</p>}
       </ul>
 
       {form && (
@@ -182,7 +182,7 @@ export function PassosAdmin() {
                 <select
                   value={form.faseId}
                   onChange={(e) => setForm({ ...form, faseId: e.target.value })}
-                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                 >
                   {fases.map((f) => (
                     <option key={f.id} value={f.id}>
@@ -197,7 +197,7 @@ export function PassosAdmin() {
                   type="number"
                   value={form.order}
                   onChange={(e) => setForm({ ...form, order: Number(e.target.value) })}
-                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                 />
               </label>
             </div>
@@ -207,7 +207,7 @@ export function PassosAdmin() {
               <input
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
               />
             </label>
 
@@ -216,7 +216,7 @@ export function PassosAdmin() {
               <input
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
               />
             </label>
 
@@ -226,7 +226,7 @@ export function PassosAdmin() {
                 <select
                   value={form.skillArea}
                   onChange={(e) => setForm({ ...form, skillArea: e.target.value as SkillArea })}
-                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                 >
                   {SKILL_AREAS.map((s) => (
                     <option key={s} value={s}>
@@ -257,7 +257,7 @@ export function PassosAdmin() {
               <button
                 type="button"
                 onClick={() => setForm(null)}
-                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
               >
                 Cancelar
               </button>
@@ -265,7 +265,7 @@ export function PassosAdmin() {
                 type="button"
                 onClick={salvar}
                 disabled={!form.title.trim() || salvando}
-                className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {salvando ? (
                   <>
@@ -297,14 +297,14 @@ export function PassosAdmin() {
               <button
                 type="button"
                 onClick={() => setApagando(null)}
-                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={confirmarApagar}
-                className="rounded-lg bg-red-500/90 px-4 py-2 text-sm font-medium text-white hover:bg-red-500"
+                className="rounded-lg bg-red-500/90 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-500"
               >
                 Apagar
               </button>

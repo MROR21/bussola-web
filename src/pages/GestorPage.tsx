@@ -59,7 +59,7 @@ export function GestorPage() {
   if (error) return <EstadoErro onRetry={carregar} />
 
   return (
-    <div className="relative flex w-full max-w-2xl flex-col gap-6">
+    <div className="anim-fade relative flex w-full max-w-2xl flex-col gap-6">
       <CompassRose className="pointer-events-none absolute -right-10 -top-4 -z-10 size-64 text-gold-500 opacity-[0.05]" />
       <header className="relative flex flex-col gap-1">
         <MapCorners tamanho={5} opacidade={25} />
@@ -73,7 +73,7 @@ export function GestorPage() {
       </header>
 
       {usuarios.length === 0 && (
-        <p className="text-neutral-500">
+        <p className="anim-fade text-neutral-500">
           Você ainda não tem supervisionados. Adicione alguém abaixo.
         </p>
       )}
@@ -103,7 +103,7 @@ export function GestorPage() {
                       e.stopPropagation()
                       remover(u.id)
                     }}
-                    className="text-sm text-neutral-500 hover:text-red-400"
+                    className="text-sm text-neutral-500 transition-colors hover:text-red-400"
                   >
                     Remover
                   </button>
@@ -136,7 +136,7 @@ export function GestorPage() {
         <button
           type="button"
           onClick={() => setAdicionando((v) => !v)}
-          className="flex items-center gap-1 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400"
+          className="flex items-center gap-1 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
         >
           {adicionando ? (
             'Fechar'
@@ -148,7 +148,7 @@ export function GestorPage() {
         </button>
 
         {adicionando && (
-          <ul className="flex flex-col gap-2">
+          <ul className="anim-fade flex flex-col gap-2">
             {disponiveis.length === 0 && (
               <li className="text-sm text-neutral-500">Nenhum colaborador disponível.</li>
             )}
@@ -164,7 +164,7 @@ export function GestorPage() {
                 <button
                   type="button"
                   onClick={() => adicionar(u.id)}
-                  className="shrink-0 text-sm text-gold-400 hover:text-gold-300"
+                  className="shrink-0 text-sm text-gold-400 transition-colors hover:text-gold-300"
                 >
                   Adicionar
                 </button>

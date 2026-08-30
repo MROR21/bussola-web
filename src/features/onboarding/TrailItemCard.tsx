@@ -47,7 +47,7 @@ export function TrailItemCard({
           )}
         >
           {concluido && (
-            <svg viewBox="0 0 20 20" className="size-3.5 fill-current">
+            <svg viewBox="0 0 20 20" className="anim-pop size-3.5 fill-current">
               <path d="M7.5 13.5 4 10l1.4-1.4 2.1 2.1 5.1-5.1L14 7z" />
             </svg>
           )}
@@ -77,7 +77,7 @@ export function TrailItemCard({
           <Link
             to={href}
             className={cx(
-              'font-medium leading-snug hover:underline',
+              'font-medium leading-snug transition-colors hover:underline',
               concluido ? 'text-neutral-500 line-through' : 'text-neutral-100',
             )}
           >
@@ -88,7 +88,7 @@ export function TrailItemCard({
 
           <Link
             to={href}
-            className="flex items-center gap-1 self-start text-sm text-gold-400 hover:text-gold-300"
+            className="flex items-center gap-1 self-start text-sm text-gold-400 transition-colors hover:text-gold-300"
           >
             Ver {isFluxo ? 'fluxo' : 'passo'} <Icon name="arrow_forward" className="text-sm" />
           </Link>

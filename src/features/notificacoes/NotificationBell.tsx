@@ -151,11 +151,11 @@ export function NotificationBell() {
         type="button"
         onClick={alternar}
         aria-label="Notificações"
-        className="relative text-neutral-300 hover:text-neutral-100"
+        className="relative text-neutral-300 transition-colors hover:text-neutral-100"
       >
         <Icon name="notifications" />
         {naoLidas > 0 && (
-          <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-gold-500 text-[10px] font-medium text-white">
+          <span className="anim-pop absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-gold-500 text-[10px] font-medium text-white">
             {naoLidas}
           </span>
         )}
@@ -167,19 +167,19 @@ export function NotificationBell() {
             <p className="text-sm font-medium text-neutral-200">Notificações</p>
             {itens.length > 0 &&
               (confirmandoLimpar ? (
-                <span className="flex items-center gap-2 text-xs">
+                <span className="anim-fade flex items-center gap-2 text-xs">
                   <span className="text-neutral-400">Apagar tudo?</span>
                   <button
                     type="button"
                     onClick={confirmarLimparTudo}
-                    className="font-medium text-red-400 hover:text-red-300"
+                    className="font-medium text-red-400 transition-colors hover:text-red-300"
                   >
                     Sim
                   </button>
                   <button
                     type="button"
                     onClick={() => setConfirmandoLimpar(false)}
-                    className="text-neutral-400 hover:text-neutral-200"
+                    className="text-neutral-400 transition-colors hover:text-neutral-200"
                   >
                     Não
                   </button>
@@ -188,18 +188,18 @@ export function NotificationBell() {
                 <button
                   type="button"
                   onClick={() => setConfirmandoLimpar(true)}
-                  className="text-xs text-neutral-500 hover:text-red-400"
+                  className="anim-fade text-xs text-neutral-500 transition-colors hover:text-red-400"
                 >
                   Limpar tudo
                 </button>
               ))}
           </div>
           {itens.length === 0 ? (
-            <p className="px-4 py-6 text-center text-sm text-neutral-500">
+            <p className="anim-fade px-4 py-6 text-center text-sm text-neutral-500">
               Nenhuma notificação por aqui.
             </p>
           ) : (
-            <ul className="max-h-80 overflow-y-auto">
+            <ul className="anim-fade max-h-80 overflow-y-auto">
               {itens.map((n) => (
                 <li
                   key={n.id}
@@ -209,7 +209,7 @@ export function NotificationBell() {
                     <button
                       type="button"
                       onClick={() => irPara(n.link)}
-                      className="flex flex-1 items-center gap-2 px-4 py-3 text-left text-sm text-neutral-300 hover:bg-navy-700"
+                      className="flex flex-1 items-center gap-2 px-4 py-3 text-left text-sm text-neutral-300 transition-colors hover:bg-navy-700"
                     >
                       {n.autorNome && (
                         <Avatar
@@ -237,7 +237,7 @@ export function NotificationBell() {
                     type="button"
                     onClick={() => apagarUma(n.id)}
                     aria-label="Apagar notificação"
-                    className="mr-2 shrink-0 text-neutral-700 hover:text-red-400"
+                    className="mr-2 shrink-0 text-neutral-700 transition-colors hover:text-red-400"
                   >
                     <Icon name="close" className="text-base" />
                   </button>

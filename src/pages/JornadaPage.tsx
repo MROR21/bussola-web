@@ -48,12 +48,14 @@ export function JornadaPage({
   if (!trail) return null
 
   return (
-    <JornadaView
-      trail={trail}
-      userId={usuario.id}
-      nome={usuario.nome}
-      gestorNome={gestorNome}
-      onRestart={onRefazer}
-    />
+    <div className="anim-fade">
+      <JornadaView
+        trail={trail}
+        userId={usuario.id}
+        nome={usuario.nome}
+        gestorNome={gestorNome}
+        onRestart={onRefazer}
+      />
+    </div>
   )
 }

@@ -118,7 +118,7 @@ export function FluxosAdmin() {
   if (error) return <p className="text-red-400">Erro: {error}</p>
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="anim-fade flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
           <Icon name="menu_book" className="text-xl text-gold-400" /> Fluxos
@@ -126,7 +126,7 @@ export function FluxosAdmin() {
         <button
           type="button"
           onClick={abrirNovo}
-          className="rounded-lg bg-gold-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-gold-400"
+          className="rounded-lg bg-gold-500 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gold-400"
         >
           + Novo fluxo
         </button>
@@ -151,21 +151,21 @@ export function FluxosAdmin() {
               <button
                 type="button"
                 onClick={() => abrirEdicao(f)}
-                className="text-sm text-gold-400 hover:text-gold-300"
+                className="text-sm text-gold-400 transition-colors hover:text-gold-300"
               >
                 Editar
               </button>
               <button
                 type="button"
                 onClick={() => setApagando(f)}
-                className="text-sm text-red-400 hover:text-red-300"
+                className="text-sm text-red-400 transition-colors hover:text-red-300"
               >
                 Apagar
               </button>
             </div>
           </li>
         ))}
-        {fluxos.length === 0 && <p className="text-sm text-neutral-500">Nenhum fluxo cadastrado.</p>}
+        {fluxos.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nenhum fluxo cadastrado.</p>}
       </ul>
 
       {form && (
@@ -187,7 +187,7 @@ export function FluxosAdmin() {
                 <select
                   value={form.moduloId}
                   onChange={(e) => setForm({ ...form, moduloId: e.target.value })}
-                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                 >
                   {modulos.map((m) => (
                     <option key={m.id} value={m.id}>
@@ -202,7 +202,7 @@ export function FluxosAdmin() {
                   type="number"
                   value={form.order}
                   onChange={(e) => setForm({ ...form, order: Number(e.target.value) })}
-                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                 />
               </label>
             </div>
@@ -215,7 +215,7 @@ export function FluxosAdmin() {
                   onChange={(e) =>
                     setForm({ ...form, squad: e.target.value ? (e.target.value as Squad) : null })
                   }
-                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                 >
                   <option value="">Todos os squads</option>
                   {SQUADS.map((s) => (
@@ -230,7 +230,7 @@ export function FluxosAdmin() {
                 <input
                   value={form.categoria}
                   onChange={(e) => setForm({ ...form, categoria: e.target.value })}
-                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                 />
               </label>
             </div>
@@ -240,7 +240,7 @@ export function FluxosAdmin() {
               <input
                 value={form.titulo}
                 onChange={(e) => setForm({ ...form, titulo: e.target.value })}
-                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
               />
             </label>
 
@@ -249,7 +249,7 @@ export function FluxosAdmin() {
               <input
                 value={form.descricao}
                 onChange={(e) => setForm({ ...form, descricao: e.target.value })}
-                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
               />
             </label>
 
@@ -259,7 +259,7 @@ export function FluxosAdmin() {
                 value={form.videoUrl}
                 onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
                 placeholder="https://..."
-                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
               />
             </label>
 
@@ -275,7 +275,7 @@ export function FluxosAdmin() {
               <button
                 type="button"
                 onClick={() => setForm(null)}
-                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
               >
                 Cancelar
               </button>
@@ -283,7 +283,7 @@ export function FluxosAdmin() {
                 type="button"
                 onClick={salvar}
                 disabled={!form.titulo.trim() || salvando}
-                className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {salvando ? (
                   <>
@@ -315,14 +315,14 @@ export function FluxosAdmin() {
               <button
                 type="button"
                 onClick={() => setApagando(null)}
-                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={confirmarApagar}
-                className="rounded-lg bg-red-500/90 px-4 py-2 text-sm font-medium text-white hover:bg-red-500"
+                className="rounded-lg bg-red-500/90 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-500"
               >
                 Apagar
               </button>

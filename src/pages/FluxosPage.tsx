@@ -177,11 +177,11 @@ export function FluxosPage() {
     )
 
     return (
-      <div className="flex w-full max-w-2xl flex-col gap-5">
+      <div className="anim-fade flex w-full max-w-2xl flex-col gap-5">
         <button
           type="button"
           onClick={sairModulo}
-          className="flex items-center gap-1 self-start text-sm text-neutral-400 hover:text-neutral-200"
+          className="flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
         >
           <Icon name="arrow_back" className="text-base" /> Voltar pros módulos
         </button>
@@ -219,7 +219,7 @@ export function FluxosPage() {
 
   // ---- Lista de módulos (cards) + busca global ----
   return (
-    <div className="flex w-full max-w-2xl flex-col gap-6">
+    <div className="anim-fade flex w-full max-w-2xl flex-col gap-6">
       <header className="relative overflow-hidden rounded-3xl border border-navy-700 bg-navy-800 p-6 shadow-xl shadow-black/20">
         <MapCorners />
         <CompassRose
@@ -245,17 +245,17 @@ export function FluxosPage() {
         value={busca}
         onChange={(e) => setBusca(e.target.value)}
         placeholder="Buscar fluxo..."
-        className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+        className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
       />
 
       {buscando ? (
         resultadosBusca.length === 0 ? (
-          <p className="text-neutral-500">Nenhum fluxo encontrado.</p>
+          <p className="anim-fade text-neutral-500">Nenhum fluxo encontrado.</p>
         ) : (
-          <ul className="flex flex-col gap-2">{resultadosBusca.map((f) => itemFluxo(f))}</ul>
+          <ul className="anim-fade flex flex-col gap-2">{resultadosBusca.map((f) => itemFluxo(f))}</ul>
         )
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="anim-fade grid grid-cols-1 gap-3 sm:grid-cols-2">
           {porModulo.map(([modulo, itens]) => {
             const feitosMod = itens.filter((f) => concluidos.has(f.id)).length
             const pct = itens.length > 0 ? Math.round((feitosMod / itens.length) * 100) : 0

@@ -81,34 +81,50 @@ export function AdminPage() {
       </div>
 
       {aba === 'fases' && (
-        <SimpleEntityCrud
-          titulo="Fases"
-          icone="route"
-          singular="fase"
-          labelFilhos="passos"
-          listar={listarFases}
-          criar={criarFase}
-          editar={editarFase}
-          apagar={apagarFase}
-          contarFilhos={async () => contarPor(await listarPassosAdmin(), (p) => p.faseId)}
-        />
+        <div className="anim-fade">
+          <SimpleEntityCrud
+            titulo="Fases"
+            icone="route"
+            singular="fase"
+            labelFilhos="passos"
+            listar={listarFases}
+            criar={criarFase}
+            editar={editarFase}
+            apagar={apagarFase}
+            contarFilhos={async () => contarPor(await listarPassosAdmin(), (p) => p.faseId)}
+          />
+        </div>
       )}
       {aba === 'modulos' && (
-        <SimpleEntityCrud
-          titulo="Módulos"
-          icone="inventory_2"
-          singular="módulo"
-          labelFilhos="fluxos"
-          listar={listarModulos}
-          criar={criarModulo}
-          editar={editarModulo}
-          apagar={apagarModulo}
-          contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
-        />
+        <div className="anim-fade">
+          <SimpleEntityCrud
+            titulo="Módulos"
+            icone="inventory_2"
+            singular="módulo"
+            labelFilhos="fluxos"
+            listar={listarModulos}
+            criar={criarModulo}
+            editar={editarModulo}
+            apagar={apagarModulo}
+            contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
+          />
+        </div>
       )}
-      {aba === 'passos' && <PassosAdmin />}
-      {aba === 'fluxos' && <FluxosAdmin />}
-      {aba === 'usuarios' && <UsuariosAdmin />}
+      {aba === 'passos' && (
+        <div className="anim-fade">
+          <PassosAdmin />
+        </div>
+      )}
+      {aba === 'fluxos' && (
+        <div className="anim-fade">
+          <FluxosAdmin />
+        </div>
+      )}
+      {aba === 'usuarios' && (
+        <div className="anim-fade">
+          <UsuariosAdmin />
+        </div>
+      )}
     </div>
   )
 }

@@ -20,7 +20,7 @@ import {
 import type { OnboardingStep } from '../features/onboarding/types'
 
 const inputCls =
-  'rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-gold-500'
+  'rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500'
 
 // Mostra a evidência: se for um link (http), vira âncora clicável; senão, texto puro.
 function Comprovacao({ texto }: { texto: string }) {
@@ -30,7 +30,7 @@ function Comprovacao({ texto }: { texto: string }) {
         href={texto}
         target="_blank"
         rel="noreferrer"
-        className="break-all text-gold-400 underline hover:text-gold-300"
+        className="break-all text-gold-400 underline transition-colors hover:text-gold-300"
       >
         {texto}
       </a>
@@ -199,7 +199,7 @@ export function PassoDetalhePage() {
       <button
         type="button"
         onClick={() => navigate(-1)}
-        className="flex items-center gap-1 self-start text-sm text-neutral-400 hover:text-neutral-200"
+        className="flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
       >
         <Icon name="arrow_back" className="text-base" /> Voltar
       </button>
@@ -213,12 +213,12 @@ export function PassoDetalhePage() {
           {step.description && <p className="text-sm text-neutral-400">{step.description}</p>}
         </div>
         {isGestor && !editandoConteudo && (
-          <div className="flex shrink-0 flex-col items-end gap-1">
+          <div className="anim-fade flex shrink-0 flex-col items-end gap-1">
             <button
               type="button"
               onClick={abrirEdicaoConteudo}
               disabled={carregandoEdicao}
-              className="flex items-center gap-1 rounded-lg border border-navy-600 px-3 py-1.5 text-sm text-gold-400 hover:border-gold-400 hover:text-gold-300 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center gap-1 rounded-lg border border-navy-600 px-3 py-1.5 text-sm text-gold-400 transition-all hover:border-gold-400 hover:text-gold-300 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {carregandoEdicao ? (
                 <>
@@ -236,13 +236,13 @@ export function PassoDetalhePage() {
       </header>
 
       {editandoConteudo && camposConteudo ? (
-        <div className="flex flex-col gap-4 rounded-2xl border border-gold-500/30 bg-navy-800 p-6">
+        <div className="anim-fade flex flex-col gap-4 rounded-2xl border border-gold-500/30 bg-navy-800 p-6">
           <label className="flex flex-col gap-1 text-sm text-neutral-400">
             Título
             <input
               value={camposConteudo.title}
               onChange={(e) => setCamposConteudo({ ...camposConteudo, title: e.target.value })}
-              className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+              className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm text-neutral-400">
@@ -251,7 +251,7 @@ export function PassoDetalhePage() {
               value={camposConteudo.description}
               onChange={(e) => setCamposConteudo({ ...camposConteudo, description: e.target.value })}
               rows={2}
-              className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+              className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm text-neutral-400">
@@ -268,7 +268,7 @@ export function PassoDetalhePage() {
             <button
               type="button"
               onClick={() => setEditandoConteudo(false)}
-              className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
+              className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
             >
               Cancelar
             </button>
@@ -276,7 +276,7 @@ export function PassoDetalhePage() {
               type="button"
               onClick={salvarConteudo}
               disabled={!camposConteudo.title.trim() || salvandoConteudo}
-              className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {salvandoConteudo ? (
                 <>
@@ -289,7 +289,7 @@ export function PassoDetalhePage() {
           </div>
         </div>
       ) : (
-        <div className="relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed">
+        <div className="anim-fade relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed">
           <MapCorners tamanho={5} opacidade={25} />
           <MapIllustration className="pointer-events-none absolute -bottom-4 -right-6 -z-10 w-56 text-gold-500 opacity-[0.06]" />
           <Markdown>{step.conteudo}</Markdown>
@@ -297,13 +297,13 @@ export function PassoDetalhePage() {
       )}
 
       {concluido ? (
-        <section className="flex flex-col gap-3 rounded-2xl border border-green-500/30 bg-navy-800 p-5">
+        <section className="anim-fade flex flex-col gap-3 rounded-2xl border border-green-500/30 bg-navy-800 p-5">
           <span className="flex items-center gap-1 self-start rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
             <Icon name="check" className="text-sm" /> Concluído
           </span>
 
           {editando ? (
-            <>
+            <div className="anim-fade flex flex-col gap-3">
               <textarea
                 value={evidencia}
                 onChange={(e) => setEvidencia(e.target.value)}
@@ -316,7 +316,7 @@ export function PassoDetalhePage() {
                   type="button"
                   onClick={concluir}
                   disabled={salvando}
-                  className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:opacity-50"
                 >
                   {salvando ? (
                     <>
@@ -329,14 +329,14 @@ export function PassoDetalhePage() {
                 <button
                   type="button"
                   onClick={() => setEditando(false)}
-                  className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
+                  className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
                 >
                   Cancelar
                 </button>
               </div>
-            </>
+            </div>
           ) : (
-            <>
+            <div className="anim-fade flex flex-col gap-3">
               <div className="flex flex-col gap-1">
                 <span className="text-xs text-neutral-500">Comprovação</span>
                 {evidencia ? (
@@ -349,7 +349,7 @@ export function PassoDetalhePage() {
                 <button
                   type="button"
                   onClick={() => setEditando(true)}
-                  className="rounded-lg bg-navy-700 px-4 py-2 text-sm text-neutral-200 hover:bg-navy-600"
+                  className="rounded-lg bg-navy-700 px-4 py-2 text-sm text-neutral-200 transition-colors hover:bg-navy-600"
                 >
                   {evidencia ? 'Editar comprovação' : 'Adicionar comprovação'}
                 </button>
@@ -357,16 +357,16 @@ export function PassoDetalhePage() {
                   type="button"
                   onClick={desmarcar}
                   disabled={salvando}
-                  className="rounded-lg px-4 py-2 text-sm text-neutral-400 hover:bg-navy-700 disabled:opacity-50"
+                  className="rounded-lg px-4 py-2 text-sm text-neutral-400 transition-all hover:bg-navy-700 disabled:opacity-50"
                 >
                   Desmarcar
                 </button>
               </div>
-            </>
+            </div>
           )}
         </section>
       ) : (
-        <section className="flex flex-col gap-2 rounded-2xl border border-navy-700 bg-navy-800 p-5">
+        <section className="anim-fade flex flex-col gap-2 rounded-2xl border border-navy-700 bg-navy-800 p-5">
           <span className="text-sm font-medium text-neutral-200">Comprovação (opcional)</span>
           <p className="text-xs text-neutral-500">
             Cole o link do PR, um print, ou uma nota do que você fez.
@@ -382,7 +382,7 @@ export function PassoDetalhePage() {
             type="button"
             onClick={concluir}
             disabled={salvando}
-            className="flex items-center gap-1.5 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400 disabled:opacity-50"
+            className="flex items-center gap-1.5 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:opacity-50"
           >
             {salvando ? (
               <>

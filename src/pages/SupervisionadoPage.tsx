@@ -75,7 +75,7 @@ export function SupervisionadoPage() {
   return (
     <div className="relative flex w-full max-w-2xl flex-col gap-5">
       <CompassRose className="pointer-events-none absolute -right-10 -top-4 -z-10 size-64 text-gold-500 opacity-[0.05]" />
-      <Link to="/gestor" className="flex items-center gap-1 text-sm text-neutral-400 hover:text-neutral-200">
+      <Link to="/gestor" className="flex items-center gap-1 text-sm text-neutral-400 transition-colors hover:text-neutral-200">
         <Icon name="arrow_back" className="text-base" /> Voltar pros supervisionados
       </Link>
 
@@ -103,7 +103,7 @@ export function SupervisionadoPage() {
       </div>
 
       {aba === 'passos' ? (
-        <div className="flex flex-col gap-4">
+        <div className="anim-fade flex flex-col gap-4">
           {fasesPassos.map(([fase, itens]) => (
             <section key={fase} className="flex flex-col gap-1">
               <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
@@ -130,7 +130,7 @@ export function SupervisionadoPage() {
                             href={p.evidencia}
                             target="_blank"
                             rel="noreferrer"
-                            className="break-all text-gold-400 underline hover:text-gold-300"
+                            className="break-all text-gold-400 underline transition-colors hover:text-gold-300"
                           >
                             {p.evidencia}
                           </a>
@@ -148,7 +148,7 @@ export function SupervisionadoPage() {
           ))}
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="anim-fade flex flex-col gap-4">
           {fluxos.length === 0 && <p className="text-neutral-500">Nenhum fluxo por aqui.</p>}
           {modulosFluxos.map(([modulo, itens]) => (
             <section key={modulo} className="flex flex-col gap-1">

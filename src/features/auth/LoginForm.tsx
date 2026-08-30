@@ -96,14 +96,14 @@ export function LoginForm() {
       </div>
 
       {ehCadastro && (
-        <label className="flex flex-col gap-1.5 text-sm">
+        <label className="anim-fade flex flex-col gap-1.5 text-sm">
           <span className="text-neutral-300">Nome</span>
           <input
             required
             value={nome}
             onChange={(e) => setNome(e.target.value)}
             placeholder="Seu nome"
-            className="rounded-lg border border-navy-600 bg-navy-900 px-3.5 py-2.5 text-neutral-100 outline-none focus:border-gold-500"
+            className="rounded-lg border border-navy-600 bg-navy-900 px-3.5 py-2.5 text-neutral-100 outline-none transition-colors focus:border-gold-500"
           />
         </label>
       )}
@@ -116,7 +116,7 @@ export function LoginForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="voce@agilean.com.br"
-          className="rounded-lg border border-navy-600 bg-navy-900 px-3.5 py-2.5 text-neutral-100 outline-none focus:border-gold-500"
+          className="rounded-lg border border-navy-600 bg-navy-900 px-3.5 py-2.5 text-neutral-100 outline-none transition-colors focus:border-gold-500"
         />
       </label>
 
@@ -129,16 +129,16 @@ export function LoginForm() {
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
           placeholder={ehCadastro ? 'Ao menos 6 caracteres' : '••••••••'}
-          className="rounded-lg border border-navy-600 bg-navy-900 px-3.5 py-2.5 text-neutral-100 outline-none focus:border-gold-500"
+          className="rounded-lg border border-navy-600 bg-navy-900 px-3.5 py-2.5 text-neutral-100 outline-none transition-colors focus:border-gold-500"
         />
       </label>
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="anim-fade text-sm text-red-400">{error}</p>}
 
       <button
         type="submit"
         disabled={loading}
-        className="flex items-center justify-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2.5 text-sm font-medium text-navy-900 hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex items-center justify-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2.5 text-sm font-medium text-navy-900 transition-all hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? (
           <>
@@ -163,7 +163,7 @@ export function LoginForm() {
             type="button"
             onClick={handleMicrosoft}
             disabled={carregandoMicrosoft}
-            className="flex items-center justify-center gap-2 rounded-lg border border-navy-600 bg-navy-900 px-4 py-2.5 text-sm font-medium text-neutral-100 hover:border-navy-500 hover:bg-navy-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center justify-center gap-2 rounded-lg border border-navy-600 bg-navy-900 px-4 py-2.5 text-sm font-medium text-neutral-100 transition-all hover:border-navy-500 hover:bg-navy-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {carregandoMicrosoft ? (
               <>
@@ -182,12 +182,12 @@ export function LoginForm() {
         {ehCadastro ? (
           <>
             Já tem conta?{' '}
-            <span className="text-gold-500 hover:text-gold-300">Entrar</span>
+            <span className="text-gold-500 transition-colors hover:text-gold-300">Entrar</span>
           </>
         ) : (
           <>
             Não tem conta?{' '}
-            <span className="text-gold-500 hover:text-gold-300">Criar conta</span>
+            <span className="text-gold-500 transition-colors hover:text-gold-300">Criar conta</span>
           </>
         )}
       </button>

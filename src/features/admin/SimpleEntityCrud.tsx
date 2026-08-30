@@ -132,7 +132,7 @@ export function SimpleEntityCrud({
   if (error) return <p className="text-red-400">Erro: {error}</p>
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="anim-fade flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
           <Icon name={icone} className="text-xl text-gold-400" /> {titulo}
@@ -140,7 +140,7 @@ export function SimpleEntityCrud({
         <button
           type="button"
           onClick={abrirNovo}
-          className="rounded-lg bg-gold-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-gold-400"
+          className="rounded-lg bg-gold-500 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gold-400"
         >
           + Novo(a) {singular}
         </button>
@@ -158,7 +158,7 @@ export function SimpleEntityCrud({
                   type="button"
                   onClick={() => mover(item, -1)}
                   disabled={indice === 0 || movendo !== null}
-                  className="leading-none text-neutral-500 hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
+                  className="leading-none text-neutral-500 transition-all hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
                   aria-label="Mover pra cima"
                 >
                   <Icon name="arrow_drop_up" className="text-lg" />
@@ -167,7 +167,7 @@ export function SimpleEntityCrud({
                   type="button"
                   onClick={() => mover(item, 1)}
                   disabled={indice === itens.length - 1 || movendo !== null}
-                  className="-mt-2 leading-none text-neutral-500 hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
+                  className="-mt-2 leading-none text-neutral-500 transition-all hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
                   aria-label="Mover pra baixo"
                 >
                   <Icon name="arrow_drop_down" className="text-lg" />
@@ -185,21 +185,21 @@ export function SimpleEntityCrud({
               <button
                 type="button"
                 onClick={() => abrirEdicao(item)}
-                className="text-sm text-gold-400 hover:text-gold-300"
+                className="text-sm text-gold-400 transition-colors hover:text-gold-300"
               >
                 Editar
               </button>
               <button
                 type="button"
                 onClick={() => setApagando(item)}
-                className="text-sm text-red-400 hover:text-red-300"
+                className="text-sm text-red-400 transition-colors hover:text-red-300"
               >
                 Apagar
               </button>
             </div>
           </li>
         ))}
-        {itens.length === 0 && <p className="text-sm text-neutral-500">Nada cadastrado ainda.</p>}
+        {itens.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nada cadastrado ainda.</p>}
       </ul>
 
       {editando && (
@@ -220,7 +220,7 @@ export function SimpleEntityCrud({
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 autoFocus
-                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
               />
             </label>
             <label className="flex flex-col gap-1 text-sm text-neutral-400">
@@ -229,14 +229,14 @@ export function SimpleEntityCrud({
                 type="number"
                 value={order}
                 onChange={(e) => setOrder(Number(e.target.value))}
-                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
               />
             </label>
             <div className="flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setEditando(null)}
-                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
               >
                 Cancelar
               </button>
@@ -244,7 +244,7 @@ export function SimpleEntityCrud({
                 type="button"
                 onClick={salvar}
                 disabled={!nome.trim() || salvando}
-                className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {salvando ? (
                   <>
@@ -276,14 +276,14 @@ export function SimpleEntityCrud({
               <button
                 type="button"
                 onClick={() => setApagando(null)}
-                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={confirmarApagar}
-                className="rounded-lg bg-red-500/90 px-4 py-2 text-sm font-medium text-white hover:bg-red-500"
+                className="rounded-lg bg-red-500/90 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-500"
               >
                 Apagar
               </button>

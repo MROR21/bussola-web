@@ -95,14 +95,14 @@ export function NivelamentoForm({
         <button
           type="button"
           onClick={() => onSubmit({ ...perfilPadrao, cargo, git }, squad)}
-          className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400"
+          className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
         >
           Ver minha trilha
         </button>
         <button
           type="button"
           onClick={() => onSkip(squad)}
-          className="text-sm text-neutral-400 hover:text-neutral-200"
+          className="text-sm text-neutral-400 transition-colors hover:text-neutral-200"
         >
           Pular (trilha completa)
         </button>

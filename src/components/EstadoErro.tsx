@@ -11,14 +11,14 @@ export function EstadoErro({
   onRetry?: () => void
 }) {
   return (
-    <div className="flex w-full flex-col items-center gap-3 py-16 text-center">
+    <div className="anim-fade flex w-full flex-col items-center gap-3 py-16 text-center">
       <Icon name="explore" className="text-4xl text-neutral-600" />
       <p className="max-w-xs text-sm text-neutral-400">{mensagem}</p>
       {onRetry && (
         <button
           type="button"
           onClick={onRetry}
-          className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400"
+          className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
         >
           Tentar de novo
         </button>

@@ -66,7 +66,7 @@ function ListaUsuarios() {
   if (error) return <p className="text-red-400">Erro: {error}</p>
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="anim-fade flex flex-col gap-4">
       <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
         <Icon name="person" className="text-xl text-gold-400" /> Usuários
       </h2>
@@ -83,7 +83,7 @@ function ListaUsuarios() {
             </div>
             <div className="flex items-center gap-3">
               {usuario.isGestor && (
-                <span className="rounded-full bg-gold-500/20 px-2 py-0.5 text-xs font-medium text-gold-300">
+                <span className="anim-pop rounded-full bg-gold-500/20 px-2 py-0.5 text-xs font-medium text-gold-300">
                   Supervisor
                 </span>
               )}
@@ -91,14 +91,14 @@ function ListaUsuarios() {
                 type="button"
                 onClick={() => alternar(usuario)}
                 disabled={alterando === usuario.id}
-                className="text-sm text-gold-400 hover:text-gold-300 disabled:cursor-not-allowed disabled:opacity-40"
+                className="text-sm text-gold-400 transition-all hover:text-gold-300 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {usuario.isGestor ? 'Remover supervisor' : 'Tornar supervisor'}
               </button>
             </div>
           </li>
         ))}
-        {itens.length === 0 && <p className="text-sm text-neutral-500">Nenhum usuário ainda.</p>}
+        {itens.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nenhum usuário ainda.</p>}
       </ul>
 
       {feedback && (
@@ -177,7 +177,7 @@ function ListaEmailsAutorizados() {
   if (error) return <p className="text-red-400">Erro: {error}</p>
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="anim-fade flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
           <Icon name="mail" className="text-xl text-gold-400" /> E-mails pré-autorizados
@@ -193,13 +193,13 @@ function ListaEmailsAutorizados() {
           onChange={(e) => setNovoEmail(e.target.value)}
           placeholder="novo.gestor@agilean.com.br"
           onKeyDown={(e) => e.key === 'Enter' && adicionar()}
-          className="flex-1 rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
+          className="flex-1 rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
         />
         <button
           type="button"
           onClick={adicionar}
           disabled={!novoEmail.trim() || salvando}
-          className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
         >
           Adicionar
         </button>
@@ -215,13 +215,13 @@ function ListaEmailsAutorizados() {
             <button
               type="button"
               onClick={() => setApagando(item)}
-              className="text-sm text-red-400 hover:text-red-300"
+              className="text-sm text-red-400 transition-colors hover:text-red-300"
             >
               Remover
             </button>
           </li>
         ))}
-        {itens.length === 0 && <p className="text-sm text-neutral-500">Nenhum e-mail na lista.</p>}
+        {itens.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nenhum e-mail na lista.</p>}
       </ul>
 
       {apagando && (
@@ -241,14 +241,14 @@ function ListaEmailsAutorizados() {
               <button
                 type="button"
                 onClick={() => setApagando(null)}
-                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={confirmarApagar}
-                className="rounded-lg bg-red-500/90 px-4 py-2 text-sm font-medium text-white hover:bg-red-500"
+                className="rounded-lg bg-red-500/90 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-500"
               >
                 Remover
               </button>
