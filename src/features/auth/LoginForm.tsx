@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Icon } from '../../components/Icon'
 import { Spinner } from '../../components/Spinner'
+import { useTitulo } from '../../hooks/useTitulo'
 import { login, loginComMicrosoft, register } from './authService'
 import { useAuthStore } from './authStore'
 import { entrarComMicrosoft, msalHabilitado } from './msal'
@@ -19,10 +21,13 @@ function MicrosoftLogo() {
 }
 
 // "Quem é você" — dois modos: entrar (e-mail + senha) e criar conta (nome + e-mail + senha) — mais
-// "Entrar com Microsoft" (workspace da própria Agilean), que serve pros dois: get-or-create sem senha.
+// "Entrar com Microsoft" (workspace da própria Agilean), que serve pros dois: get-or-create sem
+// senha. O modo mora na URL (/login ou /cadastro), não em state — dá pra voltar/compartilhar o
+// link de cadastro direto, igual o resto do app já faz com fase/módulo/passo/fluxo por nome.
 export function LoginForm() {
   const entrar = useAuthStore((state) => state.login)
-  const [modo, setModo] = useState<'login' | 'cadastro'>('login')
+  const location = useLocation()
+  const navigate = useNavigate()
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
@@ -30,7 +35,8 @@ export function LoginForm() {
   const [carregandoMicrosoft, setCarregandoMicrosoft] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const ehCadastro = modo === 'cadastro'
+  const ehCadastro = location.pathname === '/cadastro'
+  useTitulo(ehCadastro ? 'Criar conta' : 'Entrar')
 
   async function handleSubmit() {
     setLoading(true)
@@ -62,7 +68,7 @@ export function LoginForm() {
   }
 
   function trocarModo() {
-    setModo(ehCadastro ? 'login' : 'cadastro')
+    navigate(ehCadastro ? '/login' : '/cadastro')
     setError(null)
   }
 

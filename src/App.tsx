@@ -1,15 +1,23 @@
+import { useEffect } from 'react'
+import { BrowserRouter, useLocation, useNavigate } from 'react-router-dom'
 import { SessaoAutenticada } from './app/SessaoAutenticada'
 import { CompassRose } from './components/CompassRose'
 import { LoginForm } from './features/auth/LoginForm'
 import { useAuthStore } from './features/auth/authStore'
-import { useTitulo } from './hooks/useTitulo'
 
 // Sem login: tela de entrada, fora de tudo. Logo+form moram no MESMO enquadramento (um cartão só,
-// maior e com mais respiro) em vez de texto solto sobre um card pequeno separado. Componente
-// próprio (não só um branch dentro de App) pra `useTitulo()` resetar o título só enquanto essa
-// tela existe de verdade — ela desmonta ao logar, então não briga com o título de cada página.
+// maior e com mais respiro) em vez de texto solto sobre um card pequeno separado. Tem roteador
+// próprio (login = /login, cadastro = /cadastro, o `LoginForm` decide o modo pela URL) — qualquer
+// outro caminho (deep link antigo, `/`) normaliza pra /login em vez de ficar com uma URL qualquer.
 function TelaLogin() {
-  useTitulo()
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (location.pathname !== '/login' && location.pathname !== '/cadastro') {
+      navigate('/login', { replace: true })
+    }
+  }, [location.pathname, navigate])
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-navy-900 px-4 py-10 text-neutral-100">
@@ -39,7 +47,13 @@ function TelaLogin() {
 function App() {
   const usuario = useAuthStore((state) => state.usuario)
 
-  if (!usuario) return <TelaLogin />
+  if (!usuario) {
+    return (
+      <BrowserRouter>
+        <TelaLogin />
+      </BrowserRouter>
+    )
+  }
 
   // Logado: decide entre nivelamento (sem menu) e a casca (com menu).
   return <SessaoAutenticada usuario={usuario} />
