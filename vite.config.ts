@@ -22,8 +22,8 @@ export default defineConfig({
       // entrada própria do build, sem passar pelo React/router, senão o hash da resposta de login
       // se perde antes do MSAL conseguir lê-lo.
       input: {
-        main: resolve(__dirname, 'index.html'),
-        redirect: resolve(__dirname, 'redirect.html'),
+        main: resolve(import.meta.dirname, 'index.html'),
+        redirect: resolve(import.meta.dirname, 'redirect.html'),
       },
     },
   },
