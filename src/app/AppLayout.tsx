@@ -103,10 +103,10 @@ export function AppLayout() {
   }, [location.pathname])
 
   return (
-    <div className="flex h-screen overflow-hidden bg-neutral-950 text-neutral-100">
-      <aside className="flex w-60 shrink-0 flex-col gap-4 overflow-y-auto border-r border-neutral-800 bg-neutral-900 p-4">
+    <div className="flex h-screen overflow-hidden bg-navy-900 text-neutral-100">
+      <aside className="flex w-60 shrink-0 flex-col gap-4 overflow-y-auto border-r border-navy-700 bg-navy-800 p-4">
         <div className="flex items-center gap-2 px-2 py-1">
-          <Icon name="explore" className="text-2xl text-purple-400" />
+          <Icon name="explore" className="text-2xl text-gold-400" />
           <span className="text-lg font-bold">Bússola</span>
         </div>
         <nav className="flex flex-col gap-1">
@@ -129,8 +129,8 @@ export function AppLayout() {
                       cx(
                         'flex flex-1 items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
                         isActive
-                          ? 'bg-purple-500/10 text-purple-300'
-                          : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200',
+                          ? 'bg-gold-500/10 text-gold-400'
+                          : 'text-neutral-400 hover:bg-navy-700 hover:text-neutral-200',
                       )
                     }
                   >
@@ -150,7 +150,7 @@ export function AppLayout() {
                 </div>
 
                 {galhos.length > 0 && aberto && (
-                  <ul className="ml-4 flex flex-col gap-0.5 border-l border-neutral-800 py-1 pl-3">
+                  <ul className="ml-4 flex flex-col gap-0.5 border-l border-navy-700 py-1 pl-3">
                     {galhos.map((nome) => {
                       // Fase e Módulo têm bases de path diferentes (fase vive fora da Jornada,
                       // módulo é sub-rota do próprio Guia) — não dá pra derivar só de `item.to`.
@@ -164,7 +164,7 @@ export function AppLayout() {
                             className={cx(
                               'block truncate rounded-lg px-2 py-1 text-xs transition-colors',
                               ativo
-                                ? 'text-purple-300'
+                                ? 'text-gold-400'
                                 : 'text-neutral-500 hover:text-neutral-200',
                             )}
                           >
@@ -182,7 +182,7 @@ export function AppLayout() {
       </aside>
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex h-14 shrink-0 items-center justify-between border-b border-neutral-800 px-6">
+        <header className="flex h-14 shrink-0 items-center justify-between border-b border-navy-700 px-6">
           <span className="text-xs text-neutral-500">
             API:{' '}
             <strong
@@ -199,7 +199,7 @@ export function AppLayout() {
             <NotificationBell />
             <NavLink
               to="/perfil"
-              className="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-neutral-800"
+              className="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-navy-700"
             >
               <Avatar nome={nome} foto={foto} className="size-8 text-xs" />
               <span className="text-sm text-neutral-200">{nome}</span>
@@ -207,7 +207,7 @@ export function AppLayout() {
             <button
               type="button"
               onClick={() => setConfirmandoSaida(true)}
-              className="text-sm text-purple-300 hover:text-purple-200"
+              className="text-sm text-gold-400 hover:text-gold-300"
             >
               Sair
             </button>
@@ -234,7 +234,7 @@ export function AppLayout() {
           onClick={() => setConfirmandoSaida(false)}
         >
           <div
-            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
+            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col gap-1">
@@ -247,14 +247,14 @@ export function AppLayout() {
               <button
                 type="button"
                 onClick={() => setConfirmandoSaida(false)}
-                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={logout}
-                className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400"
+                className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400"
               >
                 Sair
               </button>

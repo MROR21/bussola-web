@@ -121,8 +121,8 @@ export function FluxosPage() {
         <Link
           to={`/fluxo/${fluxo.id}`}
           className={
-            'flex flex-col gap-1 rounded-xl border border-neutral-800 bg-neutral-900 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-500/50' +
-            (destacado === fluxo.id ? ' animate-pulse ring-2 ring-purple-400' : '')
+            'flex flex-col gap-1 rounded-xl border border-navy-700 bg-navy-800 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-500/50' +
+            (destacado === fluxo.id ? ' animate-pulse ring-2 ring-gold-400' : '')
           }
         >
           <div className="flex flex-wrap items-center gap-2">
@@ -136,7 +136,7 @@ export function FluxosPage() {
               </span>
             )}
             {!ocultarTag && fluxo.categoria && (
-              <span className="rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-400">
+              <span className="rounded-full bg-navy-700 px-2 py-0.5 text-xs text-neutral-400">
                 {fluxo.categoria}
               </span>
             )}
@@ -206,7 +206,7 @@ export function FluxosPage() {
     <div className="flex w-full max-w-2xl flex-col gap-6">
       <header className="flex flex-col gap-1">
         <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
-          <Icon name="menu_book" className="text-2xl text-purple-300" /> Guia pelo sistema
+          <Icon name="menu_book" className="text-2xl text-gold-400" /> Guia pelo sistema
         </h1>
         <p className="text-sm text-neutral-400">
           Consulte qualquer fluxo do sistema, de qualquer squad, quando precisar.
@@ -222,7 +222,7 @@ export function FluxosPage() {
         value={busca}
         onChange={(e) => setBusca(e.target.value)}
         placeholder="Buscar fluxo..."
-        className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+        className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
       />
 
       {buscando ? (
@@ -241,19 +241,19 @@ export function FluxosPage() {
                 key={modulo}
                 type="button"
                 onClick={() => entrarModulo(modulo)}
-                className="flex flex-col gap-2 rounded-2xl border border-neutral-800 bg-neutral-900 p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-500/50"
+                className="flex flex-col gap-2 rounded-2xl border border-navy-700 bg-navy-800 p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-500/50"
               >
                 <div className="flex items-center justify-between">
-                  <Icon name={iconeDoModulo(modulo)} className="text-2xl text-purple-300" />
+                  <Icon name={iconeDoModulo(modulo)} className="text-2xl text-gold-400" />
                   <Icon name="chevron_right" className="text-neutral-600" />
                 </div>
                 <h3 className="font-semibold text-neutral-100">{modulo}</h3>
                 <span className="text-sm text-neutral-500">
                   {feitosMod} de {itens.length} concluídos
                 </span>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-navy-700">
                   <div
-                    className="h-full rounded-full bg-purple-500 transition-all"
+                    className="h-full rounded-full bg-gold-500 transition-all"
                     style={{ width: `${pct}%` }}
                   />
                 </div>

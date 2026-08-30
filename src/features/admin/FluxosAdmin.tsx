@@ -121,12 +121,12 @@ export function FluxosAdmin() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
-          <Icon name="menu_book" className="text-xl text-purple-300" /> Fluxos
+          <Icon name="menu_book" className="text-xl text-gold-400" /> Fluxos
         </h2>
         <button
           type="button"
           onClick={abrirNovo}
-          className="rounded-lg bg-purple-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-400"
+          className="rounded-lg bg-gold-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-gold-400"
         >
           + Novo fluxo
         </button>
@@ -136,7 +136,7 @@ export function FluxosAdmin() {
         {fluxos.map((f) => (
           <li
             key={f.id}
-            className="flex items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900 p-3"
+            className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
           >
             <div className="flex min-w-0 flex-col">
               <span className="truncate text-neutral-100">
@@ -151,7 +151,7 @@ export function FluxosAdmin() {
               <button
                 type="button"
                 onClick={() => abrirEdicao(f)}
-                className="text-sm text-purple-300 hover:text-purple-200"
+                className="text-sm text-gold-400 hover:text-gold-300"
               >
                 Editar
               </button>
@@ -174,7 +174,7 @@ export function FluxosAdmin() {
           onClick={() => setForm(null)}
         >
           <div
-            className="anim-pop flex max-h-[90vh] w-full max-w-3xl flex-col gap-4 overflow-y-auto rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
+            className="anim-pop flex max-h-[90vh] w-full max-w-3xl flex-col gap-4 overflow-y-auto rounded-2xl border border-navy-700 bg-navy-800 p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-neutral-100">
@@ -187,7 +187,7 @@ export function FluxosAdmin() {
                 <select
                   value={form.moduloId}
                   onChange={(e) => setForm({ ...form, moduloId: e.target.value })}
-                  className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
                 >
                   {modulos.map((m) => (
                     <option key={m.id} value={m.id}>
@@ -202,7 +202,7 @@ export function FluxosAdmin() {
                   type="number"
                   value={form.order}
                   onChange={(e) => setForm({ ...form, order: Number(e.target.value) })}
-                  className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
                 />
               </label>
             </div>
@@ -215,7 +215,7 @@ export function FluxosAdmin() {
                   onChange={(e) =>
                     setForm({ ...form, squad: e.target.value ? (e.target.value as Squad) : null })
                   }
-                  className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
                 >
                   <option value="">Todos os squads</option>
                   {SQUADS.map((s) => (
@@ -230,7 +230,7 @@ export function FluxosAdmin() {
                 <input
                   value={form.categoria}
                   onChange={(e) => setForm({ ...form, categoria: e.target.value })}
-                  className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
                 />
               </label>
             </div>
@@ -240,7 +240,7 @@ export function FluxosAdmin() {
               <input
                 value={form.titulo}
                 onChange={(e) => setForm({ ...form, titulo: e.target.value })}
-                className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
               />
             </label>
 
@@ -249,7 +249,7 @@ export function FluxosAdmin() {
               <input
                 value={form.descricao}
                 onChange={(e) => setForm({ ...form, descricao: e.target.value })}
-                className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
               />
             </label>
 
@@ -259,7 +259,7 @@ export function FluxosAdmin() {
                 value={form.videoUrl}
                 onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
                 placeholder="https://..."
-                className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
               />
             </label>
 
@@ -275,7 +275,7 @@ export function FluxosAdmin() {
               <button
                 type="button"
                 onClick={() => setForm(null)}
-                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
               >
                 Cancelar
               </button>
@@ -283,7 +283,7 @@ export function FluxosAdmin() {
                 type="button"
                 onClick={salvar}
                 disabled={!form.titulo.trim() || salvando}
-                className="flex items-center gap-1.5 rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {salvando ? (
                   <>
@@ -304,7 +304,7 @@ export function FluxosAdmin() {
           onClick={() => setApagando(null)}
         >
           <div
-            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
+            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-neutral-100">Apagar fluxo?</h3>
@@ -315,7 +315,7 @@ export function FluxosAdmin() {
               <button
                 type="button"
                 onClick={() => setApagando(null)}
-                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
               >
                 Cancelar
               </button>
@@ -334,7 +334,7 @@ export function FluxosAdmin() {
       {feedback && (
         <div
           className={
-            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-neutral-900 px-4 py-3 text-sm shadow-lg ' +
+            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg ' +
             (feedback.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300')
           }
         >

@@ -18,7 +18,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { erro: bo
     if (!this.state.erro) return this.props.children
 
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-neutral-950 px-4 text-center text-neutral-100">
+      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-navy-900 px-4 text-center text-neutral-100">
         <Icon name="explore" className="text-5xl text-neutral-600" />
         <h1 className="text-xl font-semibold">Algo saiu do rumo</h1>
         <p className="max-w-sm text-sm text-neutral-400">
@@ -27,7 +27,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { erro: bo
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400"
+          className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400"
         >
           Recarregar
         </button>

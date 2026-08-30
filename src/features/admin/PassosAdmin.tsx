@@ -119,12 +119,12 @@ export function PassosAdmin() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
-          <Icon name="route" className="text-xl text-purple-300" /> Passos
+          <Icon name="route" className="text-xl text-gold-400" /> Passos
         </h2>
         <button
           type="button"
           onClick={abrirNovo}
-          className="rounded-lg bg-purple-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-400"
+          className="rounded-lg bg-gold-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-gold-400"
         >
           + Novo passo
         </button>
@@ -134,7 +134,7 @@ export function PassosAdmin() {
         {passos.map((p) => (
           <li
             key={p.id}
-            className="flex items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900 p-3"
+            className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
           >
             <div className="flex min-w-0 flex-col">
               <span className="truncate text-neutral-100">
@@ -146,7 +146,7 @@ export function PassosAdmin() {
               <button
                 type="button"
                 onClick={() => abrirEdicao(p)}
-                className="text-sm text-purple-300 hover:text-purple-200"
+                className="text-sm text-gold-400 hover:text-gold-300"
               >
                 Editar
               </button>
@@ -169,7 +169,7 @@ export function PassosAdmin() {
           onClick={() => setForm(null)}
         >
           <div
-            className="anim-pop flex max-h-[90vh] w-full max-w-3xl flex-col gap-4 overflow-y-auto rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
+            className="anim-pop flex max-h-[90vh] w-full max-w-3xl flex-col gap-4 overflow-y-auto rounded-2xl border border-navy-700 bg-navy-800 p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-neutral-100">
@@ -182,7 +182,7 @@ export function PassosAdmin() {
                 <select
                   value={form.faseId}
                   onChange={(e) => setForm({ ...form, faseId: e.target.value })}
-                  className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
                 >
                   {fases.map((f) => (
                     <option key={f.id} value={f.id}>
@@ -197,7 +197,7 @@ export function PassosAdmin() {
                   type="number"
                   value={form.order}
                   onChange={(e) => setForm({ ...form, order: Number(e.target.value) })}
-                  className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
                 />
               </label>
             </div>
@@ -207,7 +207,7 @@ export function PassosAdmin() {
               <input
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
               />
             </label>
 
@@ -216,7 +216,7 @@ export function PassosAdmin() {
               <input
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
               />
             </label>
 
@@ -226,7 +226,7 @@ export function PassosAdmin() {
                 <select
                   value={form.skillArea}
                   onChange={(e) => setForm({ ...form, skillArea: e.target.value as SkillArea })}
-                  className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+                  className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
                 >
                   {SKILL_AREAS.map((s) => (
                     <option key={s} value={s}>
@@ -257,7 +257,7 @@ export function PassosAdmin() {
               <button
                 type="button"
                 onClick={() => setForm(null)}
-                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
               >
                 Cancelar
               </button>
@@ -265,7 +265,7 @@ export function PassosAdmin() {
                 type="button"
                 onClick={salvar}
                 disabled={!form.title.trim() || salvando}
-                className="flex items-center gap-1.5 rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {salvando ? (
                   <>
@@ -286,7 +286,7 @@ export function PassosAdmin() {
           onClick={() => setApagando(null)}
         >
           <div
-            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
+            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-neutral-100">Apagar passo?</h3>
@@ -297,7 +297,7 @@ export function PassosAdmin() {
               <button
                 type="button"
                 onClick={() => setApagando(null)}
-                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
               >
                 Cancelar
               </button>
@@ -316,7 +316,7 @@ export function PassosAdmin() {
       {feedback && (
         <div
           className={
-            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-neutral-900 px-4 py-3 text-sm shadow-lg ' +
+            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg ' +
             (feedback.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300')
           }
         >

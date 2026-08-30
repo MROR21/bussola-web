@@ -155,15 +155,15 @@ export function NotificationBell() {
       >
         <Icon name="notifications" />
         {naoLidas > 0 && (
-          <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-purple-500 text-[10px] font-medium text-white">
+          <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-gold-500 text-[10px] font-medium text-white">
             {naoLidas}
           </span>
         )}
       </button>
 
       {aberto && (
-        <div className="anim-pop absolute right-0 z-10 mt-2 w-72 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 shadow-lg">
-          <div className="flex items-center justify-between border-b border-neutral-800 px-4 py-2">
+        <div className="anim-pop absolute right-0 z-10 mt-2 w-72 overflow-hidden rounded-xl border border-navy-700 bg-navy-800 shadow-lg">
+          <div className="flex items-center justify-between border-b border-navy-700 px-4 py-2">
             <p className="text-sm font-medium text-neutral-200">Notificações</p>
             {itens.length > 0 &&
               (confirmandoLimpar ? (
@@ -203,13 +203,13 @@ export function NotificationBell() {
               {itens.map((n) => (
                 <li
                   key={n.id}
-                  className="flex items-center gap-1 border-b border-neutral-800/60 last:border-0"
+                  className="flex items-center gap-1 border-b border-navy-700/60 last:border-0"
                 >
                   {n.link ? (
                     <button
                       type="button"
                       onClick={() => irPara(n.link)}
-                      className="flex flex-1 items-center gap-2 px-4 py-3 text-left text-sm text-neutral-300 hover:bg-neutral-800"
+                      className="flex flex-1 items-center gap-2 px-4 py-3 text-left text-sm text-neutral-300 hover:bg-navy-700"
                     >
                       {n.autorNome && (
                         <Avatar
@@ -219,7 +219,7 @@ export function NotificationBell() {
                         />
                       )}
                       <span className="flex-1">{n.mensagem}</span>
-                      <Icon name="arrow_forward" className="shrink-0 text-purple-300" />
+                      <Icon name="arrow_forward" className="shrink-0 text-gold-400" />
                     </button>
                   ) : (
                     <div className="flex flex-1 items-center gap-2 px-4 py-3 text-sm text-neutral-300">
@@ -252,11 +252,11 @@ export function NotificationBell() {
         <button
           type="button"
           onClick={abrir}
-          className="anim-pop absolute right-full top-0 z-50 mr-3 flex w-max items-center gap-2 rounded-xl border border-purple-500/40 bg-neutral-900 px-4 py-3 text-sm text-neutral-100 shadow-lg"
+          className="anim-pop absolute right-full top-0 z-50 mr-3 flex w-max items-center gap-2 rounded-xl border border-gold-500/40 bg-navy-800 px-4 py-3 text-sm text-neutral-100 shadow-lg"
         >
           <Icon name="notifications" className="text-base" /> Você tem {naoLidas}{' '}
           {naoLidas === 1 ? 'nova notificação' : 'novas notificações'}
-          <span className="absolute -right-1 top-1/2 size-2 -translate-y-1/2 rotate-45 border-r border-t border-purple-500/40 bg-neutral-900" />
+          <span className="absolute -right-1 top-1/2 size-2 -translate-y-1/2 rotate-45 border-r border-t border-gold-500/40 bg-navy-800" />
         </button>
       )}
     </div>

@@ -68,14 +68,14 @@ function ListaUsuarios() {
   return (
     <div className="flex flex-col gap-4">
       <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
-        <Icon name="person" className="text-xl text-purple-300" /> Usuários
+        <Icon name="person" className="text-xl text-gold-400" /> Usuários
       </h2>
 
       <ul className="flex flex-col gap-2">
         {itens.map((usuario) => (
           <li
             key={usuario.id}
-            className="flex items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900 p-3"
+            className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
           >
             <div className="flex flex-col">
               <span className="text-neutral-100">{usuario.nome}</span>
@@ -83,7 +83,7 @@ function ListaUsuarios() {
             </div>
             <div className="flex items-center gap-3">
               {usuario.isGestor && (
-                <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-xs font-medium text-purple-200">
+                <span className="rounded-full bg-gold-500/20 px-2 py-0.5 text-xs font-medium text-gold-300">
                   Supervisor
                 </span>
               )}
@@ -91,7 +91,7 @@ function ListaUsuarios() {
                 type="button"
                 onClick={() => alternar(usuario)}
                 disabled={alterando === usuario.id}
-                className="text-sm text-purple-300 hover:text-purple-200 disabled:cursor-not-allowed disabled:opacity-40"
+                className="text-sm text-gold-400 hover:text-gold-300 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {usuario.isGestor ? 'Remover supervisor' : 'Tornar supervisor'}
               </button>
@@ -104,7 +104,7 @@ function ListaUsuarios() {
       {feedback && (
         <div
           className={
-            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-neutral-900 px-4 py-3 text-sm shadow-lg ' +
+            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg ' +
             (feedback.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300')
           }
         >
@@ -180,7 +180,7 @@ function ListaEmailsAutorizados() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
-          <Icon name="mail" className="text-xl text-purple-300" /> E-mails pré-autorizados
+          <Icon name="mail" className="text-xl text-gold-400" /> E-mails pré-autorizados
         </h2>
         <p className="text-sm text-neutral-500">
           Quem se cadastrar com um desses e-mails já nasce supervisor, sem precisar de promoção depois.
@@ -193,13 +193,13 @@ function ListaEmailsAutorizados() {
           onChange={(e) => setNovoEmail(e.target.value)}
           placeholder="novo.gestor@agilean.com.br"
           onKeyDown={(e) => e.key === 'Enter' && adicionar()}
-          className="flex-1 rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+          className="flex-1 rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
         />
         <button
           type="button"
           onClick={adicionar}
           disabled={!novoEmail.trim() || salvando}
-          className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
         >
           Adicionar
         </button>
@@ -209,7 +209,7 @@ function ListaEmailsAutorizados() {
         {itens.map((item) => (
           <li
             key={item.id}
-            className="flex items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900 p-3"
+            className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
           >
             <span className="text-neutral-100">{item.email}</span>
             <button
@@ -230,7 +230,7 @@ function ListaEmailsAutorizados() {
           onClick={() => setApagando(null)}
         >
           <div
-            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
+            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-neutral-100">Remover e-mail?</h3>
@@ -241,7 +241,7 @@ function ListaEmailsAutorizados() {
               <button
                 type="button"
                 onClick={() => setApagando(null)}
-                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
               >
                 Cancelar
               </button>
@@ -260,7 +260,7 @@ function ListaEmailsAutorizados() {
       {feedback && (
         <div
           className={
-            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-neutral-900 px-4 py-3 text-sm shadow-lg ' +
+            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg ' +
             (feedback.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300')
           }
         >

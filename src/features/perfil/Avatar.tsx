@@ -20,7 +20,7 @@ export function Avatar({
   className?: string
 }) {
   const base = cx(
-    'flex shrink-0 select-none items-center justify-center overflow-hidden rounded-full bg-purple-500/20 font-semibold text-purple-200',
+    'flex shrink-0 select-none items-center justify-center overflow-hidden rounded-full bg-gold-500/20 font-semibold text-gold-300',
     className,
   )
   if (foto) {

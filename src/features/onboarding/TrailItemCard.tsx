@@ -25,9 +25,9 @@ export function TrailItemCard({
     <li
       className={cx(
         'rounded-xl border p-4 transition-colors',
-        concluido && 'border-neutral-800 bg-neutral-900/40',
-        !concluido && !destaque && 'border-neutral-800 bg-neutral-900',
-        destaque && 'border-purple-500/60 bg-purple-500/10 ring-1 ring-purple-500/30',
+        concluido && 'border-navy-700 bg-navy-800/40',
+        !concluido && !destaque && 'border-navy-700 bg-navy-800',
+        destaque && 'border-gold-500/60 bg-gold-500/10 ring-1 ring-gold-500/30',
       )}
     >
       <div className="flex items-start gap-3">
@@ -38,8 +38,8 @@ export function TrailItemCard({
           className={cx(
             'mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border transition-colors',
             concluido
-              ? 'border-purple-500 bg-purple-500 text-white'
-              : 'border-neutral-600 hover:border-purple-400',
+              ? 'border-gold-500 bg-gold-500 text-white'
+              : 'border-navy-500 hover:border-gold-400',
           )}
         >
           {concluido && (
@@ -52,19 +52,19 @@ export function TrailItemCard({
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
             {isFluxo ? (
-              <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-xs text-purple-300">
+              <span className="rounded-full bg-gold-500/20 px-2 py-0.5 text-xs text-gold-400">
                 Fluxo do seu squad
               </span>
             ) : (
               <span className="text-xs text-neutral-500">Passo {step.order}</span>
             )}
             {step.isCompanySpecific && !isFluxo && (
-              <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-xs text-purple-300">
+              <span className="rounded-full bg-gold-500/20 px-2 py-0.5 text-xs text-gold-400">
                 Agilean
               </span>
             )}
             {isResumo && (
-              <span className="rounded-full bg-neutral-700/50 px-2 py-0.5 text-xs text-neutral-300">
+              <span className="rounded-full bg-navy-600/50 px-2 py-0.5 text-xs text-neutral-300">
                 Resumo
               </span>
             )}
@@ -84,7 +84,7 @@ export function TrailItemCard({
 
           <Link
             to={href}
-            className="flex items-center gap-1 self-start text-sm text-purple-300 hover:text-purple-200"
+            className="flex items-center gap-1 self-start text-sm text-gold-400 hover:text-gold-300"
           >
             Ver {isFluxo ? 'fluxo' : 'passo'} <Icon name="arrow_forward" className="text-sm" />
           </Link>

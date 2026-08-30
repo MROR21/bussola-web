@@ -160,7 +160,7 @@ export function JornadaView({
           <Icon name="arrow_back" className="text-base" /> Voltar pra jornada
         </button>
         <header className="flex items-center gap-3">
-          <Icon name={iconeDaFase(faseNome)} className="text-3xl text-purple-300" />
+          <Icon name={iconeDaFase(faseNome)} className="text-3xl text-gold-400" />
           <div className="flex flex-col">
             <h2 className="text-xl font-bold text-neutral-100">{faseNome}</h2>
             <span className="text-sm text-neutral-500">
@@ -188,9 +188,9 @@ export function JornadaView({
     <div className="flex w-full max-w-2xl flex-col gap-8">
       {/* Hero — anel de progresso + próximo passo num único cartão (antes eram duas caixas soltas
           empilhadas; agora lê como um bloco só, com o glow sutil atrás do anel). */}
-      <div className="relative overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900 shadow-xl shadow-black/20">
+      <div className="relative overflow-hidden rounded-3xl border border-navy-700 bg-navy-800 shadow-xl shadow-black/20">
         <div
-          className="pointer-events-none absolute -left-12 -top-16 size-56 rounded-full bg-purple-500/10 blur-3xl"
+          className="pointer-events-none absolute -left-12 -top-16 size-56 rounded-full bg-gold-500/10 blur-3xl"
           aria-hidden="true"
         />
 
@@ -201,7 +201,7 @@ export function JornadaView({
           <div className="flex flex-col gap-1">
             <p className="text-sm text-neutral-400">Sua jornada</p>
             <h2 className="flex items-center gap-1.5 text-2xl font-bold text-neutral-100">
-              Olá, {nome} <Icon name="waving_hand" className="text-xl text-purple-300" />
+              Olá, {nome} <Icon name="waving_hand" className="text-xl text-gold-400" />
             </h2>
             <p className="text-sm text-neutral-400">
               {feitos} de {total} itens · Fase {Math.min(faseAtualIndex + 1, fases.length)} de{' '}
@@ -216,31 +216,31 @@ export function JornadaView({
         </div>
 
         {completa ? (
-          <div className="relative flex flex-col items-center gap-3 border-t border-neutral-800 bg-purple-500/10 p-6 text-center">
-            <Icon name="emoji_events" className="text-4xl text-purple-300" fill />
+          <div className="relative flex flex-col items-center gap-3 border-t border-navy-700 bg-gold-500/10 p-6 text-center">
+            <Icon name="emoji_events" className="text-4xl text-gold-400" fill />
             <h3 className="text-lg font-semibold text-neutral-100">Jornada completa!</h3>
             <p className="text-sm text-neutral-400">
               Você foi do clone ao primeiro card. Bem-vindo(a) de verdade à Agilean.
             </p>
-            <p className="flex items-center justify-center gap-1.5 text-base font-medium text-purple-200">
+            <p className="flex items-center justify-center gap-1.5 text-base font-medium text-gold-300">
               Agora é com você! <Icon name="rocket_launch" className="text-lg" />
             </p>
             <Link
               to="/fluxos"
-              className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400"
+              className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400"
             >
               Ir pro Guia pelo sistema
             </Link>
           </div>
         ) : (
           proximo && (
-            <div className="relative flex flex-col gap-3 border-t border-neutral-800 bg-purple-500/10 p-5">
+            <div className="relative flex flex-col gap-3 border-t border-navy-700 bg-gold-500/10 p-5">
               <div className="flex items-start gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-purple-400/50 bg-neutral-900 text-purple-300">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-gold-400/50 bg-navy-800 text-gold-400">
                   <Icon name={iconeDaFase(proximo.phase)} className="text-lg" />
                 </span>
                 <div className="flex flex-col gap-1">
-                  <span className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-purple-300">
+                  <span className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-gold-400">
                     <Icon name="play_arrow" className="text-sm" /> Próximo · {proximo.phase}
                   </span>
                   <h3 className="text-lg font-semibold text-neutral-100">{proximo.title}</h3>
@@ -250,7 +250,7 @@ export function JornadaView({
               <button
                 type="button"
                 onClick={() => entrarFase(proximo.phase)}
-                className="self-start rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400"
+                className="self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400"
               >
                 Ir para o passo
               </button>
@@ -269,7 +269,7 @@ export function JornadaView({
           <svg
             viewBox={`0 0 100 ${alturaTrilha}`}
             preserveAspectRatio="none"
-            className="pointer-events-none absolute inset-0 size-full text-neutral-800"
+            className="pointer-events-none absolute inset-0 size-full text-navy-700"
             aria-hidden="true"
           >
             <path
@@ -305,14 +305,14 @@ export function JornadaView({
               >
                 <span
                   className={cx(
-                    'flex size-16 shrink-0 items-center justify-center rounded-full border-2 bg-neutral-900 text-2xl transition-colors duration-200',
+                    'flex size-16 shrink-0 items-center justify-center rounded-full border-2 bg-navy-800 text-2xl transition-colors duration-200',
                     bloqueada
-                      ? 'border-dashed border-neutral-700 text-neutral-600 opacity-60'
+                      ? 'border-dashed border-navy-600 text-neutral-600 opacity-60'
                       : faseCompleta
                         ? 'border-amber-400/70 text-amber-400'
                         : atual
-                          ? 'border-purple-400 text-purple-300 shadow-[0_0_0_5px_rgba(168,85,247,0.15)]'
-                          : 'border-neutral-700 text-purple-300 hover:border-purple-500/60',
+                          ? 'border-gold-400 text-gold-400 shadow-[0_0_0_5px_rgba(201,162,39,0.15)]'
+                          : 'border-navy-600 text-gold-400 hover:border-gold-500/60',
                   )}
                 >
                   <Icon
@@ -320,22 +320,22 @@ export function JornadaView({
                     fill={faseCompleta}
                   />
                 </span>
-                <span className="flex w-full flex-col items-center gap-1 rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-2 text-center">
+                <span className="flex w-full flex-col items-center gap-1 rounded-xl border border-navy-700 bg-navy-800 px-3 py-2 text-center">
                   <span className="text-[10px] font-medium uppercase tracking-wide text-neutral-500">
                     Fase {i + 1}
                   </span>
                   <span className="text-xs font-semibold leading-tight text-neutral-100">{fase}</span>
                   {atual && !bloqueada && (
-                    <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] font-medium text-purple-200">
+                    <span className="rounded-full bg-gold-500/20 px-2 py-0.5 text-[10px] font-medium text-gold-300">
                       Você está aqui
                     </span>
                   )}
                   <span className="text-[11px] text-neutral-500">
                     {bloqueada ? 'Apto após concluir o resto' : `${feitosFase} de ${itens.length}`}
                   </span>
-                  <div className="h-1 w-full overflow-hidden rounded-full bg-neutral-800">
+                  <div className="h-1 w-full overflow-hidden rounded-full bg-navy-700">
                     <div
-                      className="h-full rounded-full bg-purple-500 transition-all"
+                      className="h-full rounded-full bg-gold-500 transition-all"
                       style={{ width: `${bloqueada ? 0 : pct}%` }}
                     />
                   </div>

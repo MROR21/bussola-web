@@ -85,7 +85,7 @@ export function SupervisionadoPage() {
             className={cx(
               'rounded-lg px-4 py-1.5 text-sm font-medium transition-colors',
               aba === chave
-                ? 'bg-purple-500/20 text-purple-200'
+                ? 'bg-gold-500/20 text-gold-300'
                 : 'text-neutral-400 hover:text-neutral-200',
             )}
           >
@@ -107,7 +107,7 @@ export function SupervisionadoPage() {
                     <div className="flex items-center gap-2">
                       <Icon
                         name={p.concluido ? 'check_circle' : 'radio_button_unchecked'}
-                        className={cx('text-base', p.concluido ? 'text-purple-400' : 'text-neutral-600')}
+                        className={cx('text-base', p.concluido ? 'text-gold-400' : 'text-neutral-600')}
                         fill={p.concluido}
                       />
                       <span className={p.concluido ? 'text-neutral-300' : 'text-neutral-500'}>
@@ -122,7 +122,7 @@ export function SupervisionadoPage() {
                             href={p.evidencia}
                             target="_blank"
                             rel="noreferrer"
-                            className="break-all text-purple-300 underline hover:text-purple-200"
+                            className="break-all text-gold-400 underline hover:text-gold-300"
                           >
                             {p.evidencia}
                           </a>
@@ -152,7 +152,7 @@ export function SupervisionadoPage() {
                   <li key={f.id} className="flex items-center gap-2 text-sm">
                     <Icon
                       name={f.concluido ? 'check_circle' : 'radio_button_unchecked'}
-                      className={cx('text-base', f.concluido ? 'text-purple-400' : 'text-neutral-600')}
+                      className={cx('text-base', f.concluido ? 'text-gold-400' : 'text-neutral-600')}
                       fill={f.concluido}
                     />
                     <span className={f.concluido ? 'text-neutral-300' : 'text-neutral-500'}>
@@ -161,7 +161,7 @@ export function SupervisionadoPage() {
                     {f.doSquad && (
                       <span
                         title="Faz parte da jornada dele"
-                        className="rounded-full bg-purple-500/20 px-1.5 py-0.5 text-[10px] text-purple-300"
+                        className="rounded-full bg-gold-500/20 px-1.5 py-0.5 text-[10px] text-gold-400"
                       >
                         do squad
                       </span>

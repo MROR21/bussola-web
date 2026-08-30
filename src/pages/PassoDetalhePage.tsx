@@ -17,7 +17,7 @@ import {
 import type { OnboardingStep } from '../features/onboarding/types'
 
 const inputCls =
-  'rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-purple-400'
+  'rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-gold-500'
 
 // Mostra a evidência: se for um link (http), vira âncora clicável; senão, texto puro.
 function Comprovacao({ texto }: { texto: string }) {
@@ -27,7 +27,7 @@ function Comprovacao({ texto }: { texto: string }) {
         href={texto}
         target="_blank"
         rel="noreferrer"
-        className="break-all text-purple-300 underline hover:text-purple-200"
+        className="break-all text-gold-400 underline hover:text-gold-300"
       >
         {texto}
       </a>
@@ -197,7 +197,7 @@ export function PassoDetalhePage() {
               type="button"
               onClick={abrirEdicaoConteudo}
               disabled={carregandoEdicao}
-              className="flex items-center gap-1 rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-purple-300 hover:border-purple-400 hover:text-purple-200 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center gap-1 rounded-lg border border-navy-600 px-3 py-1.5 text-sm text-gold-400 hover:border-gold-400 hover:text-gold-300 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {carregandoEdicao ? (
                 <>
@@ -215,13 +215,13 @@ export function PassoDetalhePage() {
       </header>
 
       {editandoConteudo && camposConteudo ? (
-        <div className="flex flex-col gap-4 rounded-2xl border border-purple-500/30 bg-neutral-900 p-6">
+        <div className="flex flex-col gap-4 rounded-2xl border border-gold-500/30 bg-navy-800 p-6">
           <label className="flex flex-col gap-1 text-sm text-neutral-400">
             Título
             <input
               value={camposConteudo.title}
               onChange={(e) => setCamposConteudo({ ...camposConteudo, title: e.target.value })}
-              className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+              className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm text-neutral-400">
@@ -230,7 +230,7 @@ export function PassoDetalhePage() {
               value={camposConteudo.description}
               onChange={(e) => setCamposConteudo({ ...camposConteudo, description: e.target.value })}
               rows={2}
-              className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+              className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm text-neutral-400">
@@ -247,7 +247,7 @@ export function PassoDetalhePage() {
             <button
               type="button"
               onClick={() => setEditandoConteudo(false)}
-              className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+              className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
             >
               Cancelar
             </button>
@@ -255,7 +255,7 @@ export function PassoDetalhePage() {
               type="button"
               onClick={salvarConteudo}
               disabled={!camposConteudo.title.trim() || salvandoConteudo}
-              className="flex items-center gap-1.5 rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {salvandoConteudo ? (
                 <>
@@ -268,13 +268,13 @@ export function PassoDetalhePage() {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-3 rounded-2xl border border-neutral-800 bg-neutral-900 p-6 leading-relaxed">
+        <div className="flex flex-col gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed">
           <Markdown>{step.conteudo}</Markdown>
         </div>
       )}
 
       {concluido ? (
-        <section className="flex flex-col gap-3 rounded-2xl border border-green-500/30 bg-neutral-900 p-5">
+        <section className="flex flex-col gap-3 rounded-2xl border border-green-500/30 bg-navy-800 p-5">
           <span className="flex items-center gap-1 self-start rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
             <Icon name="check" className="text-sm" /> Concluído
           </span>
@@ -293,7 +293,7 @@ export function PassoDetalhePage() {
                   type="button"
                   onClick={concluir}
                   disabled={salvando}
-                  className="flex items-center gap-1.5 rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400 disabled:opacity-50"
                 >
                   {salvando ? (
                     <>
@@ -306,7 +306,7 @@ export function PassoDetalhePage() {
                 <button
                   type="button"
                   onClick={() => setEditando(false)}
-                  className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+                  className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
                 >
                   Cancelar
                 </button>
@@ -326,7 +326,7 @@ export function PassoDetalhePage() {
                 <button
                   type="button"
                   onClick={() => setEditando(true)}
-                  className="rounded-lg bg-neutral-800 px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-700"
+                  className="rounded-lg bg-navy-700 px-4 py-2 text-sm text-neutral-200 hover:bg-navy-600"
                 >
                   {evidencia ? 'Editar comprovação' : 'Adicionar comprovação'}
                 </button>
@@ -334,7 +334,7 @@ export function PassoDetalhePage() {
                   type="button"
                   onClick={desmarcar}
                   disabled={salvando}
-                  className="rounded-lg px-4 py-2 text-sm text-neutral-400 hover:bg-neutral-800 disabled:opacity-50"
+                  className="rounded-lg px-4 py-2 text-sm text-neutral-400 hover:bg-navy-700 disabled:opacity-50"
                 >
                   Desmarcar
                 </button>
@@ -343,7 +343,7 @@ export function PassoDetalhePage() {
           )}
         </section>
       ) : (
-        <section className="flex flex-col gap-2 rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
+        <section className="flex flex-col gap-2 rounded-2xl border border-navy-700 bg-navy-800 p-5">
           <span className="text-sm font-medium text-neutral-200">Comprovação (opcional)</span>
           <p className="text-xs text-neutral-500">
             Cole o link do PR, um print, ou uma nota do que você fez.
@@ -359,7 +359,7 @@ export function PassoDetalhePage() {
             type="button"
             onClick={concluir}
             disabled={salvando}
-            className="flex items-center gap-1.5 self-start rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:opacity-50"
+            className="flex items-center gap-1.5 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400 disabled:opacity-50"
           >
             {salvando ? (
               <>
@@ -373,7 +373,7 @@ export function PassoDetalhePage() {
       )}
 
       {salvo && (
-        <div className="anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border border-green-500/40 bg-neutral-900 px-4 py-3 text-sm text-green-300 shadow-lg">
+        <div className="anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border border-green-500/40 bg-navy-800 px-4 py-3 text-sm text-green-300 shadow-lg">
           <Icon name="check_circle" className="text-base" /> Salvo com sucesso
         </div>
       )}

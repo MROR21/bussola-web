@@ -111,16 +111,16 @@ export function PerfilPage() {
     senhaAtual !== '' && novaSenha.length >= 6 && novaSenha === confirmar
 
   const inputCls =
-    'rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400 disabled:opacity-50'
+    'rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500 disabled:opacity-50'
   const salvarCls =
-    'flex items-center gap-1.5 self-start rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-40'
-  const cardCls = 'flex flex-col gap-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-6'
+    'flex items-center gap-1.5 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40'
+  const cardCls = 'flex flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6'
 
   return (
     <div className="flex w-full max-w-2xl flex-col gap-6">
       <header className="flex flex-col gap-1">
         <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
-          <Icon name="settings" className="text-2xl text-purple-300" /> Perfil
+          <Icon name="settings" className="text-2xl text-gold-400" /> Perfil
         </h1>
         <p className="text-sm text-neutral-400">Sua conta, foto e senha.</p>
       </header>
@@ -133,14 +133,14 @@ export function PerfilPage() {
             <span className="text-lg font-semibold text-neutral-100">{usuario.nome}</span>
             <span className="truncate text-sm text-neutral-400">{usuario.email}</span>
             <div className="mt-1 flex flex-wrap gap-1.5">
-              <span className="rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-300">
+              <span className="rounded-full bg-navy-700 px-2 py-0.5 text-xs text-neutral-300">
                 {SQUAD_LABEL[usuario.squad] ?? usuario.squad}
               </span>
-              <span className="rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-300">
+              <span className="rounded-full bg-navy-700 px-2 py-0.5 text-xs text-neutral-300">
                 {CARGO_LABEL[usuario.cargo] ?? usuario.cargo}
               </span>
               {usuario.isGestor && (
-                <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-xs text-purple-200">
+                <span className="rounded-full bg-gold-500/20 px-2 py-0.5 text-xs text-gold-300">
                   Gestor
                 </span>
               )}
@@ -169,7 +169,7 @@ export function PerfilPage() {
               type="button"
               onClick={onRemoverFoto}
               disabled={salvandoFoto}
-              className="self-start rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800 disabled:opacity-40"
+              className="self-start rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700 disabled:opacity-40"
             >
               Remover
             </button>
@@ -242,7 +242,7 @@ export function PerfilPage() {
       {feedback && (
         <div
           className={
-            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-neutral-900 px-4 py-3 text-sm shadow-lg ' +
+            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg ' +
             (feedback.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300')
           }
         >

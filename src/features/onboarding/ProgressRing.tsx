@@ -24,7 +24,7 @@ export function ProgressRing({
           cy={size / 2}
           r={raio}
           strokeWidth={stroke}
-          className="fill-none stroke-neutral-800"
+          className="fill-none stroke-navy-700"
         />
         <circle
           cx={size / 2}
@@ -32,7 +32,7 @@ export function ProgressRing({
           r={raio}
           strokeWidth={stroke}
           strokeLinecap="round"
-          className="fill-none stroke-purple-500 transition-[stroke-dashoffset] duration-500"
+          className="fill-none stroke-gold-500 transition-[stroke-dashoffset] duration-500"
           style={{ strokeDasharray: circunferencia, strokeDashoffset: preenchido }}
         />
       </svg>

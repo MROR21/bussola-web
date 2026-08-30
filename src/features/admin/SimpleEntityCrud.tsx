@@ -135,12 +135,12 @@ export function SimpleEntityCrud({
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
-          <Icon name={icone} className="text-xl text-purple-300" /> {titulo}
+          <Icon name={icone} className="text-xl text-gold-400" /> {titulo}
         </h2>
         <button
           type="button"
           onClick={abrirNovo}
-          className="rounded-lg bg-purple-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-400"
+          className="rounded-lg bg-gold-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-gold-400"
         >
           + Novo(a) {singular}
         </button>
@@ -150,7 +150,7 @@ export function SimpleEntityCrud({
         {itens.map((item, indice) => (
           <li
             key={item.id}
-            className="flex items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900 p-3"
+            className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
           >
             <div className="flex items-center gap-3">
               <div className="flex flex-col">
@@ -176,7 +176,7 @@ export function SimpleEntityCrud({
               <span className="text-xs text-neutral-500">#{item.order}</span>
               <span className="text-neutral-100">{item.nome}</span>
               {contarFilhos && (
-                <span className="rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-400">
+                <span className="rounded-full bg-navy-700 px-2 py-0.5 text-xs text-neutral-400">
                   {filhosPorId[item.id] ?? 0} {labelFilhos ?? 'itens'}
                 </span>
               )}
@@ -185,7 +185,7 @@ export function SimpleEntityCrud({
               <button
                 type="button"
                 onClick={() => abrirEdicao(item)}
-                className="text-sm text-purple-300 hover:text-purple-200"
+                className="text-sm text-gold-400 hover:text-gold-300"
               >
                 Editar
               </button>
@@ -208,7 +208,7 @@ export function SimpleEntityCrud({
           onClick={() => setEditando(null)}
         >
           <div
-            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
+            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-neutral-100">
@@ -220,7 +220,7 @@ export function SimpleEntityCrud({
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 autoFocus
-                className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
               />
             </label>
             <label className="flex flex-col gap-1 text-sm text-neutral-400">
@@ -229,14 +229,14 @@ export function SimpleEntityCrud({
                 type="number"
                 value={order}
                 onChange={(e) => setOrder(Number(e.target.value))}
-                className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-purple-400"
+                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none focus:border-gold-500"
               />
             </label>
             <div className="flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setEditando(null)}
-                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
               >
                 Cancelar
               </button>
@@ -244,7 +244,7 @@ export function SimpleEntityCrud({
                 type="button"
                 onClick={salvar}
                 disabled={!nome.trim() || salvando}
-                className="flex items-center gap-1.5 rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {salvando ? (
                   <>
@@ -265,7 +265,7 @@ export function SimpleEntityCrud({
           onClick={() => setApagando(null)}
         >
           <div
-            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
+            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-neutral-100">Apagar {singular}?</h3>
@@ -276,7 +276,7 @@ export function SimpleEntityCrud({
               <button
                 type="button"
                 onClick={() => setApagando(null)}
-                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
               >
                 Cancelar
               </button>
@@ -295,7 +295,7 @@ export function SimpleEntityCrud({
       {feedback && (
         <div
           className={
-            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-neutral-900 px-4 py-3 text-sm shadow-lg ' +
+            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg ' +
             (feedback.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300')
           }
         >

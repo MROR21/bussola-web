@@ -49,7 +49,7 @@ export function AdminPage() {
     <div className="flex w-full max-w-4xl flex-col gap-5">
       <div className="flex flex-col gap-1">
         <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
-          <Icon name="build" className="text-2xl text-purple-300" /> Administração
+          <Icon name="build" className="text-2xl text-gold-400" /> Administração
         </h1>
         <p className="text-sm text-neutral-500">
           Edite o conteúdo da Jornada e do Guia pelo sistema.
@@ -65,7 +65,7 @@ export function AdminPage() {
             className={cx(
               'rounded-lg px-4 py-1.5 text-sm font-medium transition-colors',
               aba === chave
-                ? 'bg-purple-500/20 text-purple-200'
+                ? 'bg-gold-500/20 text-gold-300'
                 : 'text-neutral-400 hover:text-neutral-200',
             )}
           >

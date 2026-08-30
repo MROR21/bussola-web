@@ -58,7 +58,7 @@ export function GestorPage() {
     <div className="flex w-full max-w-2xl flex-col gap-6">
       <header className="flex flex-col gap-1">
         <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
-          <Icon name="dashboard" className="text-2xl text-purple-300" /> Painel do gestor
+          <Icon name="dashboard" className="text-2xl text-gold-400" /> Painel do gestor
         </h1>
         <p className="text-sm text-neutral-400">
           Progresso dos seus supervisionados ({usuarios.length}{' '}
@@ -80,7 +80,7 @@ export function GestorPage() {
             <li
               key={u.id}
               onClick={() => navegar(`/supervisionado/${u.id}`)}
-              className="flex cursor-pointer flex-col gap-2 rounded-xl border border-neutral-800 bg-neutral-900 p-4 transition-colors hover:border-purple-500/50"
+              className="flex cursor-pointer flex-col gap-2 rounded-xl border border-navy-700 bg-navy-800 p-4 transition-colors hover:border-gold-500/50"
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 flex-col">
@@ -104,19 +104,19 @@ export function GestorPage() {
                 </div>
               </div>
 
-              <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-800">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-navy-700">
                 <div
-                  className="h-full rounded-full bg-purple-500 transition-all"
+                  className="h-full rounded-full bg-gold-500 transition-all"
                   style={{ width: `${percent}%` }}
                 />
               </div>
 
               <div className="flex flex-wrap gap-2 text-xs">
-                <span className="rounded-full bg-neutral-800 px-2 py-0.5 text-neutral-400">
+                <span className="rounded-full bg-navy-700 px-2 py-0.5 text-neutral-400">
                   {u.cargo}
                 </span>
                 {!u.nivelamentoConcluido && (
-                  <span className="rounded-full bg-neutral-800 px-2 py-0.5 text-neutral-500">
+                  <span className="rounded-full bg-navy-700 px-2 py-0.5 text-neutral-500">
                     Não nivelou
                   </span>
                 )}
@@ -126,11 +126,11 @@ export function GestorPage() {
         })}
       </ul>
 
-      <div className="flex flex-col gap-3 border-t border-neutral-800 pt-4">
+      <div className="flex flex-col gap-3 border-t border-navy-700 pt-4">
         <button
           type="button"
           onClick={() => setAdicionando((v) => !v)}
-          className="flex items-center gap-1 self-start rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400"
+          className="flex items-center gap-1 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400"
         >
           {adicionando ? (
             'Fechar'
@@ -149,7 +149,7 @@ export function GestorPage() {
             {disponiveis.map((u) => (
               <li
                 key={u.id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900 p-3"
+                className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
               >
                 <div className="flex min-w-0 flex-col">
                   <span className="truncate text-neutral-100">{u.nome}</span>
@@ -158,7 +158,7 @@ export function GestorPage() {
                 <button
                   type="button"
                   onClick={() => adicionar(u.id)}
-                  className="shrink-0 text-sm text-purple-300 hover:text-purple-200"
+                  className="shrink-0 text-sm text-gold-400 hover:text-gold-300"
                 >
                   Adicionar
                 </button>

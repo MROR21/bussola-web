@@ -18,7 +18,7 @@ export function EstadoErro({
         <button
           type="button"
           onClick={onRetry}
-          className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400"
+          className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400"
         >
           Tentar de novo
         </button>

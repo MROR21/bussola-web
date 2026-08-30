@@ -16,17 +16,17 @@ export function Markdown({ children }: { children: string }) {
           <ol className="ml-5 list-decimal space-y-1 text-neutral-300">{children}</ol>
         ),
         a: ({ children, href }) => (
-          <a href={href} className="text-purple-300 hover:text-purple-200">
+          <a href={href} className="text-gold-400 hover:text-gold-300">
             {children}
           </a>
         ),
         code: ({ children }) => (
-          <code className="rounded bg-neutral-800 px-1.5 py-0.5 text-sm text-purple-200">
+          <code className="rounded bg-navy-700 px-1.5 py-0.5 text-sm text-gold-300">
             {children}
           </code>
         ),
         blockquote: ({ children }) => (
-          <blockquote className="border-l-2 border-neutral-700 pl-3 text-neutral-400">
+          <blockquote className="border-l-2 border-navy-600 pl-3 text-neutral-400">
             {children}
           </blockquote>
         ),

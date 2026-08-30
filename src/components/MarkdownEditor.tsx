@@ -16,9 +16,9 @@ export function MarkdownEditor({
         onChange={(e) => onChange(e.target.value)}
         rows={16}
         placeholder={'## Título\n\nConteúdo em markdown...'}
-        className="rounded-lg border border-neutral-700 bg-neutral-950 p-3 font-mono text-sm text-neutral-100 outline-none focus:border-purple-400"
+        className="rounded-lg border border-navy-600 bg-navy-900 p-3 font-mono text-sm text-neutral-100 outline-none focus:border-gold-500"
       />
-      <div className="max-h-[26rem] overflow-y-auto rounded-lg border border-neutral-800 bg-neutral-900 p-4 leading-relaxed">
+      <div className="max-h-[26rem] overflow-y-auto rounded-lg border border-navy-700 bg-navy-800 p-4 leading-relaxed">
         {value.trim() ? (
           <Markdown>{value}</Markdown>
         ) : (

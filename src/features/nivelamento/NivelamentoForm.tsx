@@ -40,8 +40,8 @@ function OptionGroup<T extends string>({
           className={
             'rounded-lg border px-3 py-1.5 text-sm transition-colors ' +
             (value === option.value
-              ? 'border-purple-400 bg-purple-500/20 text-purple-200'
-              : 'border-neutral-700 text-neutral-300 hover:border-neutral-500')
+              ? 'border-gold-400 bg-gold-500/20 text-gold-300'
+              : 'border-navy-600 text-neutral-300 hover:border-navy-500')
           }
         >
           {option.label}
@@ -65,7 +65,7 @@ export function NivelamentoForm({
   const [git, setGit] = useState<SkillLevel>('Nenhum')
 
   return (
-    <div className="flex w-full max-w-lg flex-col gap-6 rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+    <div className="flex w-full max-w-lg flex-col gap-6 rounded-xl border border-navy-700 bg-navy-800 p-6">
       <div className="flex flex-col gap-1">
         <h2 className="text-lg font-semibold">Vamos personalizar sua trilha</h2>
         <p className="text-sm text-neutral-400">
@@ -95,7 +95,7 @@ export function NivelamentoForm({
         <button
           type="button"
           onClick={() => onSubmit({ ...perfilPadrao, cargo, git }, squad)}
-          className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white hover:bg-purple-400"
+          className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400"
         >
           Ver minha trilha
         </button>
