@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Icon } from '../components/Icon'
 import { useAuthStore } from '../features/auth/authStore'
 import { NivelamentoForm } from '../features/nivelamento/NivelamentoForm'
 import { salvarPerfil } from '../features/nivelamento/nivelamentoService'
@@ -32,7 +33,9 @@ export function NivelamentoPage({
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-neutral-950 px-4 py-12 text-neutral-100">
       <div className="flex flex-col items-center gap-1">
-        <h1 className="text-3xl font-bold tracking-tight">🧭 Vamos te situar</h1>
+        <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
+          <Icon name="explore" className="text-3xl text-purple-400" /> Vamos te situar
+        </h1>
         <p className="text-sm text-neutral-400">Responda rápido pra personalizar sua jornada.</p>
       </div>
       {erro && <p className="text-sm text-red-400">{erro}</p>}

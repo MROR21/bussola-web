@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Icon } from '../../components/Icon'
 import { login, register } from './authService'
 import { useAuthStore } from './authStore'
 
@@ -43,7 +44,15 @@ export function LoginForm() {
       className="flex w-full max-w-sm flex-col gap-4 rounded-xl border border-neutral-800 bg-neutral-900 p-6"
     >
       <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-semibold">{ehCadastro ? 'Criar conta' : 'Bem-vindo(a) 👋'}</h2>
+        <h2 className="flex items-center gap-1.5 text-lg font-semibold">
+          {ehCadastro ? (
+            'Criar conta'
+          ) : (
+            <>
+              Bem-vindo(a) <Icon name="waving_hand" className="text-lg text-purple-300" />
+            </>
+          )}
+        </h2>
         <p className="text-sm text-neutral-400">
           {ehCadastro ? 'Crie sua conta pra começar.' : 'Entre pra continuar sua jornada.'}
         </p>
