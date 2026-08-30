@@ -197,7 +197,7 @@ export function JornadaView({
       <div className="relative overflow-hidden rounded-3xl border border-navy-700 bg-navy-800 shadow-xl shadow-black/20">
         <MapCorners />
         <CompassRose
-          className="pointer-events-none absolute -bottom-10 -right-10 size-40 text-gold-500 opacity-[0.06]"
+          className="pointer-events-none absolute -bottom-10 -right-10 -z-10 size-40 text-gold-500 opacity-[0.06]"
         />
         <div
           className="pointer-events-none absolute -left-12 -top-16 size-56 rounded-full bg-gold-500/10 blur-3xl"

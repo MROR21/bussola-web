@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Icon } from '../components/Icon'
+import { CompassRose } from '../components/CompassRose'
 import { useAuthStore } from '../features/auth/authStore'
 import { useTitulo } from '../hooks/useTitulo'
 import { NivelamentoForm } from '../features/nivelamento/NivelamentoForm'
@@ -33,14 +33,17 @@ export function NivelamentoPage({
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-navy-900 px-4 py-12 text-neutral-100">
-      <div className="flex flex-col items-center gap-1">
+    <main className="relative flex min-h-screen flex-col items-center justify-center gap-6 overflow-hidden bg-navy-900 px-4 py-12 text-neutral-100">
+      <CompassRose
+        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 size-[900px] -translate-x-1/2 -translate-y-1/2 text-gold-500 opacity-[0.05]"
+      />
+      <div className="relative flex flex-col items-center gap-1">
         <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
-          <Icon name="explore" className="text-3xl text-gold-400" /> Vamos te situar
+          <CompassRose className="size-8 text-gold-400" /> Vamos te situar
         </h1>
         <p className="text-sm text-neutral-400">Responda rápido pra personalizar sua jornada.</p>
       </div>
-      {erro && <p className="text-sm text-red-400">{erro}</p>}
+      {erro && <p className="relative text-sm text-red-400">{erro}</p>}
       <NivelamentoForm onSubmit={concluir} onSkip={(squad) => concluir(perfilPadrao, squad)} />
     </main>
   )

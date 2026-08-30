@@ -220,7 +220,7 @@ export function FluxosPage() {
       <header className="relative overflow-hidden rounded-3xl border border-navy-700 bg-navy-800 p-6 shadow-xl shadow-black/20">
         <MapCorners />
         <CompassRose
-          className="pointer-events-none absolute -bottom-8 -right-8 size-32 text-gold-500 opacity-[0.06]"
+          className="pointer-events-none absolute -bottom-8 -right-8 -z-10 size-32 text-gold-500 opacity-[0.06]"
         />
         <div className="relative flex flex-col gap-1">
           <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
