@@ -192,6 +192,12 @@ export function JornadaView({
   // ---- Home: hero + próximo passo + cards das fases ----
   return (
     <div className="flex w-full max-w-2xl flex-col gap-8">
+      {/* Atmosfera da página inteira — `fixed` escapa da coluna centralizada (e do próprio scroll
+          da área de conteúdo) e cobre a viewport toda atrás de tudo, só enquanto essa tela existe.
+          Distinta da marca d'água do hero (canto oposto, maior, mais difusa) pra não duplicar. */}
+      <CompassRose
+        className="pointer-events-none fixed -right-24 -top-24 -z-10 size-[560px] text-gold-500 opacity-[0.04]"
+      />
       {/* Hero — anel de progresso + próximo passo num único cartão (antes eram duas caixas soltas
           empilhadas; agora lê como um bloco só, com o glow sutil atrás do anel). */}
       <div className="relative overflow-hidden rounded-3xl border border-navy-700 bg-navy-800 shadow-xl shadow-black/20">

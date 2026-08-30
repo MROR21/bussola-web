@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { CompassRose } from '../components/CompassRose'
 import { Icon } from '../components/Icon'
 import { useAuthStore } from '../features/auth/authStore'
 import { listarFluxos } from '../features/fluxos/fluxosService'
@@ -9,6 +10,8 @@ import { listarSteps } from '../features/onboarding/onboardingService'
 import { Avatar } from '../features/perfil/Avatar'
 import { useApiStatus } from './useApiStatus'
 import { cx } from '../utils/cx'
+
+const CHAVE_MENU_COLAPSADO = 'bussola-menu-colapsado'
 
 // Nomes distintos, na ordem de aparição (Set preserva ordem de inserção) — usado pra montar os
 // "galhos" da árvore (fases da Jornada, módulos do Guia) a partir do que o back já devolve
@@ -62,6 +65,22 @@ export function AppLayout() {
   const status = useApiStatus()
   const location = useLocation()
 
+  // Menu lateral ocultável — lembrado entre sessões (localStorage), não é estado de navegação.
+  const [colapsado, setColapsado] = useState(() => {
+    try {
+      return localStorage.getItem(CHAVE_MENU_COLAPSADO) === 'true'
+    } catch {
+      return false
+    }
+  })
+  useEffect(() => {
+    try {
+      localStorage.setItem(CHAVE_MENU_COLAPSADO, String(colapsado))
+    } catch {
+      // sem storage disponível (ex.: aba privada) — só não persiste, sem quebrar a tela
+    }
+  }, [colapsado])
+
   const itensMenu = NAV.filter(
     (item) => !item.papel || (item.papel === 'gestor' ? isGestor : !isGestor),
   )
@@ -104,12 +123,22 @@ export function AppLayout() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-navy-900 text-neutral-100">
-      <aside className="flex w-60 shrink-0 flex-col gap-4 overflow-y-auto border-r border-navy-700 bg-navy-800 p-4">
-        <div className="flex items-center gap-2 px-2 py-1">
-          <Icon name="explore" className="text-2xl text-gold-400" />
-          <span className="text-lg font-bold">Bússola</span>
+      <aside
+        className={cx(
+          'relative flex shrink-0 flex-col gap-4 overflow-y-auto border-r border-navy-700 bg-navy-800 p-4 transition-[width] duration-200',
+          colapsado ? 'w-[72px] items-center' : 'w-60',
+        )}
+      >
+        <CompassRose
+          className="pointer-events-none absolute -bottom-14 -left-14 -z-10 size-56 text-gold-500 opacity-[0.05]"
+        />
+
+        <div className={cx('flex items-center gap-2 px-2 py-1', colapsado && 'px-0')}>
+          <CompassRose className="size-6 shrink-0 text-gold-400" />
+          {!colapsado && <span className="text-lg font-bold">Bússola</span>}
         </div>
-        <nav className="flex flex-col gap-1">
+
+        <nav className="flex w-full flex-col gap-1">
           {itensMenu.map((item) => {
             const galhos = item.arvore === 'fase' ? fases : item.arvore === 'modulo' ? modulos : []
             const aberto = expandido[item.to] ?? false
@@ -120,14 +149,16 @@ export function AppLayout() {
                   <NavLink
                     to={item.to}
                     end={item.end}
+                    title={colapsado ? item.label : undefined}
                     onClick={
-                      galhos.length > 0
+                      galhos.length > 0 && !colapsado
                         ? () => setExpandido((e) => ({ ...e, [item.to]: !aberto }))
                         : undefined
                     }
                     className={({ isActive }) =>
                       cx(
                         'flex flex-1 items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+                        colapsado && 'justify-center px-0',
                         isActive
                           ? 'bg-gold-500/10 text-gold-400'
                           : 'text-neutral-400 hover:bg-navy-700 hover:text-neutral-200',
@@ -135,9 +166,9 @@ export function AppLayout() {
                     }
                   >
                     <span>{item.icon}</span>
-                    {item.label}
+                    {!colapsado && item.label}
                   </NavLink>
-                  {galhos.length > 0 && (
+                  {!colapsado && galhos.length > 0 && (
                     <button
                       type="button"
                       onClick={() => setExpandido((e) => ({ ...e, [item.to]: !aberto }))}
@@ -149,7 +180,7 @@ export function AppLayout() {
                   )}
                 </div>
 
-                {galhos.length > 0 && aberto && (
+                {!colapsado && galhos.length > 0 && aberto && (
                   <ul className="ml-4 flex flex-col gap-0.5 border-l border-navy-700 py-1 pl-3">
                     {galhos.map((nome) => {
                       // Fase e Módulo têm bases de path diferentes (fase vive fora da Jornada,
@@ -179,14 +210,36 @@ export function AppLayout() {
             )
           })}
         </nav>
+
+        <button
+          type="button"
+          onClick={() => setColapsado((v) => !v)}
+          title={colapsado ? 'Expandir menu' : 'Recolher menu'}
+          className={cx(
+            'mt-auto flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-neutral-500 hover:bg-navy-700 hover:text-neutral-200',
+            colapsado && 'justify-center px-0',
+          )}
+        >
+          <Icon name={colapsado ? 'chevron_right' : 'chevron_left'} className="text-base" />
+          {!colapsado && 'Recolher menu'}
+        </button>
       </aside>
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex h-14 shrink-0 items-center justify-between border-b border-navy-700 px-6">
-          <span className="text-xs text-neutral-500">
-            API:{' '}
+        <header className="relative flex h-16 shrink-0 items-center justify-between border-b border-navy-700 bg-gradient-to-r from-navy-800/60 to-navy-900 px-6">
+          <span className="flex items-center gap-1.5 rounded-full border border-navy-700 bg-navy-800 px-3 py-1 text-xs text-neutral-500">
+            <span
+              className={cx(
+                'size-1.5 rounded-full',
+                status === 'ok' && 'bg-green-400',
+                status === 'offline' && 'bg-red-400',
+                status === 'checando' && 'bg-neutral-500',
+              )}
+            />
+            API{' '}
             <strong
               className={cx(
+                'font-medium',
                 status === 'ok' && 'text-green-400',
                 status === 'offline' && 'text-red-400',
                 status === 'checando' && 'text-neutral-400',
@@ -199,17 +252,18 @@ export function AppLayout() {
             <NotificationBell />
             <NavLink
               to="/perfil"
-              className="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-navy-700"
+              className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-navy-700"
             >
               <Avatar nome={nome} foto={foto} className="size-8 text-xs" />
               <span className="text-sm text-neutral-200">{nome}</span>
             </NavLink>
+            <span className="h-6 w-px bg-navy-700" aria-hidden="true" />
             <button
               type="button"
               onClick={() => setConfirmandoSaida(true)}
-              className="text-sm text-gold-400 hover:text-gold-300"
+              className="flex items-center gap-1 text-sm text-gold-400 hover:text-gold-300"
             >
-              Sair
+              <Icon name="logout" className="text-base" /> Sair
             </button>
           </div>
         </header>

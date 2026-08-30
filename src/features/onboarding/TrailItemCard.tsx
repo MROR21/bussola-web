@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Icon } from '../../components/Icon'
+import { MapCorners } from '../../components/MapCorners'
 import { cx } from '../../utils/cx'
 import type { TrailStep } from './types'
 
@@ -26,12 +27,13 @@ export function TrailItemCard({
   return (
     <li
       className={cx(
-        'rounded-xl border p-4 transition-colors',
+        'relative rounded-xl border p-4 transition-colors',
         concluido && 'border-navy-700 bg-navy-800/40',
         !concluido && !destaque && 'border-navy-700 bg-navy-800',
         destaque && 'border-gold-500/60 bg-gold-500/10 ring-1 ring-gold-500/30',
       )}
     >
+      <MapCorners tamanho={3} opacidade={15} />
       <div className="flex items-start gap-3">
         <button
           type="button"
