@@ -22,6 +22,13 @@ const iconeDaFase = (fase: string) => FASE_ICONE[fase] ?? 'flag'
 // (visitável a qualquer momento).
 const FASE_FINAL = 'Primeiro Card'
 
+// Layout da trilha central: cada fase é um marco numa linha sinuosa (zigue-zague), não um grid de
+// cards — o pedido foi um caminho visual de verdade. X em % (responsivo, mesma escala do viewBox
+// do SVG) e Y em px reais (a altura do container é fixa em px).
+const TRILHA_CIRCULO = 64
+const TRILHA_PASSO_Y = 168
+const TRILHA_AMPLITUDE = 25
+
 // Home "Sua Jornada": progresso geral + próximo passo + fases em CARDS (clica e entra na fase).
 export function JornadaView({
   trail,
@@ -94,6 +101,31 @@ export function JornadaView({
     }
     return [...grupos.entries()]
   }, [trail])
+
+  // Coordenadas de cada marco da trilha (uma vez por fase) + o caminho SVG que os liga em curva.
+  const pontosTrilha = useMemo(
+    () =>
+      fases.map((_, i) => ({
+        x: i === 0 ? 50 : i % 2 === 1 ? 50 - TRILHA_AMPLITUDE : 50 + TRILHA_AMPLITUDE,
+        y: i * TRILHA_PASSO_Y + TRILHA_CIRCULO / 2,
+      })),
+    [fases],
+  )
+
+  const alturaTrilha =
+    pontosTrilha.length > 0 ? pontosTrilha[pontosTrilha.length - 1].y + TRILHA_CIRCULO / 2 + 90 : 0
+
+  const caminhoTrilha = useMemo(() => {
+    if (pontosTrilha.length < 2) return ''
+    let d = `M ${pontosTrilha[0].x} ${pontosTrilha[0].y}`
+    for (let i = 1; i < pontosTrilha.length; i++) {
+      const anterior = pontosTrilha[i - 1]
+      const atual = pontosTrilha[i]
+      const meioY = (anterior.y + atual.y) / 2
+      d += ` C ${anterior.x} ${meioY}, ${atual.x} ${meioY}, ${atual.x} ${atual.y}`
+    }
+    return d
+  }, [pontosTrilha])
 
   const total = trail.length
   const feitos = trail.filter(estaConcluido).length
@@ -213,18 +245,37 @@ export function JornadaView({
         )
       )}
 
-      {/* Fases em cards — clica e entra na fase */}
+      {/* Trilha central — um caminho sinuoso ligando as fases, marco por marco (em vez de um
+          grid de cards): o pedido foi um sentido de trilha literal, não uma lista disfarçada. */}
       <section className="flex flex-col gap-3">
         <h3 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
           Fases da jornada
         </h3>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="relative mx-auto w-full max-w-md" style={{ height: alturaTrilha }}>
+          <svg
+            viewBox={`0 0 100 ${alturaTrilha}`}
+            preserveAspectRatio="none"
+            className="pointer-events-none absolute inset-0 size-full text-neutral-800"
+            aria-hidden="true"
+          >
+            <path
+              d={caminhoTrilha}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeDasharray="3 7"
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+            />
+          </svg>
+
           {fases.map(([fase, itens], i) => {
             const feitosFase = itens.filter(estaConcluido).length
             const pct = itens.length > 0 ? Math.round((feitosFase / itens.length) * 100) : 0
             const faseCompleta = feitosFase === itens.length
             const atual = proximo?.phase === fase
             const bloqueada = fase === FASE_FINAL && !faseFinalLiberada
+            const ponto = pontosTrilha[i]
 
             return (
               <button
@@ -233,44 +284,48 @@ export function JornadaView({
                 disabled={bloqueada}
                 onClick={() => entrarFase(fase)}
                 className={cx(
-                  'flex flex-col gap-2 rounded-2xl border bg-neutral-900 p-5 text-left transition-all duration-200',
-                  bloqueada
-                    ? 'cursor-not-allowed border-neutral-800 opacity-50'
-                    : 'hover:-translate-y-0.5',
-                  !bloqueada && (atual
-                    ? 'border-purple-500/60 hover:border-purple-500'
-                    : 'border-neutral-800 hover:border-purple-500/50'),
+                  'absolute flex w-[152px] -translate-x-1/2 flex-col items-center gap-2 transition-transform duration-200',
+                  bloqueada ? 'cursor-not-allowed' : 'hover:-translate-y-0.5',
                 )}
+                style={{ left: `${ponto.x}%`, top: ponto.y - TRILHA_CIRCULO / 2 }}
               >
-                <div className="flex items-center justify-between">
-                  <Icon name={iconeDaFase(fase)} className="text-2xl text-purple-300" />
-                  {bloqueada ? (
-                    <Icon name="lock" className="text-neutral-500" title="Complete as fases anteriores" />
-                  ) : faseCompleta ? (
-                    <Icon name="military_tech" className="text-amber-400" fill title="Fase concluída" />
-                  ) : atual ? (
+                <span
+                  className={cx(
+                    'flex size-16 shrink-0 items-center justify-center rounded-full border-2 bg-neutral-900 text-2xl transition-colors duration-200',
+                    bloqueada
+                      ? 'border-dashed border-neutral-700 text-neutral-600 opacity-60'
+                      : faseCompleta
+                        ? 'border-amber-400/70 text-amber-400'
+                        : atual
+                          ? 'border-purple-400 text-purple-300 shadow-[0_0_0_5px_rgba(168,85,247,0.15)]'
+                          : 'border-neutral-700 text-purple-300 hover:border-purple-500/60',
+                  )}
+                >
+                  <Icon
+                    name={bloqueada ? 'lock' : faseCompleta ? 'military_tech' : iconeDaFase(fase)}
+                    fill={faseCompleta}
+                  />
+                </span>
+                <span className="flex w-full flex-col items-center gap-1 rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-2 text-center">
+                  <span className="text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+                    Fase {i + 1}
+                  </span>
+                  <span className="text-xs font-semibold leading-tight text-neutral-100">{fase}</span>
+                  {atual && !bloqueada && (
                     <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] font-medium text-purple-200">
                       Você está aqui
                     </span>
-                  ) : (
-                    <Icon name="chevron_right" className="text-neutral-600" />
                   )}
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-                    Fase {i + 1}
+                  <span className="text-[11px] text-neutral-500">
+                    {bloqueada ? 'Apto após concluir o resto' : `${feitosFase} de ${itens.length}`}
                   </span>
-                  <h3 className="font-semibold text-neutral-100">{fase}</h3>
-                </div>
-                <span className="text-sm text-neutral-500">
-                  {bloqueada ? 'Apto após concluir o resto' : `${feitosFase} de ${itens.length} itens`}
+                  <div className="h-1 w-full overflow-hidden rounded-full bg-neutral-800">
+                    <div
+                      className="h-full rounded-full bg-purple-500 transition-all"
+                      style={{ width: `${bloqueada ? 0 : pct}%` }}
+                    />
+                  </div>
                 </span>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
-                  <div
-                    className="h-full rounded-full bg-purple-500 transition-all"
-                    style={{ width: `${bloqueada ? 0 : pct}%` }}
-                  />
-                </div>
               </button>
             )
           })}
