@@ -267,10 +267,13 @@ export function AppLayout() {
       </button>
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="relative flex h-16 shrink-0 items-center justify-between overflow-hidden border-b border-navy-700 bg-gradient-to-r from-navy-800 via-navy-800/70 to-navy-900 px-6">
-          <CompassRose
-            className="pointer-events-none absolute -right-6 -top-10 size-32 text-gold-500 opacity-[0.07]"
-          />
+        <header className="relative flex h-16 shrink-0 items-center justify-between border-b border-navy-700 bg-gradient-to-r from-navy-800 via-navy-800/70 to-navy-900 px-6">
+          {/* overflow-hidden fica só aqui, contendo a marca d'água que sangra pra fora — não no
+              header inteiro, senão corta o dropdown de notificação, que precisa abrir PRA FORA
+              da faixa de 64px do header. */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <CompassRose className="absolute -right-6 -top-10 size-32 text-gold-500 opacity-[0.07]" />
+          </div>
           <div
             className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gold-500/50 to-transparent"
             aria-hidden="true"
