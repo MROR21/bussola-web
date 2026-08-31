@@ -49,6 +49,26 @@
   }
 }
 
+@keyframes bussola-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes bussola-pop-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
 /* Entrada de página/conteúdo (sobe suave). Sem fill-mode: o keyframe final já é
    idêntico ao estado normal (transform:none), então não precisa "segurar" — segurar
    deixaria um transform ativo, e isso quebra position:fixed dos filhos (viram
@@ -67,10 +87,24 @@
   animation: bussola-pop-in 0.18s ease-out;
 }
 
+/* Saída (usadas com o hook `useSaida`, que segura o elemento montado mais um pouco pra essa
+   animação rodar antes do unmount de verdade). `forwards` segura o estado final (invisível) até
+   lá — seguro aqui porque nada dentro desses modais/toasts é position:fixed (só o backdrop é, e
+   ele só recebe o fade, sem transform). */
+.anim-fade-out {
+  animation: bussola-fade-out 0.15s ease-in forwards;
+}
+
+.anim-pop-out {
+  animation: bussola-pop-out 0.15s ease-in forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .anim-page,
   .anim-fade,
-  .anim-pop {
+  .anim-pop,
+  .anim-fade-out,
+  .anim-pop-out {
     animation: none;
   }
 }

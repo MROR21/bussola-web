@@ -155,7 +155,10 @@ export function NotificationBell() {
       >
         <Icon name="notifications" />
         {naoLidas > 0 && (
-          <span className="anim-pop absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-gold-500 text-[10px] font-medium text-white">
+          <span
+            key={naoLidas}
+            className="anim-pop absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-gold-500 text-[10px] font-medium text-white"
+          >
             {naoLidas}
           </span>
         )}

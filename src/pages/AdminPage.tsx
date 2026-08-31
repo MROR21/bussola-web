@@ -54,7 +54,7 @@ export function AdminPage() {
     <div className="relative flex w-full max-w-4xl flex-col gap-5">
       <CompassRose className="pointer-events-none absolute -right-10 -top-8 size-72 text-gold-500 opacity-[0.06]" />
       <MapIllustration className="pointer-events-none absolute -bottom-6 -left-10 w-64 text-gold-500 opacity-[0.06]" />
-      <div className="relative flex flex-col gap-1 self-start">
+      <div className="relative flex flex-col gap-1 self-start p-5">
         <MapCorners tamanho={5} opacidade={25} />
         <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
           <Icon name="build" className="text-2xl text-gold-400" /> Administração

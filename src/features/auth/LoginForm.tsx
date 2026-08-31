@@ -80,7 +80,7 @@ export function LoginForm() {
       }}
       className="flex flex-col gap-6"
     >
-      <div className="flex flex-col gap-1">
+      <div key={ehCadastro ? 'cadastro' : 'login'} className="anim-fade flex flex-col gap-1">
         <h2 className="flex items-center gap-1.5 text-xl font-semibold">
           {ehCadastro ? (
             'Criar conta'

@@ -81,7 +81,7 @@ export function SupervisionadoPage() {
         <Icon name="arrow_back" className="text-base" /> Voltar pros supervisionados
       </Link>
 
-      <div className="relative self-start">
+      <div className="relative self-start p-5">
         <MapCorners tamanho={5} opacidade={25} />
         <h1 className="text-2xl font-bold text-neutral-100">{dados.nome}</h1>
       </div>

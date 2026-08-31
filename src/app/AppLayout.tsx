@@ -9,6 +9,7 @@ import { NotificationBell } from '../features/notificacoes/NotificationBell'
 import { listarSteps } from '../features/onboarding/onboardingService'
 import { Avatar } from '../features/perfil/Avatar'
 import { useApiStatus } from './useApiStatus'
+import { useSaida } from '../hooks/useSaida'
 import { cx } from '../utils/cx'
 
 const CHAVE_MENU_COLAPSADO = 'bussola-menu-colapsado'
@@ -62,6 +63,7 @@ export function AppLayout() {
   const isGestor = useAuthStore((state) => state.usuario?.isGestor ?? false)
   const logout = useAuthStore((state) => state.logout)
   const [confirmandoSaida, setConfirmandoSaida] = useState(false)
+  const { montado: modalSaidaMontado, saindo: modalSaidaSaindo } = useSaida(confirmandoSaida)
   const status = useApiStatus()
   const location = useLocation()
 
@@ -135,12 +137,19 @@ export function AppLayout() {
 
         <div
           className={cx(
-            'flex items-center gap-2 border-b border-navy-700 px-2 pb-4 pt-1',
-            colapsado && 'px-0',
+            'flex items-center border-b border-navy-700 px-2 pb-4 pt-1',
+            colapsado ? 'px-0' : 'gap-2',
           )}
         >
           <CompassRose className="size-6 shrink-0 text-gold-400" />
-          {!colapsado && <span className="text-lg font-bold">Bússola</span>}
+          <span
+            className={cx(
+              'overflow-hidden whitespace-nowrap text-lg font-bold transition-all duration-200',
+              colapsado ? 'max-w-0 opacity-0' : 'max-w-[160px] opacity-100',
+            )}
+          >
+            Bússola
+          </span>
         </div>
 
         {/* Só a lista de navegação rola (min-h-0 é o que deixa o flex-1 respeitar o espaço
@@ -174,8 +183,8 @@ export function AppLayout() {
                     }
                     className={({ isActive }) =>
                       cx(
-                        'flex items-center gap-3 rounded-lg text-sm transition-colors',
-                        colapsado ? 'size-10 shrink-0 justify-center' : 'flex-1 px-3 py-2',
+                        'flex items-center rounded-lg text-sm transition-colors',
+                        colapsado ? 'size-10 shrink-0 justify-center' : 'flex-1 gap-3 px-3 py-2',
                         isActive
                           ? 'bg-gold-500/10 text-gold-400'
                           : 'text-neutral-400 hover:bg-navy-700 hover:text-neutral-200',
@@ -183,7 +192,14 @@ export function AppLayout() {
                     }
                   >
                     <span>{item.icon}</span>
-                    {!colapsado && item.label}
+                    <span
+                      className={cx(
+                        'overflow-hidden whitespace-nowrap transition-all duration-200',
+                        colapsado ? 'max-w-0 opacity-0' : 'max-w-[160px] opacity-100',
+                      )}
+                    >
+                      {item.label}
+                    </span>
                   </NavLink>
                   {!colapsado && galhos.length > 0 && (
                     <button
@@ -318,13 +334,19 @@ export function AppLayout() {
         </main>
       </div>
 
-      {confirmandoSaida && (
+      {modalSaidaMontado && (
         <div
-          className="anim-fade fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4"
+          className={cx(
+            'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
+            modalSaidaSaindo ? 'anim-fade-out' : 'anim-fade',
+          )}
           onClick={() => setConfirmandoSaida(false)}
         >
           <div
-            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6"
+            className={cx(
+              'flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6',
+              modalSaidaSaindo ? 'anim-pop-out' : 'anim-pop',
+            )}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col gap-1">
@@ -337,14 +359,14 @@ export function AppLayout() {
               <button
                 type="button"
                 onClick={() => setConfirmandoSaida(false)}
-                className="rounded-lg px-4 py-2 text-sm text-neutral-300 hover:bg-navy-700"
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={logout}
-                className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-400"
+                className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
               >
                 Sair
               </button>

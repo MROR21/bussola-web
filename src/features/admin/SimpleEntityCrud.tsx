@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Icon } from '../../components/Icon'
 import { Carregando, Spinner } from '../../components/Spinner'
+import { useSaidaValor } from '../../hooks/useSaida'
 import { cx } from '../../utils/cx'
 import type { EntidadeSimples } from './types'
 
@@ -39,6 +40,36 @@ export function SimpleEntityCrud({
   const [movendo, setMovendo] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
 
+  const modalEdicao = useSaidaValor(editando)
+  const modalApagar = useSaidaValor(apagando)
+  const toastFeedback = useSaidaValor(feedback)
+
+  // FLIP: guarda a posição de cada linha ANTES do reordenar (ainda na ordem antiga) pra, depois
+  // que a lista chega na ordem nova, animar cada linha da posição antiga até a atual em vez de só
+  // "pipocar" direto no lugar certo.
+  const refsLinhas = useRef(new Map<string, HTMLLIElement>())
+  const posicoesAntes = useRef<Map<string, DOMRect> | null>(null)
+
+  useLayoutEffect(() => {
+    const antes = posicoesAntes.current
+    if (!antes) return
+    posicoesAntes.current = null
+
+    refsLinhas.current.forEach((linha, id) => {
+      const rectAntes = antes.get(id)
+      if (!rectAntes) return
+      const deltaY = rectAntes.top - linha.getBoundingClientRect().top
+      if (Math.abs(deltaY) < 1) return
+      linha.style.transition = 'none'
+      linha.style.transform = `translateY(${deltaY}px)`
+      linha.getBoundingClientRect() // força o navegador a aplicar o transform acima antes da próxima linha
+      requestAnimationFrame(() => {
+        linha.style.transition = 'transform 220ms ease-out'
+        linha.style.transform = ''
+      })
+    })
+  }, [itens])
+
   async function carregar() {
     setLoading(true)
     setError(null)
@@ -61,6 +92,10 @@ export function SimpleEntityCrud({
     const indice = itens.findIndex((i) => i.id === item.id)
     const vizinho = itens[indice + direcao]
     if (!vizinho) return
+
+    const rects = new Map<string, DOMRect>()
+    refsLinhas.current.forEach((linha, id) => rects.set(id, linha.getBoundingClientRect()))
+    posicoesAntes.current = rects
 
     setMovendo(item.id)
     try {
@@ -151,6 +186,10 @@ export function SimpleEntityCrud({
         {itens.map((item, indice) => (
           <li
             key={item.id}
+            ref={(el) => {
+              if (el) refsLinhas.current.set(item.id, el)
+              else refsLinhas.current.delete(item.id)
+            }}
             className={cx(
               'flex items-center justify-between gap-3 rounded-xl border p-3 transition-colors',
               movendo === item.id ? 'border-gold-500/50 bg-navy-700' : 'border-navy-700 bg-navy-800',
@@ -210,17 +249,23 @@ export function SimpleEntityCrud({
         {itens.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nada cadastrado ainda.</p>}
       </ul>
 
-      {editando && (
+      {modalEdicao.montado && (
         <div
-          className="anim-fade fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4"
+          className={cx(
+            'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
+            modalEdicao.saindo ? 'anim-fade-out' : 'anim-fade',
+          )}
           onClick={() => setEditando(null)}
         >
           <div
-            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6"
+            className={cx(
+              'flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6',
+              modalEdicao.saindo ? 'anim-pop-out' : 'anim-pop',
+            )}
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-neutral-100">
-              {editando === 'novo' ? `Novo(a) ${singular}` : `Editar ${singular}`}
+              {modalEdicao.valor === 'novo' ? `Novo(a) ${singular}` : `Editar ${singular}`}
             </h3>
             <label className="flex flex-col gap-1 text-sm text-neutral-400">
               Nome
@@ -267,18 +312,24 @@ export function SimpleEntityCrud({
         </div>
       )}
 
-      {apagando && (
+      {modalApagar.montado && modalApagar.valor && (
         <div
-          className="anim-fade fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4"
+          className={cx(
+            'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
+            modalApagar.saindo ? 'anim-fade-out' : 'anim-fade',
+          )}
           onClick={() => setApagando(null)}
         >
           <div
-            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6"
+            className={cx(
+              'flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6',
+              modalApagar.saindo ? 'anim-pop-out' : 'anim-pop',
+            )}
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-neutral-100">Apagar {singular}?</h3>
             <p className="text-sm text-neutral-400">
-              Tem certeza que deseja apagar "{apagando.nome}"?
+              Tem certeza que deseja apagar "{modalApagar.valor.nome}"?
             </p>
             <div className="flex justify-end gap-2">
               <button
@@ -300,15 +351,16 @@ export function SimpleEntityCrud({
         </div>
       )}
 
-      {feedback && (
+      {toastFeedback.montado && toastFeedback.valor && (
         <div
-          className={
-            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg ' +
-            (feedback.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300')
-          }
+          className={cx(
+            'fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg',
+            toastFeedback.saindo ? 'anim-pop-out' : 'anim-pop',
+            toastFeedback.valor.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300',
+          )}
         >
-          <Icon name={feedback.ok ? 'check_circle' : 'warning'} className="text-base" />
-          {feedback.texto}
+          <Icon name={toastFeedback.valor.ok ? 'check_circle' : 'warning'} className="text-base" />
+          {toastFeedback.valor.texto}
         </div>
       )}
     </div>
