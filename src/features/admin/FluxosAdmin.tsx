@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Icon } from '../../components/Icon'
 import { MarkdownEditor } from '../../components/MarkdownEditor'
 import { Carregando, Spinner } from '../../components/Spinner'
+import { useSaidaValor } from '../../hooks/useSaida'
+import { cx } from '../../utils/cx'
 import type { Squad } from '../nivelamento/types'
 import {
   apagarFluxo,
@@ -24,6 +26,10 @@ export function FluxosAdmin() {
   const [salvando, setSalvando] = useState(false)
   const [apagando, setApagando] = useState<FluxoAdmin | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
+
+  const modalForm = useSaidaValor(form)
+  const modalApagar = useSaidaValor(apagando)
+  const toastFeedback = useSaidaValor(feedback)
 
   async function carregar() {
     setLoading(true)
@@ -168,15 +174,23 @@ export function FluxosAdmin() {
         {fluxos.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nenhum fluxo cadastrado.</p>}
       </ul>
 
-      {form && (
+      {modalForm.montado && (
         <div
-          className="anim-fade fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4"
+          className={cx(
+            'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
+            modalForm.saindo ? 'anim-fade-out' : 'anim-fade',
+          )}
           onClick={() => setForm(null)}
         >
           <div
-            className="anim-pop flex max-h-[90vh] w-full max-w-3xl flex-col gap-4 overflow-y-auto rounded-2xl border border-navy-700 bg-navy-800 p-6"
+            className={cx(
+              'flex max-h-[90vh] w-full max-w-3xl flex-col gap-4 overflow-y-auto rounded-2xl border border-navy-700 bg-navy-800 p-6',
+              modalForm.saindo ? 'anim-pop-out' : 'anim-pop',
+            )}
             onClick={(e) => e.stopPropagation()}
           >
+            {form && (
+            <>
             <h3 className="text-lg font-semibold text-neutral-100">
               {editando ? 'Editar fluxo' : 'Novo fluxo'}
             </h3>
@@ -294,22 +308,30 @@ export function FluxosAdmin() {
                 )}
               </button>
             </div>
+            </>
+            )}
           </div>
         </div>
       )}
 
-      {apagando && (
+      {modalApagar.montado && modalApagar.valor && (
         <div
-          className="anim-fade fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4"
+          className={cx(
+            'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
+            modalApagar.saindo ? 'anim-fade-out' : 'anim-fade',
+          )}
           onClick={() => setApagando(null)}
         >
           <div
-            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6"
+            className={cx(
+              'flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6',
+              modalApagar.saindo ? 'anim-pop-out' : 'anim-pop',
+            )}
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-neutral-100">Apagar fluxo?</h3>
             <p className="text-sm text-neutral-400">
-              Tem certeza que deseja apagar "{apagando.titulo}"?
+              Tem certeza que deseja apagar "{modalApagar.valor.titulo}"?
             </p>
             <div className="flex justify-end gap-2">
               <button
@@ -331,15 +353,16 @@ export function FluxosAdmin() {
         </div>
       )}
 
-      {feedback && (
+      {toastFeedback.montado && toastFeedback.valor && (
         <div
-          className={
-            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg ' +
-            (feedback.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300')
-          }
+          className={cx(
+            'fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg',
+            toastFeedback.saindo ? 'anim-pop-out' : 'anim-pop',
+            toastFeedback.valor.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300',
+          )}
         >
-          <Icon name={feedback.ok ? 'check_circle' : 'warning'} className="text-base" />
-          {feedback.texto}
+          <Icon name={toastFeedback.valor.ok ? 'check_circle' : 'warning'} className="text-base" />
+          {toastFeedback.valor.texto}
         </div>
       )}
     </div>

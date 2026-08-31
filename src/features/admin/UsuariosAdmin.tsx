@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../../components/Icon'
 import { Carregando } from '../../components/Spinner'
+import { useSaidaValor } from '../../hooks/useSaida'
+import { cx } from '../../utils/cx'
 import {
   apagarEmailAutorizado,
   criarEmailAutorizado,
@@ -27,6 +29,7 @@ function ListaUsuarios() {
   const [error, setError] = useState<string | null>(null)
   const [alterando, setAlterando] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
+  const toastFeedback = useSaidaValor(feedback)
 
   async function carregar() {
     setLoading(true)
@@ -101,15 +104,16 @@ function ListaUsuarios() {
         {itens.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nenhum usuário ainda.</p>}
       </ul>
 
-      {feedback && (
+      {toastFeedback.montado && toastFeedback.valor && (
         <div
-          className={
-            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg ' +
-            (feedback.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300')
-          }
+          className={cx(
+            'fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg',
+            toastFeedback.saindo ? 'anim-pop-out' : 'anim-pop',
+            toastFeedback.valor.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300',
+          )}
         >
-          <Icon name={feedback.ok ? 'check_circle' : 'warning'} className="text-base" />
-          {feedback.texto}
+          <Icon name={toastFeedback.valor.ok ? 'check_circle' : 'warning'} className="text-base" />
+          {toastFeedback.valor.texto}
         </div>
       )}
     </div>
@@ -124,6 +128,8 @@ function ListaEmailsAutorizados() {
   const [salvando, setSalvando] = useState(false)
   const [apagando, setApagando] = useState<EmailAutorizado | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
+  const modalApagar = useSaidaValor(apagando)
+  const toastFeedback = useSaidaValor(feedback)
 
   async function carregar() {
     setLoading(true)
@@ -224,18 +230,24 @@ function ListaEmailsAutorizados() {
         {itens.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nenhum e-mail na lista.</p>}
       </ul>
 
-      {apagando && (
+      {modalApagar.montado && modalApagar.valor && (
         <div
-          className="anim-fade fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4"
+          className={cx(
+            'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
+            modalApagar.saindo ? 'anim-fade-out' : 'anim-fade',
+          )}
           onClick={() => setApagando(null)}
         >
           <div
-            className="anim-pop flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6"
+            className={cx(
+              'flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6',
+              modalApagar.saindo ? 'anim-pop-out' : 'anim-pop',
+            )}
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-neutral-100">Remover e-mail?</h3>
             <p className="text-sm text-neutral-400">
-              "{apagando.email}" deixa de nascer como supervisor ao se cadastrar.
+              "{modalApagar.valor.email}" deixa de nascer como supervisor ao se cadastrar.
             </p>
             <div className="flex justify-end gap-2">
               <button
@@ -257,15 +269,16 @@ function ListaEmailsAutorizados() {
         </div>
       )}
 
-      {feedback && (
+      {toastFeedback.montado && toastFeedback.valor && (
         <div
-          className={
-            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg ' +
-            (feedback.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300')
-          }
+          className={cx(
+            'fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg',
+            toastFeedback.saindo ? 'anim-pop-out' : 'anim-pop',
+            toastFeedback.valor.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300',
+          )}
         >
-          <Icon name={feedback.ok ? 'check_circle' : 'warning'} className="text-base" />
-          {feedback.texto}
+          <Icon name={toastFeedback.valor.ok ? 'check_circle' : 'warning'} className="text-base" />
+          {toastFeedback.valor.texto}
         </div>
       )}
     </div>

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Icon } from '../../components/Icon'
+import { useSaida } from '../../hooks/useSaida'
+import { cx } from '../../utils/cx'
 import { Avatar } from '../perfil/Avatar'
 import {
   apagarNotificacao,
@@ -21,6 +23,8 @@ export function NotificationBell() {
   const [aberto, setAberto] = useState(false)
   const [toast, setToast] = useState(false)
   const [confirmandoLimpar, setConfirmandoLimpar] = useState(false)
+  const { montado: painelMontado, saindo: painelSaindo } = useSaida(aberto)
+  const { montado: toastMontado, saindo: toastSaindo } = useSaida(toast)
   const ref = useRef<HTMLDivElement>(null)
   // Ids que já dispararam toast — garante um aviso por notificação, sem repetir a cada poll.
   const jaAvisadasRef = useRef<Set<string>>(new Set())
@@ -164,8 +168,13 @@ export function NotificationBell() {
         )}
       </button>
 
-      {aberto && (
-        <div className="anim-pop absolute right-0 z-10 mt-2 w-72 overflow-hidden rounded-xl border border-navy-700 bg-navy-800 shadow-lg">
+      {painelMontado && (
+        <div
+          className={cx(
+            'absolute right-0 z-10 mt-2 w-72 overflow-hidden rounded-xl border border-navy-700 bg-navy-800 shadow-lg',
+            painelSaindo ? 'anim-pop-out' : 'anim-pop',
+          )}
+        >
           <div className="flex items-center justify-between border-b border-navy-700 px-4 py-2">
             <p className="text-sm font-medium text-neutral-200">Notificações</p>
             {itens.length > 0 &&
@@ -251,11 +260,14 @@ export function NotificationBell() {
         </div>
       )}
 
-      {toast && (
+      {toastMontado && (
         <button
           type="button"
           onClick={abrir}
-          className="anim-pop absolute right-full top-0 z-50 mr-3 flex w-max items-center gap-2 rounded-xl border border-gold-500/40 bg-navy-800 px-4 py-3 text-sm text-neutral-100 shadow-lg"
+          className={cx(
+            'absolute right-full top-0 z-50 mr-3 flex w-max items-center gap-2 rounded-xl border border-gold-500/40 bg-navy-800 px-4 py-3 text-sm text-neutral-100 shadow-lg',
+            toastSaindo ? 'anim-pop-out' : 'anim-pop',
+          )}
         >
           <Icon name="notifications" className="text-base" /> Você tem {naoLidas}{' '}
           {naoLidas === 1 ? 'nova notificação' : 'novas notificações'}

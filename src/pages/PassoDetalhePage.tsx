@@ -7,6 +7,8 @@ import { MapIllustration } from '../components/MapIllustration'
 import { Markdown } from '../components/Markdown'
 import { MarkdownEditor } from '../components/MarkdownEditor'
 import { Carregando, Spinner } from '../components/Spinner'
+import { useSaida } from '../hooks/useSaida'
+import { cx } from '../utils/cx'
 import { useAuthStore } from '../features/auth/authStore'
 import { useTitulo } from '../hooks/useTitulo'
 import { editarPasso, listarPassosAdmin } from '../features/admin/adminService'
@@ -64,6 +66,7 @@ export function PassoDetalhePage() {
   const [salvandoConteudo, setSalvandoConteudo] = useState(false)
   const [erroEdicao, setErroEdicao] = useState<string | null>(null)
   const [salvo, setSalvo] = useState(false)
+  const { montado: toastSalvoMontado, saindo: toastSalvoSaindo } = useSaida(salvo)
 
   useEffect(() => {
     if (!usuario) return
@@ -395,8 +398,13 @@ export function PassoDetalhePage() {
         </section>
       )}
 
-      {salvo && (
-        <div className="anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border border-green-500/40 bg-navy-800 px-4 py-3 text-sm text-green-300 shadow-lg">
+      {toastSalvoMontado && (
+        <div
+          className={cx(
+            'fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border border-green-500/40 bg-navy-800 px-4 py-3 text-sm text-green-300 shadow-lg',
+            toastSalvoSaindo ? 'anim-pop-out' : 'anim-pop',
+          )}
+        >
           <Icon name="check_circle" className="text-base" /> Salvo com sucesso
         </div>
       )}

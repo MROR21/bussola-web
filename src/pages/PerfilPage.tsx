@@ -4,6 +4,8 @@ import { Icon } from '../components/Icon'
 import { MapCorners } from '../components/MapCorners'
 import { MapIllustration } from '../components/MapIllustration'
 import { Spinner } from '../components/Spinner'
+import { useSaidaValor } from '../hooks/useSaida'
+import { cx } from '../utils/cx'
 import { useAuthStore } from '../features/auth/authStore'
 import { useTitulo } from '../hooks/useTitulo'
 import { Avatar } from '../features/perfil/Avatar'
@@ -28,6 +30,7 @@ export function PerfilPage() {
   const atualizarUsuario = useAuthStore((s) => s.atualizarUsuario)
 
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
+  const toastFeedback = useSaidaValor(feedback)
   const fileRef = useRef<HTMLInputElement>(null)
 
   // Formulário de e-mail.
@@ -247,15 +250,16 @@ export function PerfilPage() {
         </button>
       </form>
 
-      {feedback && (
+      {toastFeedback.montado && toastFeedback.valor && (
         <div
-          className={
-            'anim-pop fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg ' +
-            (feedback.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300')
-          }
+          className={cx(
+            'fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg',
+            toastFeedback.saindo ? 'anim-pop-out' : 'anim-pop',
+            toastFeedback.valor.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300',
+          )}
         >
-          <Icon name={feedback.ok ? 'check_circle' : 'warning'} className="text-base" />
-          {feedback.texto}
+          <Icon name={toastFeedback.valor.ok ? 'check_circle' : 'warning'} className="text-base" />
+          {toastFeedback.valor.texto}
         </div>
       )}
     </div>
