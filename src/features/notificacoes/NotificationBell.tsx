@@ -4,6 +4,7 @@ import { Icon } from '../../components/Icon'
 import { useSaida } from '../../hooks/useSaida'
 import { cx } from '../../utils/cx'
 import { Avatar } from '../perfil/Avatar'
+import { tempoRelativo } from '../../utils/tempoRelativo'
 import {
   apagarNotificacao,
   apagarTodasNotificacoes,
@@ -230,7 +231,10 @@ export function NotificationBell() {
                           className="size-7 text-[10px]"
                         />
                       )}
-                      <span className="flex-1">{n.mensagem}</span>
+                      <span className="flex flex-1 flex-col gap-0.5">
+                        <span>{n.mensagem}</span>
+                        <span className="text-xs text-neutral-500">{tempoRelativo(n.criadaEm)}</span>
+                      </span>
                       <Icon name="arrow_forward" className="shrink-0 text-gold-400" />
                     </button>
                   ) : (
@@ -242,7 +246,10 @@ export function NotificationBell() {
                           className="size-7 text-[10px]"
                         />
                       )}
-                      <span className="flex-1">{n.mensagem}</span>
+                      <span className="flex flex-1 flex-col gap-0.5">
+                        <span>{n.mensagem}</span>
+                        <span className="text-xs text-neutral-500">{tempoRelativo(n.criadaEm)}</span>
+                      </span>
                     </div>
                   )}
                   <button
