@@ -45,6 +45,8 @@ export const apagarFluxo = (id: string) => apiSend('DELETE', `/admin/fluxos/${id
 export const listarUsuariosAdmin = () => apiGet<UsuarioAdmin[]>('/admin/usuarios')
 export const definirGestor = (id: string, isGestor: boolean) =>
   apiSend('PUT', `/admin/usuarios/${id}/gestor`, { isGestor })
+export const definirAtivo = (id: string, ativo: boolean) =>
+  apiSend('PUT', `/admin/usuarios/${id}/ativo`, { ativo })
 
 // E-mails pré-autorizados a virar gestor no cadastro
 export const listarEmailsAutorizados = () =>

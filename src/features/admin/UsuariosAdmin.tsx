@@ -6,6 +6,7 @@ import { cx } from '../../utils/cx'
 import {
   apagarEmailAutorizado,
   criarEmailAutorizado,
+  definirAtivo,
   definirGestor,
   listarEmailsAutorizados,
   listarUsuariosAdmin,
@@ -65,6 +66,18 @@ function ListaUsuarios() {
     }
   }
 
+  async function alternarAcesso(usuario: UsuarioAdmin) {
+    setAlterando(usuario.id)
+    try {
+      await definirAtivo(usuario.id, !usuario.ativo)
+      await carregar()
+    } catch (e) {
+      setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao salvar', ok: false })
+    } finally {
+      setAlterando(null)
+    }
+  }
+
   if (loading) return <Carregando texto="Carregando..." />
   if (error) return <p className="text-red-400">Erro: {error}</p>
 
@@ -81,10 +94,17 @@ function ListaUsuarios() {
             className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
           >
             <div className="flex flex-col">
-              <span className="text-neutral-100">{usuario.nome}</span>
+              <span className={cx(usuario.ativo ? 'text-neutral-100' : 'text-neutral-500 line-through')}>
+                {usuario.nome}
+              </span>
               <span className="text-xs text-neutral-500">{usuario.email}</span>
             </div>
             <div className="flex items-center gap-3">
+              {!usuario.ativo && (
+                <span className="anim-pop rounded-full bg-red-500/20 px-2 py-0.5 text-xs font-medium text-red-300">
+                  Acesso revogado
+                </span>
+              )}
               {usuario.isGestor && (
                 <span className="anim-pop rounded-full bg-gold-500/20 px-2 py-0.5 text-xs font-medium text-gold-300">
                   Supervisor
@@ -97,6 +117,17 @@ function ListaUsuarios() {
                 className="text-sm text-gold-400 transition-all hover:text-gold-300 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {usuario.isGestor ? 'Remover supervisor' : 'Tornar supervisor'}
+              </button>
+              <button
+                type="button"
+                onClick={() => alternarAcesso(usuario)}
+                disabled={alterando === usuario.id}
+                className={cx(
+                  'text-sm transition-all disabled:cursor-not-allowed disabled:opacity-40',
+                  usuario.ativo ? 'text-red-400 hover:text-red-300' : 'text-green-400 hover:text-green-300',
+                )}
+              >
+                {usuario.ativo ? 'Revogar acesso' : 'Reativar acesso'}
               </button>
             </div>
           </li>
