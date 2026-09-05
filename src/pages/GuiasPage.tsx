@@ -51,8 +51,21 @@ export function GuiasPage() {
   const entrarModulo = (modulo: string) => navigate(`/guias/${encodeURIComponent(modulo)}`)
   const sairModulo = () => navigate('/guias')
   const [destacado, setDestacado] = useState<string | null>(null)
+  // Tags (grupos) colapsadas dentro do módulo aberto — some ao trocar de módulo.
+  const [colapsados, setColapsados] = useState<Set<string>>(new Set())
+  const toggleGrupo = (tag: string) =>
+    setColapsados((prev) => {
+      const novo = new Set(prev)
+      if (novo.has(tag)) novo.delete(tag)
+      else novo.add(tag)
+      return novo
+    })
 
   useTitulo(moduloSelecionado ?? 'Guia pelo sistema')
+
+  useEffect(() => {
+    setColapsados(new Set())
+  }, [moduloSelecionado])
 
   useEffect(() => {
     let cancelado = false
@@ -142,34 +155,40 @@ export function GuiasPage() {
 
   // Um item de fluxo (card com link), reusado na busca e dentro do módulo.
   // ocultarTag: esconde o chip da categoria quando o item já está sob o cabeçalho da tag.
+  // Status (concluído/vídeo/padrão) vira um badge de ícone à esquerda — dá pra escanear o que já
+  // foi feito sem entrar em cada item, sem precisar de um chip de texto "Concluído" por linha.
   function itemFluxo(fluxo: Fluxo, ocultarTag = false) {
+    const feito = concluidos.has(fluxo.id)
+    const iconeStatus = feito ? 'check_circle' : fluxo.videoUrl ? 'smart_display' : 'article'
     return (
       <li key={fluxo.id} id={`fluxo-${fluxo.id}`}>
         <Link
           to={`/fluxo/${encodeURIComponent(fluxo.titulo)}`}
           className={
-            'relative flex flex-col gap-1 rounded-xl border border-navy-700 bg-navy-800 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-500/50' +
+            'relative flex items-center gap-3 rounded-xl border border-navy-700 bg-navy-800 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-500/50' +
             (destacado === fluxo.id ? ' animate-pulse ring-2 ring-gold-400' : '')
           }
         >
           <MapCorners tamanho={3} opacidade={15} />
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-medium text-neutral-100">{fluxo.titulo}</span>
-            {fluxo.videoUrl && (
-              <Icon name="smart_display" className="text-base text-neutral-400" title="Tem vídeo" />
-            )}
-            {concluidos.has(fluxo.id) && (
-              <span className="flex items-center gap-1 rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
-                <Icon name="check" className="text-sm" /> Concluído
-              </span>
-            )}
-            {!ocultarTag && fluxo.categoria && (
-              <span className="rounded-full bg-navy-700 px-2 py-0.5 text-xs text-neutral-400">
-                {fluxo.categoria}
-              </span>
-            )}
+          <span
+            className={
+              'flex size-9 shrink-0 items-center justify-center rounded-full ' +
+              (feito ? 'bg-gold-500/15 text-gold-400' : 'bg-navy-700 text-neutral-500')
+            }
+          >
+            <Icon name={iconeStatus} className="text-lg" />
+          </span>
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-medium text-neutral-100">{fluxo.titulo}</span>
+              {!ocultarTag && fluxo.categoria && (
+                <span className="rounded-full bg-navy-700 px-2 py-0.5 text-xs text-neutral-400">
+                  {fluxo.categoria}
+                </span>
+              )}
+            </div>
+            <span className="text-sm text-neutral-400">{fluxo.descricao}</span>
           </div>
-          <span className="text-sm text-neutral-400">{fluxo.descricao}</span>
         </Link>
       </li>
     )
@@ -213,20 +232,56 @@ export function GuiasPage() {
           <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gold-500/10 text-gold-400">
             <Icon name={iconeDoModulo(moduloSelecionado)} className="text-2xl" />
           </span>
-          <h1 className="text-2xl font-bold text-neutral-100">{moduloSelecionado}</h1>
+          <div className="flex flex-col gap-0.5">
+            <h1 className="text-2xl font-bold text-neutral-100">{moduloSelecionado}</h1>
+            {itens.length > 0 && (
+              <span className="text-xs text-neutral-500">
+                {itens.filter((f) => concluidos.has(f.id)).length} de {itens.length} concluídos
+              </span>
+            )}
+          </div>
         </div>
         {grupos.length > 1 ? (
-          <div className="flex flex-col gap-6">
-            {grupos.map(([tag, fluxosTag]) => (
-              <section key={tag} className="flex flex-col gap-2">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
-                  {tag}
-                </h2>
-                <ul className="flex flex-col gap-2">
-                  {fluxosTag.map((f) => itemFluxo(f, true))}
-                </ul>
-              </section>
-            ))}
+          <div className="flex flex-col gap-4">
+            {grupos.map(([tag, fluxosTag]) => {
+              const feitosTag = fluxosTag.filter((f) => concluidos.has(f.id)).length
+              const pctTag =
+                fluxosTag.length > 0 ? Math.round((feitosTag / fluxosTag.length) * 100) : 0
+              const aberto = !colapsados.has(tag)
+              return (
+                <section key={tag} className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleGrupo(tag)}
+                    className="flex flex-col gap-1.5 rounded-lg px-1 py-1 text-left transition-colors hover:text-neutral-300"
+                  >
+                    <span className="flex items-center justify-between gap-3">
+                      <span className="flex items-center gap-1.5 text-sm font-semibold text-neutral-300">
+                        <Icon
+                          name={aberto ? 'expand_more' : 'chevron_right'}
+                          className="text-base text-neutral-500"
+                        />
+                        {tag}
+                      </span>
+                      <span className="text-xs text-neutral-500">
+                        {feitosTag}/{fluxosTag.length}
+                      </span>
+                    </span>
+                    <div className="h-1 w-full overflow-hidden rounded-full bg-navy-700">
+                      <div
+                        className="h-full rounded-full bg-gold-500 transition-all"
+                        style={{ width: `${pctTag}%` }}
+                      />
+                    </div>
+                  </button>
+                  {aberto && (
+                    <ul className="anim-fade flex flex-col gap-2">
+                      {fluxosTag.map((f) => itemFluxo(f, true))}
+                    </ul>
+                  )}
+                </section>
+              )
+            })}
           </div>
         ) : (
           <ul className="flex flex-col gap-2">{itens.map((f) => itemFluxo(f))}</ul>
