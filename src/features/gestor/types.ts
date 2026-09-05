@@ -35,6 +35,7 @@ export interface PassoProgresso {
 // Progresso detalhado de um supervisionado (GET /gestor/usuarios/{id}/progresso).
 export interface ProgressoSupervisionado {
   nome: string
+  cargo: Cargo
   passos: PassoProgresso[]
 }
 

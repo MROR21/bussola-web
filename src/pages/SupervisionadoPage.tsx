@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { CompassRose } from '../components/CompassRose'
 import { EstadoErro } from '../components/EstadoErro'
@@ -8,7 +8,10 @@ import { MapIllustration } from '../components/MapIllustration'
 import { Carregando } from '../components/Spinner'
 import { useTitulo } from '../hooks/useTitulo'
 import { cx } from '../utils/cx'
+import { ACESSOS_POR_CARGO, NOME_CARGO } from '../features/gestor/acessosPorCargo'
 import { getFluxosSupervisionado, getProgressoDetalhado } from '../features/gestor/gestorService'
+import { GuiaModulosLeitura } from '../features/gestor/GuiaModulosLeitura'
+import { TrilhaFasesLeitura } from '../features/gestor/TrilhaFasesLeitura'
 import type { FluxoProgresso, ProgressoSupervisionado } from '../features/gestor/types'
 
 // Tela de detalhe de um supervisionado, com abas: Passos (jornada) e Fluxos.
@@ -43,28 +46,6 @@ export function SupervisionadoPage() {
     }
   }, [id, tentativa])
 
-  const fasesPassos = useMemo(() => {
-    const grupos: Record<string, ProgressoSupervisionado['passos']> = {}
-    for (const passo of dados?.passos ?? []) {
-      const lista = grupos[passo.phase] ?? []
-      lista.push(passo)
-      grupos[passo.phase] = lista
-    }
-    return Object.entries(grupos)
-  }, [dados])
-
-  const modulosFluxos = useMemo(() => {
-    const grupos = new Map<string, FluxoProgresso[]>()
-    for (const fluxo of fluxos) {
-      const lista = grupos.get(fluxo.modulo) ?? []
-      lista.push(fluxo)
-      grupos.set(fluxo.modulo, lista)
-    }
-    return [...grupos.entries()].sort(
-      (a, b) => Number(a[0] === 'Básico do dev') - Number(b[0] === 'Básico do dev'),
-    )
-  }, [fluxos])
-
   if (loading) return <Carregando texto="Carregando o progresso..." />
   if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
   if (!dados) return null
@@ -72,6 +53,7 @@ export function SupervisionadoPage() {
   const passosFeitos = dados.passos.filter((p) => p.concluido).length
   const passosTotal = dados.passos.length
   const fluxosFeitos = fluxos.filter((f) => f.concluido).length
+  const acessos = ACESSOS_POR_CARGO[dados.cargo]
 
   return (
     <div className="relative flex w-full max-w-2xl flex-col gap-5">
@@ -81,10 +63,39 @@ export function SupervisionadoPage() {
         <Icon name="arrow_back" className="text-base" /> Voltar pros supervisionados
       </Link>
 
-      <div className="relative self-start p-5">
+      <div className="relative flex items-center gap-3 self-start p-5">
         <MapCorners tamanho={5} opacidade={25} />
         <h1 className="text-2xl font-bold text-neutral-100">{dados.nome}</h1>
+        <span className="rounded-full bg-navy-700 px-2.5 py-1 text-xs font-medium text-neutral-400">
+          {NOME_CARGO[dados.cargo]}
+        </span>
       </div>
+
+      <details className="group rounded-2xl border border-navy-700 bg-navy-800 p-4">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium text-neutral-100">
+          <span className="flex items-center gap-2">
+            <Icon name="key" className="text-base text-gold-400" /> Acessos a liberar (
+            {NOME_CARGO[dados.cargo]})
+          </span>
+          <Icon
+            name="expand_more"
+            className="text-neutral-500 transition-transform duration-200 group-open:rotate-180"
+          />
+        </summary>
+        <ul className="mt-3 flex flex-wrap gap-2">
+          {acessos.map((acesso) => (
+            <li
+              key={acesso}
+              className="rounded-full border border-navy-600 bg-navy-900 px-3 py-1 text-xs text-neutral-300"
+            >
+              {acesso}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 text-xs text-neutral-500">
+          Rascunho ilustrativo por cargo — lista definitiva a confirmar.
+        </p>
+      </details>
 
       <div className="flex gap-2">
         {(['passos', 'fluxos'] as const).map((chave) => (
@@ -106,81 +117,17 @@ export function SupervisionadoPage() {
 
       {aba === 'passos' ? (
         <div className="anim-fade flex flex-col gap-4">
-          {fasesPassos.map(([fase, itens]) => (
-            <section key={fase} className="flex flex-col gap-1">
-              <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                {fase}
-              </h2>
-              <ul className="flex flex-col gap-1">
-                {itens.map((p) => (
-                  <li key={p.id} className="flex flex-col gap-1 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Icon
-                        name={p.concluido ? 'check_circle' : 'radio_button_unchecked'}
-                        className={cx('text-base', p.concluido ? 'text-gold-400' : 'text-neutral-600')}
-                        fill={p.concluido}
-                      />
-                      <span className={p.concluido ? 'text-neutral-300' : 'text-neutral-500'}>
-                        {p.title}
-                      </span>
-                    </div>
-                    {p.concluido && p.evidencia && (
-                      <div className="ml-6 flex items-start gap-1.5 text-xs">
-                        <Icon name="attach_file" className="text-sm text-neutral-600" />
-                        {/^https?:\/\//i.test(p.evidencia.trim()) ? (
-                          <a
-                            href={p.evidencia}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="break-all text-gold-400 underline transition-colors hover:text-gold-300"
-                          >
-                            {p.evidencia}
-                          </a>
-                        ) : (
-                          <span className="whitespace-pre-wrap break-words text-neutral-400">
-                            {p.evidencia}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
+          <p className="self-center text-xs font-medium uppercase tracking-wide text-neutral-500">
+            Progresso de {dados.nome}
+          </p>
+          <TrilhaFasesLeitura passos={dados.passos} />
         </div>
       ) : (
         <div className="anim-fade flex flex-col gap-4">
-          {fluxos.length === 0 && <p className="text-neutral-500">Nenhum fluxo por aqui.</p>}
-          {modulosFluxos.map(([modulo, itens]) => (
-            <section key={modulo} className="flex flex-col gap-1">
-              <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                {modulo}
-              </h2>
-              <ul className="flex flex-col gap-1">
-                {itens.map((f) => (
-                  <li key={f.id} className="flex items-center gap-2 text-sm">
-                    <Icon
-                      name={f.concluido ? 'check_circle' : 'radio_button_unchecked'}
-                      className={cx('text-base', f.concluido ? 'text-gold-400' : 'text-neutral-600')}
-                      fill={f.concluido}
-                    />
-                    <span className={f.concluido ? 'text-neutral-300' : 'text-neutral-500'}>
-                      {f.titulo}
-                    </span>
-                    {f.doSquad && (
-                      <span
-                        title="Faz parte da jornada dele"
-                        className="rounded-full bg-gold-500/20 px-1.5 py-0.5 text-[10px] text-gold-400"
-                      >
-                        do squad
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
+          <p className="self-center text-xs font-medium uppercase tracking-wide text-neutral-500">
+            Guia de {dados.nome}
+          </p>
+          <GuiaModulosLeitura fluxos={fluxos} />
         </div>
       )}
     </div>
