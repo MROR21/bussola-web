@@ -23,7 +23,14 @@ export function GestorPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [adicionando, setAdicionando] = useState(false)
+  const [buscaDisponivel, setBuscaDisponivel] = useState('')
   const navegar = useNavigate()
+
+  const disponiveisFiltrados = disponiveis.filter((u) => {
+    const q = buscaDisponivel.trim().toLowerCase()
+    if (!q) return true
+    return `${u.nome} ${u.email}`.toLowerCase().includes(q)
+  })
 
   async function carregar() {
     setError(null)
@@ -150,11 +157,23 @@ export function GestorPage() {
         </button>
 
         {adicionando && (
-          <ul className="anim-fade flex flex-col gap-2">
+          <div className="anim-fade flex flex-col gap-2">
+            {disponiveis.length > 3 && (
+              <input
+                value={buscaDisponivel}
+                onChange={(e) => setBuscaDisponivel(e.target.value)}
+                placeholder="Buscar por nome ou e-mail..."
+                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500"
+              />
+            )}
+            <ul className="flex flex-col gap-2">
             {disponiveis.length === 0 && (
               <li className="text-sm text-neutral-500">Nenhum colaborador disponível.</li>
             )}
-            {disponiveis.map((u) => (
+            {disponiveis.length > 0 && disponiveisFiltrados.length === 0 && (
+              <li className="text-sm text-neutral-500">Nenhum colaborador encontrado.</li>
+            )}
+            {disponiveisFiltrados.map((u) => (
               <li
                 key={u.id}
                 className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
@@ -172,7 +191,8 @@ export function GestorPage() {
                 </button>
               </li>
             ))}
-          </ul>
+            </ul>
+          </div>
         )}
       </div>
     </div>

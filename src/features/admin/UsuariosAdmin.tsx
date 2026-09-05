@@ -30,7 +30,14 @@ function ListaUsuarios() {
   const [error, setError] = useState<string | null>(null)
   const [alterando, setAlterando] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
+  const [busca, setBusca] = useState('')
   const toastFeedback = useSaidaValor(feedback)
+
+  const itensFiltrados = itens.filter((u) => {
+    const q = busca.trim().toLowerCase()
+    if (!q) return true
+    return `${u.nome} ${u.email}`.toLowerCase().includes(q)
+  })
 
   async function carregar() {
     setLoading(true)
@@ -87,8 +94,20 @@ function ListaUsuarios() {
         <Icon name="person" className="text-xl text-gold-400" /> Usuários
       </h2>
 
+      {itens.length > 3 && (
+        <input
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          placeholder="Buscar por nome ou e-mail..."
+          className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500"
+        />
+      )}
+
       <ul className="flex flex-col gap-2">
-        {itens.map((usuario) => (
+        {itens.length > 0 && itensFiltrados.length === 0 && (
+          <p className="anim-fade text-sm text-neutral-500">Nenhum usuário encontrado.</p>
+        )}
+        {itensFiltrados.map((usuario) => (
           <li
             key={usuario.id}
             className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
@@ -159,8 +178,14 @@ function ListaEmailsAutorizados() {
   const [salvando, setSalvando] = useState(false)
   const [apagando, setApagando] = useState<EmailAutorizado | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
+  const [busca, setBusca] = useState('')
   const modalApagar = useSaidaValor(apagando)
   const toastFeedback = useSaidaValor(feedback)
+
+  const itensFiltrados = itens.filter((item) => {
+    const q = busca.trim().toLowerCase()
+    return !q || item.email.toLowerCase().includes(q)
+  })
 
   async function carregar() {
     setLoading(true)
@@ -242,8 +267,20 @@ function ListaEmailsAutorizados() {
         </button>
       </div>
 
+      {itens.length > 3 && (
+        <input
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          placeholder="Buscar por e-mail..."
+          className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500"
+        />
+      )}
+
       <ul className="flex flex-col gap-2">
-        {itens.map((item) => (
+        {itens.length > 0 && itensFiltrados.length === 0 && (
+          <p className="anim-fade text-sm text-neutral-500">Nenhum e-mail encontrado.</p>
+        )}
+        {itensFiltrados.map((item) => (
           <li
             key={item.id}
             className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
