@@ -112,13 +112,15 @@ export function AppLayout() {
   }
   const regiaoAnterior = useRef<string | null>(null)
 
-  // Expande sozinha a seção da rota atual, mas só na TROCA de seção (deep link, ou veio de outra
-  // aba) — enquanto o usuário navega dentro da mesma seção, não briga com um toggle manual (senão
-  // fechar a árvore e clicar de novo na aba nunca "pegava", ficava sempre reaberta sozinha).
+  // Ao TROCAR de seção (deep link, ou veio de outra aba), fecha sozinha a seção que ficou pra
+  // trás — não abre mais a nova sozinha (isso causava um tremor visual no primeiro clique: abrir
+  // e a lista de galhos empurrando o resto do menu na mesma hora). Quem quiser ver os galhos da
+  // aba nova clica de novo, manualmente (ou na seta, ou na própria label).
   useEffect(() => {
     const atual = regiaoDe(location.pathname)
-    if (atual && atual !== regiaoAnterior.current) {
-      setExpandido((e) => ({ ...e, [atual]: true }))
+    const anterior = regiaoAnterior.current
+    if (anterior && anterior !== atual) {
+      setExpandido((e) => ({ ...e, [anterior]: false }))
     }
     regiaoAnterior.current = atual
   }, [location.pathname])
