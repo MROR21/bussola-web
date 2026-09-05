@@ -148,12 +148,11 @@ export function GuiasPage() {
         <Link
           to={`/fluxo/${encodeURIComponent(fluxo.titulo)}`}
           className={
-            'relative flex flex-col gap-1 overflow-hidden rounded-xl border border-navy-700 bg-navy-800 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-500/50' +
+            'relative flex flex-col gap-1 rounded-xl border border-navy-700 bg-navy-800 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-500/50' +
             (destacado === fluxo.id ? ' animate-pulse ring-2 ring-gold-400' : '')
           }
         >
           <MapCorners tamanho={3} opacidade={15} />
-          <CompassRose className="pointer-events-none absolute -bottom-4 -right-4 size-16 text-gold-500 opacity-[0.06]" />
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-medium text-neutral-100">{fluxo.titulo}</span>
             {fluxo.videoUrl && (
@@ -289,10 +288,9 @@ export function GuiasPage() {
                       key={modulo}
                       type="button"
                       onClick={() => entrarModulo(modulo)}
-                      className="relative flex flex-col gap-2 overflow-hidden rounded-2xl border border-navy-700 bg-navy-800 p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-500/50"
+                      className="relative flex flex-col gap-2 rounded-2xl border border-navy-700 bg-navy-800 p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-500/50"
                     >
                       <MapCorners tamanho={4} opacidade={20} />
-                      <CompassRose className="pointer-events-none absolute -bottom-6 -right-6 size-24 text-gold-500 opacity-[0.06]" />
                       <div className="flex items-center justify-between">
                         <Icon name={iconeDoModulo(modulo)} className="text-2xl text-gold-400" />
                         <Icon name="chevron_right" className="text-neutral-600" />
