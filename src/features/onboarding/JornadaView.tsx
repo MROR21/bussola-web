@@ -23,9 +23,8 @@ const FASE_ICONE: Record<string, string> = {
 }
 const iconeDaFase = (fase: string) => FASE_ICONE[fase] ?? 'flag'
 
-// Só a fase final espera todo o resto pronto antes de liberar — as demais seguem no gate suave
-// (visitável a qualquer momento).
-const FASE_FINAL = 'Primeiro Card'
+// Cada fase só libera depois que a ANTERIOR estiver 100% concluída — gate rígido em sequência
+// (decisão do Miguel 2026-09-05, substituindo o gate suave que só travava a fase final).
 
 // Layout da trilha central: cada fase é um marco numa linha sinuosa (zigue-zague), não um grid de
 // cards — o pedido foi um caminho visual de verdade. X em % (responsivo, mesma escala do viewBox
@@ -142,18 +141,17 @@ export function JornadaView({
   const proximo = trail.find((item) => !estaConcluido(item))
   const faseAtualIndex = proximo ? fases.findIndex(([fase]) => fase === proximo.phase) : fases.length - 1
 
-  const indiceFaseFinal = fases.findIndex(([fase]) => fase === FASE_FINAL)
-  const faseFinalLiberada =
-    indiceFaseFinal < 0 ||
-    fases
-      .slice(0, indiceFaseFinal)
-      .every(([, itens]) => itens.every(estaConcluido))
+  // Fase no índice i só libera se TODAS as anteriores (0..i-1) estiverem 100% concluídas — a
+  // primeira fase sempre libera (slice vazio, every() é true).
+  const faseLiberada = (i: number) =>
+    fases.slice(0, i).every(([, itens]) => itens.every(estaConcluido))
 
   // ---- Vista de UMA fase (entrou no card) ----
-  // Só entra se a fase da URL existe de fato (param inválido/velho → cai na home) e, se for a
-  // fase final, se já estiver liberada (senão volta pra home — o link direto não fura o gate).
-  const faseEntry = faseSelecionada ? fases.find(([f]) => f === faseSelecionada) : undefined
-  const podeEntrar = faseEntry && (faseEntry[0] !== FASE_FINAL || faseFinalLiberada)
+  // Só entra se a fase da URL existe de fato (param inválido/velho → cai na home) e já estiver
+  // liberada na sequência (senão volta pra home — o link direto não fura o gate).
+  const faseSelecionadaIndex = faseSelecionada ? fases.findIndex(([f]) => f === faseSelecionada) : -1
+  const faseEntry = faseSelecionadaIndex >= 0 ? fases[faseSelecionadaIndex] : undefined
+  const podeEntrar = faseEntry && faseLiberada(faseSelecionadaIndex)
   if (podeEntrar) {
     const [faseNome, itens] = faseEntry
     const feitosFase = itens.filter(estaConcluido).length
@@ -312,7 +310,7 @@ export function JornadaView({
             const pct = itens.length > 0 ? Math.round((feitosFase / itens.length) * 100) : 0
             const faseCompleta = feitosFase === itens.length
             const atual = proximo?.phase === fase
-            const bloqueada = fase === FASE_FINAL && !faseFinalLiberada
+            const bloqueada = !faseLiberada(i)
             const ponto = pontosTrilha[i]
 
             return (
@@ -355,7 +353,7 @@ export function JornadaView({
                     </span>
                   )}
                   <span className="text-[11px] text-neutral-500">
-                    {bloqueada ? 'Apto após concluir o resto' : `${feitosFase} de ${itens.length}`}
+                    {bloqueada ? 'Apto após concluir a fase anterior' : `${feitosFase} de ${itens.length}`}
                   </span>
                   <div className="h-1 w-full overflow-hidden rounded-full bg-navy-700">
                     <div
