@@ -10,8 +10,13 @@ function comAuth(headers: Record<string, string> = {}): Record<string, string> {
   return token ? { ...headers, Authorization: `Bearer ${token}` } : headers
 }
 
+// Mensagem genérica pra quando o fetch nem chega a receber resposta (servidor fora do ar, sem
+// rede etc.) — o navegador rejeita a Promise nesses casos, sem status/corpo pra ler.
+const ERRO_SEM_CONEXAO = 'Não foi possível falar com o servidor. Verifique sua conexão ou tente novamente em instantes.'
+
 // Extrai a mensagem de erro do back. Padrão do back: corpo { erro: "..." }.
-// Se não vier JSON (ex.: 204 ou 500 cru), cai numa mensagem genérica com o status.
+// Se não vier JSON (ex.: 500 cru, ou o proxy do Vite respondendo no lugar do back que caiu), cai
+// numa mensagem genérica com só o status — nunca expõe o path interno da API pro usuário.
 async function extrairErro(response: Response, path: string): Promise<string> {
   // 401 fora do login = token expirado/inválido → desloga e volta pro login (sem erro cru).
   if (response.status === 401 && !path.startsWith('/auth/')) {
@@ -26,11 +31,21 @@ async function extrairErro(response: Response, path: string): Promise<string> {
   } catch {
     // resposta sem corpo JSON — usa o fallback abaixo
   }
-  return `Erro ${response.status} ao chamar ${path}`
+  return `Ocorreu um erro no servidor (${response.status}). Tente novamente em instantes.`
+}
+
+// Envolve o fetch de verdade — se ele nem chegar a responder (servidor fora do ar), troca o erro
+// cru do navegador (ex.: "Failed to fetch") por uma mensagem amigável.
+async function fetchOuFalhaAmigavel(path: string, init: RequestInit): Promise<Response> {
+  try {
+    return await fetch(`${API_BASE}${path}`, init)
+  } catch {
+    throw new Error(ERRO_SEM_CONEXAO)
+  }
 }
 
 export async function apiGet<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, { headers: comAuth() })
+  const response = await fetchOuFalhaAmigavel(path, { headers: comAuth() })
   if (!response.ok) {
     throw new Error(await extrairErro(response, path))
   }
@@ -39,7 +54,7 @@ export async function apiGet<T>(path: string): Promise<T> {
 
 // POST com corpo JSON. Usado no nivelamento (envia o Perfil, recebe a trilha).
 export async function apiPost<T>(path: string, body: unknown): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
+  const response = await fetchOuFalhaAmigavel(path, {
     method: 'POST',
     headers: comAuth({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body),
@@ -57,7 +72,7 @@ export async function apiSend(
   path: string,
   body?: unknown,
 ): Promise<void> {
-  const response = await fetch(`${API_BASE}${path}`, {
+  const response = await fetchOuFalhaAmigavel(path, {
     method,
     headers: comAuth(body === undefined ? {} : { 'Content-Type': 'application/json' }),
     body: body === undefined ? undefined : JSON.stringify(body),

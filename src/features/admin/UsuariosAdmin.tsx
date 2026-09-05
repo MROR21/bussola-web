@@ -31,7 +31,9 @@ function ListaUsuarios() {
   const [alterando, setAlterando] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
   const [busca, setBusca] = useState('')
+  const [confirmando, setConfirmando] = useState<{ usuario: UsuarioAdmin; acao: 'gestor' | 'ativo' } | null>(null)
   const toastFeedback = useSaidaValor(feedback)
+  const modalConfirmar = useSaidaValor(confirmando)
 
   const itensFiltrados = itens.filter((u) => {
     const q = busca.trim().toLowerCase()
@@ -85,6 +87,14 @@ function ListaUsuarios() {
     }
   }
 
+  async function confirmarAlteracao() {
+    if (!confirmando) return
+    const { usuario, acao } = confirmando
+    setConfirmando(null)
+    if (acao === 'gestor') await alternar(usuario)
+    else await alternarAcesso(usuario)
+  }
+
   if (loading) return <Carregando texto="Carregando..." />
   if (error) return <p className="text-red-400">Erro: {error}</p>
 
@@ -94,14 +104,12 @@ function ListaUsuarios() {
         <Icon name="person" className="text-xl text-gold-400" /> Usuários
       </h2>
 
-      {itens.length > 3 && (
-        <input
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          placeholder="Buscar por nome ou e-mail..."
-          className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500"
-        />
-      )}
+      <input
+        value={busca}
+        onChange={(e) => setBusca(e.target.value)}
+        placeholder="Buscar por nome ou e-mail..."
+        className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500"
+      />
 
       <ul className="flex flex-col gap-2">
         {itens.length > 0 && itensFiltrados.length === 0 && (
@@ -131,7 +139,7 @@ function ListaUsuarios() {
               )}
               <button
                 type="button"
-                onClick={() => alternar(usuario)}
+                onClick={() => setConfirmando({ usuario, acao: 'gestor' })}
                 disabled={alterando === usuario.id}
                 className="text-sm text-gold-400 transition-all hover:text-gold-300 disabled:cursor-not-allowed disabled:opacity-40"
               >
@@ -139,7 +147,7 @@ function ListaUsuarios() {
               </button>
               <button
                 type="button"
-                onClick={() => alternarAcesso(usuario)}
+                onClick={() => setConfirmando({ usuario, acao: 'ativo' })}
                 disabled={alterando === usuario.id}
                 className={cx(
                   'text-sm transition-all disabled:cursor-not-allowed disabled:opacity-40',
@@ -153,6 +161,70 @@ function ListaUsuarios() {
         ))}
         {itens.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nenhum usuário ainda.</p>}
       </ul>
+
+      {modalConfirmar.montado && modalConfirmar.valor && (
+        <div
+          className={cx(
+            'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
+            modalConfirmar.saindo ? 'anim-fade-out' : 'anim-fade',
+          )}
+          onClick={() => setConfirmando(null)}
+        >
+          <div
+            className={cx(
+              'flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6',
+              modalConfirmar.saindo ? 'anim-pop-out' : 'anim-pop',
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {(() => {
+              const { usuario, acao } = modalConfirmar.valor
+              const titulo =
+                acao === 'gestor'
+                  ? usuario.isGestor
+                    ? 'Remover supervisor?'
+                    : 'Tornar supervisor?'
+                  : usuario.ativo
+                    ? 'Revogar acesso?'
+                    : 'Reativar acesso?'
+              const descricao =
+                acao === 'gestor'
+                  ? usuario.isGestor
+                    ? `"${usuario.nome}" deixa de ver o painel do gestor.`
+                    : `"${usuario.nome}" passa a ver o painel do gestor e pode ter supervisionados.`
+                  : usuario.ativo
+                    ? `"${usuario.nome}" não vai mais conseguir entrar no Bússola.`
+                    : `"${usuario.nome}" volta a conseguir entrar no Bússola.`
+              const perigoso = acao === 'ativo' && usuario.ativo
+              return (
+                <>
+                  <h3 className="text-lg font-semibold text-neutral-100">{titulo}</h3>
+                  <p className="text-sm text-neutral-400">{descricao}</p>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setConfirmando(null)}
+                      className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={confirmarAlteracao}
+                      className={cx(
+                        'rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors',
+                        perigoso ? 'bg-red-500/90 hover:bg-red-500' : 'bg-gold-500 hover:bg-gold-400',
+                      )}
+                    >
+                      Confirmar
+                    </button>
+                  </div>
+                </>
+              )
+            })()}
+          </div>
+        </div>
+      )}
 
       {toastFeedback.montado && toastFeedback.valor && (
         <div
@@ -267,14 +339,12 @@ function ListaEmailsAutorizados() {
         </button>
       </div>
 
-      {itens.length > 3 && (
-        <input
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          placeholder="Buscar por e-mail..."
-          className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500"
-        />
-      )}
+      <input
+        value={busca}
+        onChange={(e) => setBusca(e.target.value)}
+        placeholder="Buscar por e-mail..."
+        className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500"
+      />
 
       <ul className="flex flex-col gap-2">
         {itens.length > 0 && itensFiltrados.length === 0 && (

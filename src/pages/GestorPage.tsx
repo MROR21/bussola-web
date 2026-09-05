@@ -158,14 +158,12 @@ export function GestorPage() {
 
         {adicionando && (
           <div className="anim-fade flex flex-col gap-2">
-            {disponiveis.length > 3 && (
-              <input
-                value={buscaDisponivel}
-                onChange={(e) => setBuscaDisponivel(e.target.value)}
-                placeholder="Buscar por nome ou e-mail..."
-                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500"
-              />
-            )}
+            <input
+              value={buscaDisponivel}
+              onChange={(e) => setBuscaDisponivel(e.target.value)}
+              placeholder="Buscar por nome ou e-mail..."
+              className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500"
+            />
             <ul className="flex flex-col gap-2">
             {disponiveis.length === 0 && (
               <li className="text-sm text-neutral-500">Nenhum colaborador disponível.</li>
