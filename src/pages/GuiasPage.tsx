@@ -198,23 +198,22 @@ export function GuiasPage() {
     )
 
     return (
-      <div className="anim-fade flex w-full max-w-2xl flex-col gap-5">
+      <div className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
+        <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.06]" />
+        <MapIllustration className="pointer-events-none absolute -bottom-10 -left-8 w-56 text-gold-500 opacity-[0.06]" />
         <button
           type="button"
           onClick={sairModulo}
-          className="flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
+          className="relative flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
         >
           <Icon name="arrow_back" className="text-base" /> Voltar pros módulos
         </button>
-        <div className="relative overflow-hidden rounded-2xl border border-navy-700 bg-navy-800 p-5">
-          <MapCorners tamanho={5} opacidade={30} />
-          <MapIllustration className="pointer-events-none absolute -bottom-6 -right-4 w-40 text-gold-500 opacity-[0.06]" />
-          <div className="relative flex items-center gap-3">
-            <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gold-500/10 text-gold-400">
-              <Icon name={iconeDoModulo(moduloSelecionado)} className="text-2xl" />
-            </span>
-            <h1 className="text-2xl font-bold text-neutral-100">{moduloSelecionado}</h1>
-          </div>
+        <div className="relative flex items-center gap-3 self-start p-5">
+          <MapCorners tamanho={5} opacidade={25} />
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gold-500/10 text-gold-400">
+            <Icon name={iconeDoModulo(moduloSelecionado)} className="text-2xl" />
+          </span>
+          <h1 className="text-2xl font-bold text-neutral-100">{moduloSelecionado}</h1>
         </div>
         {grupos.length > 1 ? (
           <div className="flex flex-col gap-6">
@@ -240,26 +239,22 @@ export function GuiasPage() {
 
   // ---- Lista de módulos (cards) + busca global ----
   return (
-    <div className="anim-fade flex w-full max-w-2xl flex-col gap-6">
-      <header className="relative overflow-hidden rounded-3xl border border-navy-700 bg-navy-800 p-6 shadow-xl shadow-black/20">
-        <MapCorners />
-        <CompassRose
-          className="pointer-events-none absolute -bottom-8 -right-8 size-32 text-gold-500 opacity-[0.06]"
-        />
-        <MapIllustration className="pointer-events-none absolute -left-8 -top-6 w-48 text-gold-500 opacity-[0.05]" />
-        <div className="relative flex flex-col gap-1">
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
-            <Icon name="menu_book" className="text-2xl text-gold-400" /> Guia pelo sistema
-          </h1>
-          <p className="text-sm text-neutral-400">
-            Consulte qualquer fluxo do sistema, de qualquer squad, quando precisar.
+    <div className="anim-fade relative flex w-full max-w-2xl flex-col gap-6">
+      <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.06]" />
+      <MapIllustration className="pointer-events-none absolute -bottom-6 -left-8 w-56 text-gold-500 opacity-[0.06]" />
+      <header className="relative flex flex-col gap-1 self-start p-5">
+        <MapCorners tamanho={5} opacidade={25} />
+        <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
+          <Icon name="menu_book" className="text-2xl text-gold-400" /> Guia pelo sistema
+        </h1>
+        <p className="text-sm text-neutral-400">
+          Consulte qualquer fluxo do sistema, de qualquer squad, quando precisar.
+        </p>
+        {fluxos.length > 0 && (
+          <p className="text-xs text-neutral-500">
+            {feitos} de {fluxos.length} concluídos
           </p>
-          {fluxos.length > 0 && (
-            <p className="text-xs text-neutral-500">
-              {feitos} de {fluxos.length} concluídos
-            </p>
-          )}
-        </div>
+        )}
       </header>
 
       <input
