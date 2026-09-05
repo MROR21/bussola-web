@@ -140,19 +140,29 @@ export function GuiasPage() {
     )
   }, [busca, fluxos])
 
-  // Conteúdo interno de um item de fluxo (ícone + título + descrição), reusado nos dois estilos de
-  // linha abaixo. O ícone indica o TIPO de conteúdo (vídeo/artigo) — o Guia é um repositório de
-  // consulta, não uma trilha a completar, então não carrega nenhuma marca de "concluído" aqui (o
-  // "Marcar como concluído" continua existindo, só que dentro do próprio fluxo).
-  function conteudoFluxo(fluxo: Fluxo, ocultarTag: boolean) {
+  // Um item de fluxo (card com link), reusado na busca e dentro do módulo.
+  // ocultarTag: esconde o chip da categoria quando o item já está sob o cabeçalho da tag.
+  function itemFluxo(fluxo: Fluxo, ocultarTag = false) {
     return (
-      <>
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-navy-700 text-neutral-500">
-          <Icon name={fluxo.videoUrl ? 'smart_display' : 'article'} className="text-lg" />
-        </span>
-        <div className="flex min-w-0 flex-col gap-0.5">
+      <li key={fluxo.id} id={`fluxo-${fluxo.id}`}>
+        <Link
+          to={`/fluxo/${encodeURIComponent(fluxo.titulo)}`}
+          className={
+            'relative flex flex-col gap-1 rounded-xl border border-navy-700 bg-navy-800 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-500/50' +
+            (destacado === fluxo.id ? ' animate-pulse ring-2 ring-gold-400' : '')
+          }
+        >
+          <MapCorners tamanho={3} opacidade={15} />
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-medium text-neutral-100">{fluxo.titulo}</span>
+            {fluxo.videoUrl && (
+              <Icon name="smart_display" className="text-base text-neutral-400" title="Tem vídeo" />
+            )}
+            {concluidos.has(fluxo.id) && (
+              <span className="flex items-center gap-1 rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
+                <Icon name="check" className="text-sm" /> Concluído
+              </span>
+            )}
             {!ocultarTag && fluxo.categoria && (
               <span className="rounded-full bg-navy-700 px-2 py-0.5 text-xs text-neutral-400">
                 {fluxo.categoria}
@@ -160,43 +170,6 @@ export function GuiasPage() {
             )}
           </div>
           <span className="text-sm text-neutral-400">{fluxo.descricao}</span>
-        </div>
-      </>
-    )
-  }
-
-  // Item avulso (card próprio) — usado na busca e no módulo de tag única, onde não há uma lista
-  // compartilhada pra agrupar as linhas.
-  function itemFluxo(fluxo: Fluxo, ocultarTag = false) {
-    return (
-      <li key={fluxo.id} id={`fluxo-${fluxo.id}`}>
-        <Link
-          to={`/fluxo/${encodeURIComponent(fluxo.titulo)}`}
-          className={
-            'relative flex items-center gap-3 rounded-xl border border-navy-700 bg-navy-800 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-500/50' +
-            (destacado === fluxo.id ? ' animate-pulse ring-2 ring-gold-400' : '')
-          }
-        >
-          <MapCorners tamanho={3} opacidade={15} />
-          {conteudoFluxo(fluxo, ocultarTag)}
-        </Link>
-      </li>
-    )
-  }
-
-  // Linha dentro de uma lista de tag agrupada — sem borda/card próprio, as linhas dividem o mesmo
-  // container (visual de "índice de documentação", menos denso que um card empilhado por item).
-  function linhaFluxo(fluxo: Fluxo) {
-    return (
-      <li key={fluxo.id} id={`fluxo-${fluxo.id}`}>
-        <Link
-          to={`/fluxo/${encodeURIComponent(fluxo.titulo)}`}
-          className={
-            'flex items-center gap-3 p-4 transition-colors hover:bg-navy-700/40' +
-            (destacado === fluxo.id ? ' animate-pulse bg-gold-500/10' : '')
-          }
-        >
-          {conteudoFluxo(fluxo, true)}
         </Link>
       </li>
     )
@@ -243,12 +216,14 @@ export function GuiasPage() {
           <h1 className="text-2xl font-bold text-neutral-100">{moduloSelecionado}</h1>
         </div>
         {grupos.length > 1 ? (
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-6">
             {grupos.map(([tag, fluxosTag]) => (
               <section key={tag} className="flex flex-col gap-2">
-                <h2 className="text-sm font-semibold text-neutral-300">{tag}</h2>
-                <ul className="flex flex-col divide-y divide-navy-700 overflow-hidden rounded-xl border border-navy-700 bg-navy-800">
-                  {fluxosTag.map((f) => linhaFluxo(f))}
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+                  {tag}
+                </h2>
+                <ul className="flex flex-col gap-2">
+                  {fluxosTag.map((f) => itemFluxo(f, true))}
                 </ul>
               </section>
             ))}
