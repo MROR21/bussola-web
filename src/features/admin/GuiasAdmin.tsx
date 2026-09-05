@@ -16,7 +16,16 @@ import type { FluxoAdmin, FluxoAdminInput, Modulo } from './types'
 
 const SQUADS: Squad[] = ['MaoDeObra', 'QuizQuality', 'Agilean']
 
-export function FluxosAdmin() {
+// Tópico é só um agrupamento VISUAL por cima dos Módulos que já existem (mesma regra da GuiasPage,
+// sem entidade/migration nova) — todo módulo cai em "Fluxos do sistema" por padrão.
+const TOPICO_POR_MODULO: Record<string, string> = {
+  'Básico do dev': 'Padrões do sistema',
+}
+const TOPICO_PADRAO = 'Fluxos do sistema'
+const topicoDoModulo = (m: string) => TOPICO_POR_MODULO[m] ?? TOPICO_PADRAO
+const pesoTopico = (t: string) => (t === TOPICO_PADRAO ? '' : t)
+
+export function GuiasAdmin() {
   const [fluxos, setFluxos] = useState<FluxoAdmin[]>([])
   const [modulos, setModulos] = useState<Modulo[]>([])
   const [loading, setLoading] = useState(true)
@@ -120,6 +129,29 @@ export function FluxosAdmin() {
 
   const nomeDoModulo = (moduloId: string) => modulos.find((m) => m.id === moduloId)?.nome ?? '?'
 
+  // Agrupa os fluxos por Módulo (na ordem já definida no Admin de Módulos) e os módulos por
+  // Tópico — mesma organização visual da tela de Guias, pra achar um item específico mais rápido
+  // do que rolando uma lista única com tudo misturado.
+  const porTopico = (() => {
+    const porModulo = new Map<string, FluxoAdmin[]>()
+    for (const f of fluxos) {
+      const lista = porModulo.get(f.moduloId) ?? []
+      lista.push(f)
+      porModulo.set(f.moduloId, lista)
+    }
+    const porTopicoMap = new Map<string, [Modulo, FluxoAdmin[]][]>()
+    for (const modulo of modulos) {
+      const itens = porModulo.get(modulo.id) ?? []
+      const topico = topicoDoModulo(modulo.nome)
+      const lista = porTopicoMap.get(topico) ?? []
+      lista.push([modulo, itens])
+      porTopicoMap.set(topico, lista)
+    }
+    return [...porTopicoMap.entries()].sort((a, b) =>
+      pesoTopico(a[0]).localeCompare(pesoTopico(b[0]), 'pt'),
+    )
+  })()
+
   if (loading) return <Carregando texto="Carregando..." />
   if (error) return <p className="text-red-400">Erro: {error}</p>
 
@@ -127,7 +159,7 @@ export function FluxosAdmin() {
     <div className="anim-fade flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
-          <Icon name="menu_book" className="text-xl text-gold-400" /> Fluxos
+          <Icon name="menu_book" className="text-xl text-gold-400" /> Guias
         </h2>
         <button
           type="button"
@@ -138,41 +170,64 @@ export function FluxosAdmin() {
         </button>
       </div>
 
-      <ul className="flex flex-col gap-2">
-        {fluxos.map((f) => (
-          <li
-            key={f.id}
-            className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
-          >
-            <div className="flex min-w-0 flex-col">
-              <span className="truncate text-neutral-100">
-                #{f.order} · {f.titulo}
-              </span>
-              <span className="text-xs text-neutral-500">
-                {nomeDoModulo(f.moduloId)}
-                {f.squad ? ` · ${f.squad}` : ' · todos os squads'}
-              </span>
-            </div>
-            <div className="flex shrink-0 gap-3">
-              <button
-                type="button"
-                onClick={() => abrirEdicao(f)}
-                className="text-sm text-gold-400 transition-colors hover:text-gold-300"
-              >
-                Editar
-              </button>
-              <button
-                type="button"
-                onClick={() => setApagando(f)}
-                className="text-sm text-red-400 transition-colors hover:text-red-300"
-              >
-                Apagar
-              </button>
-            </div>
-          </li>
-        ))}
-        {fluxos.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nenhum fluxo cadastrado.</p>}
-      </ul>
+      {fluxos.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nenhum fluxo cadastrado.</p>}
+
+      <div className="flex flex-col gap-5">
+        {porTopico.map(([topico, modulosDoTopico]) => {
+          const totalTopico = modulosDoTopico.reduce((n, [, itens]) => n + itens.length, 0)
+          if (totalTopico === 0) return null
+          return (
+            <section key={topico} className="flex flex-col gap-3">
+              {porTopico.length > 1 && (
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  {topico}
+                </h3>
+              )}
+              {modulosDoTopico.map(([modulo, itens]) =>
+                itens.length === 0 ? null : (
+                  <div key={modulo.id} className="flex flex-col gap-2">
+                    <h4 className="text-sm font-medium text-neutral-400">{modulo.nome}</h4>
+                    <ul className="flex flex-col gap-2">
+                      {itens.map((f) => (
+                        <li
+                          key={f.id}
+                          className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
+                        >
+                          <div className="flex min-w-0 flex-col">
+                            <span className="truncate text-neutral-100">
+                              #{f.order} · {f.titulo}
+                            </span>
+                            <span className="text-xs text-neutral-500">
+                              {nomeDoModulo(f.moduloId)}
+                              {f.squad ? ` · ${f.squad}` : ' · todos os squads'}
+                            </span>
+                          </div>
+                          <div className="flex shrink-0 gap-3">
+                            <button
+                              type="button"
+                              onClick={() => abrirEdicao(f)}
+                              className="text-sm text-gold-400 transition-colors hover:text-gold-300"
+                            >
+                              Editar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setApagando(f)}
+                              className="text-sm text-red-400 transition-colors hover:text-red-300"
+                            >
+                              Apagar
+                            </button>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ),
+              )}
+            </section>
+          )
+        })}
+      </div>
 
       {modalForm.montado && (
         <div

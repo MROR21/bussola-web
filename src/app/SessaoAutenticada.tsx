@@ -9,8 +9,8 @@ import { AppLayout } from './AppLayout'
 import { AdminPage } from '../pages/AdminPage'
 import { ChatPage } from '../pages/ChatPage'
 import { FluxoDetalhePage } from '../pages/FluxoDetalhePage'
-import { FluxosPage } from '../pages/FluxosPage'
 import { GestorPage } from '../pages/GestorPage'
+import { GuiasPage } from '../pages/GuiasPage'
 import { JornadaPage } from '../pages/JornadaPage'
 import { NivelamentoPage } from '../pages/NivelamentoPage'
 import { PassoDetalhePage } from '../pages/PassoDetalhePage'
@@ -119,8 +119,8 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
             }
           />
           <Route path="/passo/:titulo" element={<PassoDetalhePage />} />
-          <Route path="/fluxos" element={<FluxosPage />} />
-          <Route path="/fluxos/:modulo" element={<FluxosPage />} />
+          <Route path="/guias" element={<GuiasPage />} />
+          <Route path="/guias/:modulo" element={<GuiasPage />} />
           <Route path="/fluxo/:titulo" element={<FluxoDetalhePage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/perfil" element={<PerfilPage />} />

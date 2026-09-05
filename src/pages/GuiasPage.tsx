@@ -19,17 +19,28 @@ const MODULO_ICONE: Record<string, string> = {
 }
 const iconeDoModulo = (m: string) => MODULO_ICONE[m] ?? 'extension'
 
-// Guia pelo sistema (referência viva): módulos em cards → entra → fluxos dentro (+ busca global).
-// Aberto a qualquer colaborador logado, gestor ou não — não há mais atribuição individual: o
-// fluxo do próprio squad já entra como parte da Jornada; aqui é a consulta livre de tudo.
-export function FluxosPage() {
+// Tópico é só um agrupamento VISUAL por cima dos Módulos que já existem (sem entidade/migration
+// nova) — todo módulo cai em "Fluxos do sistema" por padrão, exceto os listados aqui.
+const TOPICO_POR_MODULO: Record<string, string> = {
+  'Básico do dev': 'Padrões do sistema',
+}
+const TOPICO_PADRAO = 'Fluxos do sistema'
+const topicoDoModulo = (m: string) => TOPICO_POR_MODULO[m] ?? TOPICO_PADRAO
+// "Fluxos do sistema" sempre lidera; "Padrões do sistema" (e qualquer outro tópico futuro) depois.
+const pesoTopico = (t: string) => (t === TOPICO_PADRAO ? '' : t)
+
+// Guia pelo sistema (referência viva): módulos em cards, agrupados por Tópico → entra → fluxos
+// dentro (+ busca global). Aberto a qualquer colaborador logado, gestor ou não — não há mais
+// atribuição individual: o fluxo do próprio squad já entra como parte da Jornada; aqui é a
+// consulta livre de tudo.
+export function GuiasPage() {
   const [fluxos, setFluxos] = useState<Fluxo[]>([])
   const [concluidos, setConcluidos] = useState<Set<string>>(new Set())
   const [busca, setBusca] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [tentativa, setTentativa] = useState(0)
-  // O módulo aberto vive no PATH (/fluxos/:modulo) — mesmo padrão da Jornada: assim o "voltar" (do
+  // O módulo aberto vive no PATH (/guias/:modulo) — mesmo padrão da Jornada: assim o "voltar" (do
   // navegador ou ao sair de um fluxo) retorna pro módulo certo, não pro topo do guia. `destaque`
   // continua um parâmetro de busca (é um deep-link de notificação, não "onde" você está).
   const { modulo: moduloParam } = useParams<{ modulo?: string }>()
@@ -37,8 +48,8 @@ export function FluxosPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const destaqueParam = searchParams.get('destaque')
-  const entrarModulo = (modulo: string) => navigate(`/fluxos/${encodeURIComponent(modulo)}`)
-  const sairModulo = () => navigate('/fluxos')
+  const entrarModulo = (modulo: string) => navigate(`/guias/${encodeURIComponent(modulo)}`)
+  const sairModulo = () => navigate('/guias')
   const [destacado, setDestacado] = useState<string | null>(null)
 
   useTitulo(moduloSelecionado ?? 'Guia pelo sistema')
@@ -72,7 +83,7 @@ export function FluxosPage() {
     const alvo = fluxos.find((f) => f.id === destaqueParam)
     if (!alvo) return
     if (moduloSelecionado !== alvo.modulo) {
-      navigate(`/fluxos/${encodeURIComponent(alvo.modulo)}?destaque=${destaqueParam}`, {
+      navigate(`/guias/${encodeURIComponent(alvo.modulo)}?destaque=${destaqueParam}`, {
         replace: true,
       })
       return
@@ -105,11 +116,21 @@ export function FluxosPage() {
       lista.push(fluxo)
       grupos.set(fluxo.modulo, lista)
     }
-    // "Básico do dev" sempre por último → o módulo do squad aparece primeiro.
-    return [...grupos.entries()].sort(
-      (a, b) => Number(a[0] === 'Básico do dev') - Number(b[0] === 'Básico do dev'),
-    )
+    return [...grupos.entries()]
   }, [fluxos])
+
+  // Agrupa os módulos (já com seus fluxos) por Tópico — "Fluxos do sistema" sempre primeiro,
+  // "Padrões do sistema" (Básico do dev) depois. Puramente visual, não vem do back.
+  const porTopico = useMemo(() => {
+    const grupos = new Map<string, [string, Fluxo[]][]>()
+    for (const entrada of porModulo) {
+      const topico = topicoDoModulo(entrada[0])
+      const lista = grupos.get(topico) ?? []
+      lista.push(entrada)
+      grupos.set(topico, lista)
+    }
+    return [...grupos.entries()].sort((a, b) => pesoTopico(a[0]).localeCompare(pesoTopico(b[0]), 'pt'))
+  }, [porModulo])
 
   const resultadosBusca = useMemo(() => {
     const q = busca.trim().toLowerCase()
@@ -255,35 +276,46 @@ export function FluxosPage() {
           <ul className="anim-fade flex flex-col gap-2">{resultadosBusca.map((f) => itemFluxo(f))}</ul>
         )
       ) : (
-        <div className="anim-fade grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {porModulo.map(([modulo, itens]) => {
-            const feitosMod = itens.filter((f) => concluidos.has(f.id)).length
-            const pct = itens.length > 0 ? Math.round((feitosMod / itens.length) * 100) : 0
-            return (
-              <button
-                key={modulo}
-                type="button"
-                onClick={() => entrarModulo(modulo)}
-                className="relative flex flex-col gap-2 rounded-2xl border border-navy-700 bg-navy-800 p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-500/50"
-              >
-                <MapCorners tamanho={4} opacidade={20} />
-                <div className="flex items-center justify-between">
-                  <Icon name={iconeDoModulo(modulo)} className="text-2xl text-gold-400" />
-                  <Icon name="chevron_right" className="text-neutral-600" />
-                </div>
-                <h3 className="font-semibold text-neutral-100">{modulo}</h3>
-                <span className="text-sm text-neutral-500">
-                  {feitosMod} de {itens.length} concluídos
-                </span>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-navy-700">
-                  <div
-                    className="h-full rounded-full bg-gold-500 transition-all"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-              </button>
-            )
-          })}
+        <div className="anim-fade flex flex-col gap-6">
+          {porTopico.map(([topico, modulos]) => (
+            <section key={topico} className="flex flex-col gap-3">
+              {porTopico.length > 1 && (
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+                  {topico}
+                </h2>
+              )}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {modulos.map(([modulo, itens]) => {
+                  const feitosMod = itens.filter((f) => concluidos.has(f.id)).length
+                  const pct = itens.length > 0 ? Math.round((feitosMod / itens.length) * 100) : 0
+                  return (
+                    <button
+                      key={modulo}
+                      type="button"
+                      onClick={() => entrarModulo(modulo)}
+                      className="relative flex flex-col gap-2 rounded-2xl border border-navy-700 bg-navy-800 p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-500/50"
+                    >
+                      <MapCorners tamanho={4} opacidade={20} />
+                      <div className="flex items-center justify-between">
+                        <Icon name={iconeDoModulo(modulo)} className="text-2xl text-gold-400" />
+                        <Icon name="chevron_right" className="text-neutral-600" />
+                      </div>
+                      <h3 className="font-semibold text-neutral-100">{modulo}</h3>
+                      <span className="text-sm text-neutral-500">
+                        {feitosMod} de {itens.length} concluídos
+                      </span>
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-navy-700">
+                        <div
+                          className="h-full rounded-full bg-gold-500 transition-all"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </section>
+          ))}
         </div>
       )}
     </div>

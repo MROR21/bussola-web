@@ -46,11 +46,11 @@ function TrilhaIcon() {
 
 type Papel = 'gestor' | 'colaborador'
 // `arvore` diz que tipo de galho essa seção tem (fase ou módulo) — usado só pra escolher a lista
-// certa (`fases`/`modulos`) e a base do path (/fase ou /fluxos) na hora de montar o link.
+// certa (`fases`/`modulos`) e a base do path (/fase ou /guias) na hora de montar o link.
 const NAV: { to: string; label: string; icon: ReactNode; end: boolean; papel?: Papel; arvore?: 'fase' | 'modulo' }[] = [
   { to: '/gestor', label: 'Supervisionados', icon: <Icon name="group" className="text-[18px]" />, end: false, papel: 'gestor' },
   { to: '/', label: 'Jornada', icon: <TrilhaIcon />, end: true, papel: 'colaborador', arvore: 'fase' },
-  { to: '/fluxos', label: 'Guias', icon: <Icon name="menu_book" className="text-[18px]" />, end: false, arvore: 'modulo' },
+  { to: '/guias', label: 'Guias', icon: <Icon name="menu_book" className="text-[18px]" />, end: false, arvore: 'modulo' },
   { to: '/chat', label: 'Assistente', icon: <Icon name="chat" className="text-[18px]" />, end: false },
   { to: '/admin', label: 'Admin', icon: <Icon name="build" className="text-[18px]" />, end: false, papel: 'gestor' },
   { to: '/perfil', label: 'Perfil', icon: <Icon name="settings" className="text-[18px]" />, end: false },
@@ -107,7 +107,7 @@ export function AppLayout() {
   // ENTROU numa seção vindo de fora — não a cada navegação dentro dela.
   const regiaoDe = (pathname: string): string | null => {
     if (pathname === '/' || pathname.startsWith('/fase')) return '/'
-    if (pathname.startsWith('/fluxo')) return '/fluxos'
+    if (pathname.startsWith('/fluxo') || pathname.startsWith('/guias')) return '/guias'
     return null
   }
   const regiaoAnterior = useRef<string | null>(null)
@@ -221,7 +221,7 @@ export function AppLayout() {
                     {galhos.map((nome) => {
                       // Fase e Módulo têm bases de path diferentes (fase vive fora da Jornada,
                       // módulo é sub-rota do próprio Guia) — não dá pra derivar só de `item.to`.
-                      const base = item.arvore === 'fase' ? '/fase' : '/fluxos'
+                      const base = item.arvore === 'fase' ? '/fase' : '/guias'
                       const linkTo = `${base}/${encodeURIComponent(nome)}`
                       const ativo = location.pathname === linkTo
                       return (

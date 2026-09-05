@@ -250,7 +250,7 @@ export function JornadaView({
               Agora é com você! <Icon name="rocket_launch" className="text-lg" />
             </p>
             <Link
-              to="/fluxos"
+              to="/guias"
               className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
             >
               Ir pro Guia pelo sistema

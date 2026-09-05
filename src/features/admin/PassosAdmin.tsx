@@ -118,6 +118,18 @@ export function PassosAdmin() {
 
   const nomeDaFase = (faseId: string) => fases.find((f) => f.id === faseId)?.nome ?? '?'
 
+  // Agrupa os passos por Fase (na ordem já definida no Admin de Fases) — mesma organização visual
+  // da Jornada em si, pra achar um passo específico mais rápido do que rolando uma lista única.
+  const porFase = (() => {
+    const grupos = new Map<string, PassoAdmin[]>()
+    for (const p of passos) {
+      const lista = grupos.get(p.faseId) ?? []
+      lista.push(p)
+      grupos.set(p.faseId, lista)
+    }
+    return fases.map((fase) => [fase, grupos.get(fase.id) ?? []] as const)
+  })()
+
   if (loading) return <Carregando texto="Carregando..." />
   if (error) return <p className="text-red-400">Erro: {error}</p>
 
@@ -136,38 +148,50 @@ export function PassosAdmin() {
         </button>
       </div>
 
-      <ul className="flex flex-col gap-2">
-        {passos.map((p) => (
-          <li
-            key={p.id}
-            className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
-          >
-            <div className="flex min-w-0 flex-col">
-              <span className="truncate text-neutral-100">
-                #{p.order} · {p.title}
-              </span>
-              <span className="text-xs text-neutral-500">{nomeDaFase(p.faseId)}</span>
-            </div>
-            <div className="flex shrink-0 gap-3">
-              <button
-                type="button"
-                onClick={() => abrirEdicao(p)}
-                className="text-sm text-gold-400 transition-colors hover:text-gold-300"
-              >
-                Editar
-              </button>
-              <button
-                type="button"
-                onClick={() => setApagando(p)}
-                className="text-sm text-red-400 transition-colors hover:text-red-300"
-              >
-                Apagar
-              </button>
-            </div>
-          </li>
-        ))}
-        {passos.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nenhum passo cadastrado.</p>}
-      </ul>
+      {passos.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nenhum passo cadastrado.</p>}
+
+      <div className="flex flex-col gap-5">
+        {porFase.map(([fase, itens]) =>
+          itens.length === 0 ? null : (
+            <section key={fase.id} className="flex flex-col gap-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                {fase.nome}
+              </h3>
+              <ul className="flex flex-col gap-2">
+                {itens.map((p) => (
+                  <li
+                    key={p.id}
+                    className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
+                  >
+                    <div className="flex min-w-0 flex-col">
+                      <span className="truncate text-neutral-100">
+                        #{p.order} · {p.title}
+                      </span>
+                      <span className="text-xs text-neutral-500">{nomeDaFase(p.faseId)}</span>
+                    </div>
+                    <div className="flex shrink-0 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => abrirEdicao(p)}
+                        className="text-sm text-gold-400 transition-colors hover:text-gold-300"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setApagando(p)}
+                        className="text-sm text-red-400 transition-colors hover:text-red-300"
+                      >
+                        Apagar
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ),
+        )}
+      </div>
 
       {modalForm.montado && (
         <div
