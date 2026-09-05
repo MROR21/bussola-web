@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { CompassRose } from '../components/CompassRose'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
 import { MapCorners } from '../components/MapCorners'
@@ -195,20 +196,23 @@ export function PassoDetalhePage() {
   if (!step) return null
 
   return (
-    <article className="flex w-full max-w-2xl flex-col gap-5">
+    <article className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
+      <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.06]" />
+      <MapIllustration className="pointer-events-none absolute -bottom-10 -left-8 w-56 text-gold-500 opacity-[0.06]" />
       {/* Volta no histórico (não um destino fixo) — quem entrou por uma fase da Jornada retorna
           pra ela, em vez de sempre cair na home (era o bug que o Miguel reportou: link fixo pra
           "/", igual ao que já tinha sido corrigido no Fluxo). */}
       <button
         type="button"
         onClick={() => navigate(-1)}
-        className="flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
+        className="relative flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
       >
         <Icon name="arrow_back" className="text-base" /> Voltar
       </button>
 
-      <header className="flex items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
+      <header className="relative flex items-start justify-between gap-3">
+        <div className="relative flex flex-col gap-1 self-start p-5">
+          <MapCorners tamanho={5} opacidade={25} />
           <span className="text-sm text-neutral-500">
             Passo {step.order} · {step.phase}
           </span>
@@ -292,9 +296,7 @@ export function PassoDetalhePage() {
           </div>
         </div>
       ) : (
-        <div className="anim-fade relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed">
-          <MapCorners tamanho={5} opacidade={25} />
-          <MapIllustration className="pointer-events-none absolute -bottom-4 -right-6 w-56 text-gold-500 opacity-[0.06]" />
+        <div className="anim-fade flex flex-col gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed">
           <Markdown>{step.conteudo}</Markdown>
         </div>
       )}
