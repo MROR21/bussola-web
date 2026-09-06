@@ -43,37 +43,64 @@ function ItemDiarioDeBordo({
   bloqueado: boolean
   href: string
 }) {
-  const conteudo = (
-    <>
-      <div className="flex shrink-0 flex-col items-center">
+  const marco = (
+    <div className="flex shrink-0 flex-col items-center">
+      <span
+        className={cx(
+          'flex size-11 shrink-0 items-center justify-center rounded-full border-2 bg-navy-800 text-base transition-colors duration-200',
+          bloqueado
+            ? 'border-dashed border-navy-600 text-neutral-600 opacity-60'
+            : feito
+              ? 'border-amber-400/70 text-amber-400'
+              : atual
+                ? 'anim-pulso border-gold-400 text-gold-400 shadow-[0_0_0_4px_rgba(201,162,39,0.15)]'
+                : 'border-navy-600 text-gold-400',
+        )}
+      >
+        <Icon
+          name={bloqueado ? 'lock' : feito ? 'military_tech' : item.tipo === 'fluxo' ? 'hub' : 'flag'}
+          fill={feito}
+        />
+      </span>
+      {!isLast && (
         <span
           className={cx(
-            'flex size-11 shrink-0 items-center justify-center rounded-full border-2 bg-navy-800 text-base transition-colors duration-200',
-            bloqueado
-              ? 'border-dashed border-navy-600 text-neutral-600 opacity-60'
-              : feito
-                ? 'border-amber-400/70 text-amber-400'
-                : atual
-                  ? 'anim-pulso border-gold-400 text-gold-400 shadow-[0_0_0_4px_rgba(201,162,39,0.15)]'
-                  : 'border-navy-600 text-gold-400',
+            'my-1 min-h-[16px] w-px flex-1',
+            bloqueado ? 'border-l border-dashed border-navy-600' : 'bg-navy-600',
           )}
-        >
-          <Icon
-            name={
-              bloqueado ? 'lock' : feito ? 'military_tech' : item.tipo === 'fluxo' ? 'hub' : 'flag'
-            }
-            fill={feito}
-          />
-        </span>
-        {!isLast && (
-          <span
-            className={cx(
-              'my-1 min-h-[16px] w-px flex-1',
-              bloqueado ? 'border-l border-dashed border-navy-600' : 'bg-navy-600',
-            )}
-          />
-        )}
-      </div>
+        />
+      )}
+    </div>
+  )
+
+  // O item ATUAL se expande em formato de destaque (título, descrição, CTA) na própria posição
+  // dele na lista — assim que ele é concluído, vira uma entrada compacta igual as outras, e é o
+  // próximo item que virar "atual" quem expande, no lugar dele.
+  if (atual) {
+    return (
+      <li className="flex gap-3">
+        {marco}
+        <div className="relative mb-6 flex-1 overflow-hidden rounded-xl border border-gold-500/50 bg-gold-500/10 p-4">
+          <MapCorners tamanho={4} opacidade={25} />
+          <span className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-gold-400">
+            <Icon name="play_arrow" className="text-sm" /> Passo atual
+          </span>
+          <h3 className="text-base font-semibold text-neutral-100">{item.title}</h3>
+          {item.description && <p className="text-sm text-neutral-400">{item.description}</p>}
+          <Link
+            to={href}
+            className="mt-2 inline-block rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
+          >
+            Ir para o {item.tipo === 'fluxo' ? 'fluxo' : 'passo'}
+          </Link>
+        </div>
+      </li>
+    )
+  }
+
+  const conteudo = (
+    <>
+      {marco}
       <div className="flex flex-1 flex-col gap-0.5 pb-6">
         <span className="text-xs text-neutral-500">
           {item.tipo === 'fluxo' ? 'Fluxo do squad' : `Passo ${indice + 1}`}
@@ -81,16 +108,11 @@ function ItemDiarioDeBordo({
         <span
           className={cx(
             'text-sm font-medium leading-snug',
-            bloqueado ? 'text-neutral-600' : atual ? 'text-gold-300' : 'text-neutral-200',
+            bloqueado ? 'text-neutral-600' : 'text-neutral-200',
           )}
         >
           {item.title}
         </span>
-        {atual && (
-          <span className="w-fit rounded-full bg-gold-500/20 px-2 py-0.5 text-[11px] font-medium text-gold-300">
-            Aguardando você
-          </span>
-        )}
         {feito && (
           <span className="w-fit rounded-full bg-amber-400/10 px-2 py-0.5 text-[11px] text-amber-400">
             Carimbado
@@ -288,31 +310,12 @@ export function JornadaView({
         ) : (
           itemAtual && (
             <>
-              <div className="relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-gold-500/50 bg-gold-500/10 p-5">
-                <MapCorners tamanho={5} opacidade={25} />
-                <div className="flex items-start gap-3">
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-gold-400/50 bg-navy-800 text-gold-400">
-                    <Icon name={itemAtual.tipo === 'fluxo' ? 'hub' : 'flag'} className="text-lg" />
-                  </span>
-                  <div className="flex flex-col gap-1">
-                    <span className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-gold-400">
-                      <Icon name="play_arrow" className="text-sm" /> Passo atual
-                    </span>
-                    <h3 className="text-lg font-semibold text-neutral-100">{itemAtual.title}</h3>
-                    <p className="text-sm text-neutral-400">{itemAtual.description}</p>
-                  </div>
-                </div>
-                <Link
-                  to={hrefDoItem(itemAtual)}
-                  className="self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
-                >
-                  Ir para o {itemAtual.tipo === 'fluxo' ? 'fluxo' : 'passo'}
-                </Link>
-              </div>
-
               {/* "Diário de bordo" — lista vertical de entradas de log ligadas por uma linha fina
                   (não a trilha sinuosa da Jornada: um nível abaixo pede um registro mais discreto,
-                  tipo caderno de bordo, não outro mapa). */}
+                  tipo caderno de bordo, não outro mapa). O destaque do "passo atual" não é mais um
+                  card fixo separado — a entrada atual DENTRO da lista se expande (título, descrição,
+                  botão) e some pro formato compacto assim que é concluída, o próximo item que virar
+                  atual expande no lugar dele (o destaque "sobe" acompanhando o progresso). */}
               <ul className="relative flex flex-col">
                 {itens.map((item, i) => (
                   <ItemDiarioDeBordo
