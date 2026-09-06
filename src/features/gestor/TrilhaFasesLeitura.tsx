@@ -10,7 +10,7 @@ const FASE_ICONE: Record<string, string> = {
   'Ambiente técnico': 'computer',
   Padrões: 'square_foot',
   'Conheça o sistema': 'hub',
-  'Primeiro Card': 'assignment',
+  'Primeiro Card': 'emoji_events',
 }
 const iconeDaFase = (fase: string) => FASE_ICONE[fase] ?? 'flag'
 const FASE_FINAL = 'Primeiro Card'
@@ -44,8 +44,13 @@ export function TrilhaFasesLeitura({ passos }: { passos: PassoProgresso[] }) {
     [fases],
   )
 
+  // O "+140" precisa caber o card de rótulo mais alto possível — quando a ÚLTIMA fase da trilha
+  // também é a "atual" (mostra o badge extra "Está aqui"), o card fica mais alto que o normal; com
+  // folga curta demais (era +90), esse card vazava por baixo da altura do container e ficava
+  // sobreposto ao conteúdo seguinte da página (bug real reportado pelo Miguel, print da fase
+  // "Primeiro Card" por cima do checklist).
   const alturaTrilha =
-    pontosTrilha.length > 0 ? pontosTrilha[pontosTrilha.length - 1].y + TRILHA_CIRCULO / 2 + 90 : 0
+    pontosTrilha.length > 0 ? pontosTrilha[pontosTrilha.length - 1].y + TRILHA_CIRCULO / 2 + 140 : 0
 
   const caminhoTrilha = useMemo(() => {
     if (pontosTrilha.length < 2) return ''
