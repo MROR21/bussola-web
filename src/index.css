@@ -16,37 +16,36 @@
   --color-gold-300: #e8c968;
 }
 
-/* Modo claro — segunda versão (2026-09-06), refeita com pesquisa de verdade depois que a 1ª
-   tentativa (texto cinza puro, espelhado matematicamente) saiu "pouco profissional". Duas ideias
-   centrais, baseadas em como sistemas de design sérios fazem essa conversão (Material Design 3 e
-   afins): (1) NÃO inverter a escala de cinza — cada cor tem seu próprio ajuste de tom/saturação;
-   texto nunca fica cinza neutro nem preto puro, sempre carrega uma leve matiz de marca (aqui, a
-   mesma matiz fria do navy, ~265 graus em OKLCH — "tinta" contra o "papel" quente do fundo,
-   reforçando a metáfora de carta náutica: papel envelhecido + tinta escura). (2) o acento (gold)
-   fica mais ESCURO E mais SATURADO no claro (não só mais escuro) — o dourado do escuro é claro e
-   pouco saturado de propósito (pra não estourar contra o navy escuro); no claro precisa do oposto.
-   Todo valor abaixo foi calculado em OKLCH e conferido contra o contraste mínimo WCAG AA (4.5:1 pra
-   texto normal, 3:1 pro resto) — não é palpite.
-   - navy: fundo/borda com leve matiz quente (~80 graus, tom de pergaminho antigo), fundo de
-     cartão mais claro que o fundo de página (cartão "elevado" acima do papel).
-   - gold: mesmo tom (~88-90 graus), lightness bem mais baixa e chroma um pouco maior que no
-     escuro — resultado tipo "bronze antigo", não "dourado lavado".
-   - neutral (texto): tingido de navy (~265 graus) em toda a escala, não só nos extremos — cada
-     degrau (100 a 700) tem sua própria luminosidade E chroma, testado por contraste real (não é
-     mais só espelhar 100↔900 etc.).
-   - red/green/amber: mantidos com os valores REAIS do Tailwind (600 a 800), medidos por
-     contraste — não são tons inventados. */
+/* Modo claro — terceira versão (2026-09-06). A 2ª versão trocava a matiz do fundo pra um tom
+   quente de pergaminho (~80 graus) enquanto o texto ficava frio (~265, matiz do navy) — bonito,
+   mas o Miguel apontou o problema real: isso não é como sistemas sérios costumam derivar um modo
+   do outro. Pesquisei de novo e confirmei — Material Design faz exatamente o padrão que ele
+   descreveu: MESMA matiz de marca nos dois modos, só muda o tom (claro = tom bem alto/quase
+   branco da mesma cor; escuro = tom bem baixo/quase preto dela) — não troca de matiz. Aqui: o
+   fundo do modo claro agora usa a MESMA matiz do navy escuro (~265 graus, azul frio), só clareada
+   — é literalmente "o azul escuro, só que claro", não um tom de papel diferente. O dourado continua
+   a única cor que muda de comportamento (fica mais vivo/saturado no claro, não só mais escuro) —
+   isso também é padrão documentado (o acento pode ficar mais saturado no claro que no escuro,
+   ficando fiel à ideia do Miguel de "cores mais vivas, não só o oposto"). Contraste calculado e
+   validado em cada valor (WCAG AA, 4.5:1 texto normal).
+   - navy: mesma matiz ~265 (a do navy escuro) em toda a escala, só a luminosidade muda — cartão
+     mais claro que a página (elevação).
+   - gold: mesma matiz (~88-90), mais escuro E MAIS saturado que no escuro — acento vivo de
+     propósito, não "bronze apagado".
+   - neutral (texto): mesma matiz ~265, coerente agora com o fundo (antes era a única coisa fria
+     num fundo quente — inconsistência corrigida).
+   - red/green/amber: mantidos (valores reais do Tailwind, medidos por contraste). */
 :root[data-theme='light'] {
   color-scheme: light;
-  --color-navy-900: oklch(96% 0.014 85);
-  --color-navy-800: oklch(99% 0.006 85);
-  --color-navy-700: oklch(88% 0.018 80);
-  --color-navy-600: oklch(78% 0.035 78);
-  --color-navy-500: oklch(62% 0.05 75);
+  --color-navy-900: oklch(95% 0.02 265);
+  --color-navy-800: oklch(98.5% 0.008 265);
+  --color-navy-700: oklch(82% 0.03 265);
+  --color-navy-600: oklch(72% 0.05 265);
+  --color-navy-500: oklch(58% 0.08 265);
 
-  --color-gold-500: oklch(52% 0.145 88);
-  --color-gold-400: oklch(58% 0.15 89);
-  --color-gold-300: oklch(66% 0.135 90);
+  --color-gold-500: oklch(53% 0.17 88);
+  --color-gold-400: oklch(60% 0.17 89);
+  --color-gold-300: oklch(68% 0.155 90);
 
   --color-neutral-100: oklch(22% 0.025 265);
   --color-neutral-200: oklch(30% 0.022 265);
