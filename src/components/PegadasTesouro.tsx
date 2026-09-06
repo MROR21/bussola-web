@@ -33,7 +33,7 @@ export function PegadasTesouro({ className = '' }: { className?: string }) {
       <svg
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
-        className="pointer-events-none absolute inset-0 size-full text-gold-500/30"
+        className="pointer-events-none absolute inset-0 size-full text-gold-500/60"
       >
         <path
           d={ROTA}
