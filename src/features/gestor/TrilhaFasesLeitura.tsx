@@ -122,10 +122,7 @@ export function TrilhaFasesLeitura({ passos }: { passos: PassoProgresso[] }) {
                   expandida && 'ring-2 ring-gold-300/60',
                 )}
               >
-                <Icon
-                  name={bloqueada ? 'lock' : faseCompleta ? 'military_tech' : iconeDaFase(fase)}
-                  fill={faseCompleta}
-                />
+                <Icon name={bloqueada ? 'lock' : iconeDaFase(fase)} />
               </span>
               <span className="flex w-full flex-col items-center gap-1 rounded-xl border border-navy-700 bg-navy-800 px-3 py-2 text-center">
                 <span className="text-[10px] font-medium uppercase tracking-wide text-neutral-500">
