@@ -37,10 +37,11 @@ export function PegadasTesouro({ className = '' }: { className?: string }) {
       >
         <path
           d={ROTA}
+          pathLength={100}
           fill="none"
           stroke="currentColor"
           strokeWidth={1.2}
-          strokeDasharray="3 4"
+          strokeDasharray="2 3"
           strokeLinecap="round"
           vectorEffect="non-scaling-stroke"
         />
