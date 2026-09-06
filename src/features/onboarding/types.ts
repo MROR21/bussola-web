@@ -11,6 +11,7 @@ export interface OnboardingStep {
   isCompanySpecific: boolean
   skillArea: SkillArea
   conteudo: string
+  videoUrl: string
 }
 
 // Profundidade recomendada de um passo, calculada pelo back a partir do Perfil.

@@ -69,6 +69,7 @@ export function PassosAdmin() {
       isCompanySpecific: true,
       skillArea: 'None',
       conteudo: '',
+      videoUrl: '',
     })
   }
 
@@ -82,6 +83,7 @@ export function PassosAdmin() {
       isCompanySpecific: passo.isCompanySpecific,
       skillArea: passo.skillArea,
       conteudo: passo.conteudo,
+      videoUrl: passo.videoUrl,
     })
   }
 
@@ -282,6 +284,16 @@ export function PassosAdmin() {
                 Específico da Agilean (sempre essencial)
               </label>
             </div>
+
+            <label className="flex flex-col gap-1 text-sm text-neutral-400">
+              URL do vídeo (opcional)
+              <input
+                value={form.videoUrl}
+                onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
+                placeholder="https://..."
+                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
+              />
+            </label>
 
             <div className="flex flex-col gap-1 text-sm text-neutral-400">
               Conteúdo

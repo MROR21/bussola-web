@@ -21,22 +21,7 @@ import {
   listarFluxos,
 } from '../features/fluxos/fluxosService'
 import type { Fluxo } from '../features/fluxos/types'
-
-// Converte links comuns de YouTube pro formato /embed; outros (Vimeo, interno) passam direto.
-function paraEmbed(url: string): string {
-  try {
-    const u = new URL(url)
-    if (u.hostname.includes('youtube.com') && u.searchParams.get('v')) {
-      return `https://www.youtube.com/embed/${u.searchParams.get('v')}`
-    }
-    if (u.hostname === 'youtu.be') {
-      return `https://www.youtube.com/embed${u.pathname}`
-    }
-    return url
-  } catch {
-    return url
-  }
-}
+import { paraEmbed } from '../utils/video'
 
 // Página de um fluxo (rota /fluxo/:titulo): o conteúdo em Markdown, consulta pura.
 export function FluxoDetalhePage() {

@@ -10,6 +10,7 @@ import { MarkdownEditor } from '../components/MarkdownEditor'
 import { Carregando, Spinner } from '../components/Spinner'
 import { useSaida } from '../hooks/useSaida'
 import { cx } from '../utils/cx'
+import { paraEmbed } from '../utils/video'
 import { useAuthStore } from '../features/auth/authStore'
 import { useTitulo } from '../hooks/useTitulo'
 import { editarPasso, listarPassosAdmin } from '../features/admin/adminService'
@@ -63,7 +64,7 @@ export function PassoDetalhePage() {
   const [editandoConteudo, setEditandoConteudo] = useState(false)
   const [carregandoEdicao, setCarregandoEdicao] = useState(false)
   const [baseAdmin, setBaseAdmin] = useState<PassoAdmin | null>(null)
-  const [camposConteudo, setCamposConteudo] = useState<Pick<PassoAdmin, 'title' | 'description' | 'conteudo'> | null>(null)
+  const [camposConteudo, setCamposConteudo] = useState<Pick<PassoAdmin, 'title' | 'description' | 'conteudo' | 'videoUrl'> | null>(null)
   const [salvandoConteudo, setSalvandoConteudo] = useState(false)
   const [erroEdicao, setErroEdicao] = useState<string | null>(null)
   const [salvo, setSalvo] = useState(false)
@@ -147,6 +148,7 @@ export function PassoDetalhePage() {
         title: atual.title,
         description: atual.description,
         conteudo: atual.conteudo,
+        videoUrl: atual.videoUrl,
       })
       setEditandoConteudo(true)
     } catch (e) {
@@ -262,6 +264,15 @@ export function PassoDetalhePage() {
             />
           </label>
           <label className="flex flex-col gap-1 text-sm text-neutral-400">
+            URL do vídeo (opcional)
+            <input
+              value={camposConteudo.videoUrl}
+              onChange={(e) => setCamposConteudo({ ...camposConteudo, videoUrl: e.target.value })}
+              placeholder="https://..."
+              className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-sm text-neutral-400">
             Conteúdo
             <MarkdownEditor
               value={camposConteudo.conteudo}
@@ -296,8 +307,21 @@ export function PassoDetalhePage() {
           </div>
         </div>
       ) : (
-        <div className="anim-fade flex flex-col gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed">
-          <Markdown>{step.conteudo}</Markdown>
+        <div className="anim-fade flex flex-col gap-5">
+          {step.videoUrl && (
+            <div className="aspect-video w-full overflow-hidden rounded-2xl border border-navy-700">
+              <iframe
+                src={paraEmbed(step.videoUrl)}
+                title={step.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="size-full"
+              />
+            </div>
+          )}
+          <div className="flex flex-col gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed">
+            <Markdown>{step.conteudo}</Markdown>
+          </div>
         </div>
       )}
 

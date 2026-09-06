@@ -21,6 +21,7 @@ export interface PassoAdmin {
   isCompanySpecific: boolean
   skillArea: SkillArea
   conteudo: string
+  videoUrl: string
 }
 
 export type PassoAdminInput = Omit<PassoAdmin, 'id'>
