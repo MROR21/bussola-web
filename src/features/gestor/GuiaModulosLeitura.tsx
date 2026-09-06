@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Icon } from '../../components/Icon'
 import { MapCorners } from '../../components/MapCorners'
 import { cx } from '../../utils/cx'
@@ -17,6 +17,12 @@ const iconeDoModulo = (m: string) => MODULO_ICONE[m] ?? 'extension'
 // clicando expande a lista de fluxos daquele módulo em vez de mostrar tudo de cara.
 export function GuiaModulosLeitura({ fluxos }: { fluxos: FluxoProgresso[] }) {
   const [moduloExpandido, setModuloExpandido] = useState<string | null>(null)
+  // Guarda o último módulo visto mesmo depois de fechar — sem isso, ao clicar de novo pra fechar o
+  // conteúdo some junto, e não sobra nada pra animar encolhendo até 0.
+  const [ultimoModuloVisto, setUltimoModuloVisto] = useState<string | null>(null)
+  useEffect(() => {
+    if (moduloExpandido) setUltimoModuloVisto(moduloExpandido)
+  }, [moduloExpandido])
 
   const porModulo = useMemo(() => {
     const grupos = new Map<string, FluxoProgresso[]>()
@@ -70,36 +76,50 @@ export function GuiaModulosLeitura({ fluxos }: { fluxos: FluxoProgresso[] }) {
         })}
       </div>
 
-      {moduloExpandido && (
-        <section className="anim-fade flex flex-col gap-2 rounded-2xl border border-navy-700 bg-navy-800 p-4">
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-            {moduloExpandido}
-          </h4>
-          <ul className="flex flex-col gap-1.5">
-            {porModulo
-              .find(([m]) => m === moduloExpandido)?.[1]
-              .map((f) => (
-                <li key={f.id} className="flex items-center gap-2 text-sm">
-                  <Icon
-                    name={f.concluido ? 'check_circle' : 'radio_button_unchecked'}
-                    className={cx('text-base', f.concluido ? 'text-gold-400' : 'text-neutral-600')}
-                    fill={f.concluido}
-                  />
-                  <span className={f.concluido ? 'text-neutral-300' : 'text-neutral-500'}>
-                    {f.titulo}
-                  </span>
-                  {f.doSquad && (
-                    <span
-                      title="Faz parte da jornada dele"
-                      className="rounded-full bg-gold-500/20 px-1.5 py-0.5 text-[10px] text-gold-400"
-                    >
-                      do squad
-                    </span>
-                  )}
-                </li>
-              ))}
-          </ul>
-        </section>
+      {/* Grid-rows em vez de montar/desmontar na hora (mesma técnica do menu lateral) — guarda o
+          último módulo visto pra ter conteúdo pra mostrar ENQUANTO encolhe até 0. */}
+      {ultimoModuloVisto && (
+        <div
+          className={cx(
+            'grid transition-[grid-template-rows] duration-200 ease-out',
+            moduloExpandido ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+          )}
+        >
+          <div className="overflow-hidden">
+            <section className="flex flex-col gap-2 rounded-2xl border border-navy-700 bg-navy-800 p-4">
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                {ultimoModuloVisto}
+              </h4>
+              <ul className="flex flex-col gap-1.5">
+                {porModulo
+                  .find(([m]) => m === ultimoModuloVisto)?.[1]
+                  .map((f) => (
+                    <li key={f.id} className="flex items-center gap-2 text-sm">
+                      <Icon
+                        name={f.concluido ? 'check_circle' : 'radio_button_unchecked'}
+                        className={cx(
+                          'text-base',
+                          f.concluido ? 'text-gold-400' : 'text-neutral-600',
+                        )}
+                        fill={f.concluido}
+                      />
+                      <span className={f.concluido ? 'text-neutral-300' : 'text-neutral-500'}>
+                        {f.titulo}
+                      </span>
+                      {f.doSquad && (
+                        <span
+                          title="Faz parte da jornada dele"
+                          className="rounded-full bg-gold-500/20 px-1.5 py-0.5 text-[10px] text-gold-400"
+                        >
+                          do squad
+                        </span>
+                      )}
+                    </li>
+                  ))}
+              </ul>
+            </section>
+          </div>
+        </div>
       )}
     </div>
   )

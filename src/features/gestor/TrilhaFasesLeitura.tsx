@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Icon } from '../../components/Icon'
 import { cx } from '../../utils/cx'
 import type { PassoProgresso } from './types'
@@ -24,6 +24,13 @@ const TRILHA_AMPLITUDE = 25
 // clicar num marco só abre/fecha os itens daquela fase aqui embaixo, não navega nem marca nada.
 export function TrilhaFasesLeitura({ passos }: { passos: PassoProgresso[] }) {
   const [faseExpandida, setFaseExpandida] = useState<string | null>(null)
+  // Guarda a última fase mostrada mesmo depois de fechar — sem isso, ao clicar de novo pra fechar
+  // o conteúdo some junto (`faseExpandida` vira null), e não sobra nada pra animar encolhendo até
+  // 0 (só desmontava na hora, sem transição nenhuma).
+  const [ultimaFaseVista, setUltimaFaseVista] = useState<string | null>(null)
+  useEffect(() => {
+    if (faseExpandida) setUltimaFaseVista(faseExpandida)
+  }, [faseExpandida])
 
   const fases = useMemo(() => {
     const grupos = new Map<string, PassoProgresso[]>()
@@ -70,7 +77,9 @@ export function TrilhaFasesLeitura({ passos }: { passos: PassoProgresso[] }) {
     indiceFaseFinal < 0 ||
     fases.slice(0, indiceFaseFinal).every(([, itens]) => itens.every((p) => p.concluido))
 
-  const itensExpandidos = faseExpandida ? fases.find(([f]) => f === faseExpandida)?.[1] : undefined
+  const itensExpandidos = ultimaFaseVista
+    ? fases.find(([f]) => f === ultimaFaseVista)?.[1]
+    : undefined
 
   if (fases.length === 0) return null
 
@@ -124,7 +133,7 @@ export function TrilhaFasesLeitura({ passos }: { passos: PassoProgresso[] }) {
                       : atual
                         ? 'border-gold-400 text-gold-400 shadow-[0_0_0_5px_rgba(201,162,39,0.15)]'
                         : 'border-navy-600 text-gold-400 hover:border-gold-500/60',
-                  expandida && 'anim-pulso',
+                  (atual || expandida) && 'anim-pulso',
                 )}
               >
                 <Icon name={bloqueada ? 'lock' : iconeDaFase(fase)} />
@@ -154,47 +163,62 @@ export function TrilhaFasesLeitura({ passos }: { passos: PassoProgresso[] }) {
         })}
       </div>
 
+      {/* Grid-rows em vez de montar/desmontar na hora (mesma técnica do menu lateral) — guarda a
+          última fase vista (`ultimaFaseVista`) pra ter conteúdo pra mostrar ENQUANTO encolhe até
+          0, já que `faseExpandida` vira null assim que fecha. */}
       {itensExpandidos && (
-        <section className="anim-fade flex flex-col gap-2 rounded-2xl border border-navy-700 bg-navy-800 p-4">
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-            {faseExpandida}
-          </h4>
-          <ul className="flex flex-col gap-1.5">
-            {itensExpandidos.map((p) => (
-              <li key={p.id} className="flex flex-col gap-1 text-sm">
-                <div className="flex items-center gap-2">
-                  <Icon
-                    name={p.concluido ? 'check_circle' : 'radio_button_unchecked'}
-                    className={cx('text-base', p.concluido ? 'text-gold-400' : 'text-neutral-600')}
-                    fill={p.concluido}
-                  />
-                  <span className={p.concluido ? 'text-neutral-300' : 'text-neutral-500'}>
-                    {p.title}
-                  </span>
-                </div>
-                {p.concluido && p.evidencia && (
-                  <div className="ml-6 flex items-start gap-1.5 text-xs">
-                    <Icon name="attach_file" className="text-sm text-neutral-600" />
-                    {/^https?:\/\//i.test(p.evidencia.trim()) ? (
-                      <a
-                        href={p.evidencia}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="break-all text-gold-400 underline transition-colors hover:text-gold-300"
-                      >
-                        {p.evidencia}
-                      </a>
-                    ) : (
-                      <span className="whitespace-pre-wrap break-words text-neutral-400">
-                        {p.evidencia}
+        <div
+          className={cx(
+            'grid transition-[grid-template-rows] duration-200 ease-out',
+            faseExpandida ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+          )}
+        >
+          <div className="overflow-hidden">
+            <section className="flex flex-col gap-2 rounded-2xl border border-navy-700 bg-navy-800 p-4">
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                {ultimaFaseVista}
+              </h4>
+              <ul className="flex flex-col gap-1.5">
+                {itensExpandidos.map((p) => (
+                  <li key={p.id} className="flex flex-col gap-1 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Icon
+                        name={p.concluido ? 'check_circle' : 'radio_button_unchecked'}
+                        className={cx(
+                          'text-base',
+                          p.concluido ? 'text-gold-400' : 'text-neutral-600',
+                        )}
+                        fill={p.concluido}
+                      />
+                      <span className={p.concluido ? 'text-neutral-300' : 'text-neutral-500'}>
+                        {p.title}
                       </span>
+                    </div>
+                    {p.concluido && p.evidencia && (
+                      <div className="ml-6 flex items-start gap-1.5 text-xs">
+                        <Icon name="attach_file" className="text-sm text-neutral-600" />
+                        {/^https?:\/\//i.test(p.evidencia.trim()) ? (
+                          <a
+                            href={p.evidencia}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="break-all text-gold-400 underline transition-colors hover:text-gold-300"
+                          >
+                            {p.evidencia}
+                          </a>
+                        ) : (
+                          <span className="whitespace-pre-wrap break-words text-neutral-400">
+                            {p.evidencia}
+                          </span>
+                        )}
+                      </div>
                     )}
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        </section>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </div>
+        </div>
       )}
     </div>
   )
