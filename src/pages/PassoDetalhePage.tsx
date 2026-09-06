@@ -201,6 +201,12 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
   if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
   if (!step) return null
 
+  // Comprovação (link de PR/print/nota) só faz sentido na fase "Primeiro Card" — é a única onde o
+  // passo produz um artefato real pra linkar. Nas demais fases (Ambientação/Padrões/Ambiente
+  // técnico) o passo é leitura ou uma ação local pontual (instalar algo, clonar um repo) sem nada
+  // que valha a pena anexar, então ali o botão só marca concluído.
+  const exigeComprovacao = step.phase === 'Primeiro Card'
+
   return (
     <article className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
       <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.06]" />
@@ -334,7 +340,16 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
             <Icon name="check" className="text-sm" /> Concluído
           </span>
 
-          {editando ? (
+          {!exigeComprovacao ? (
+            <button
+              type="button"
+              onClick={desmarcar}
+              disabled={salvando}
+              className="self-start rounded-lg px-4 py-2 text-sm text-neutral-400 transition-all hover:bg-navy-700 disabled:opacity-50"
+            >
+              Desmarcar
+            </button>
+          ) : editando ? (
             <div className="anim-fade flex flex-col gap-3">
               <textarea
                 value={evidencia}
@@ -399,17 +414,21 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
         </section>
       ) : (
         <section className="anim-fade flex flex-col gap-2 rounded-2xl border border-navy-700 bg-navy-800 p-5">
-          <span className="text-sm font-medium text-neutral-200">Comprovação (opcional)</span>
-          <p className="text-xs text-neutral-500">
-            Cole o link do PR, um print, ou uma nota do que você fez.
-          </p>
-          <textarea
-            value={evidencia}
-            onChange={(e) => setEvidencia(e.target.value)}
-            rows={2}
-            placeholder="https://bitbucket.org/... ou uma nota"
-            className={inputCls}
-          />
+          {exigeComprovacao && (
+            <>
+              <span className="text-sm font-medium text-neutral-200">Comprovação (opcional)</span>
+              <p className="text-xs text-neutral-500">
+                Cole o link do PR, um print, ou uma nota do que você fez.
+              </p>
+              <textarea
+                value={evidencia}
+                onChange={(e) => setEvidencia(e.target.value)}
+                rows={2}
+                placeholder="https://bitbucket.org/... ou uma nota"
+                className={inputCls}
+              />
+            </>
+          )}
           <button
             type="button"
             onClick={concluir}
