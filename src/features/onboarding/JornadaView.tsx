@@ -35,7 +35,7 @@ const FASE_RESUMO: Record<string, string> = {
 }
 
 // Confete saindo do card quando a fase é concluída — cada pedacinho "explode" (pop + queda curta +
-// sumiço) e REPETE várias vezes seguidas (~10s no total, como se confetes novos fossem surgindo),
+// sumiço) e REPETE 3 vezes seguidas (~3s no total, como se confetes novos fossem surgindo),
 // não é 1 pedaço caindo devagar. Depois da última repetição, `forwards` segura invisível (não fica
 // em loop pra sempre). Posições espalhadas nas 4 bordas do card, pra dar a sensação de "saindo de
 // dentro dele" pros lados de fora.
