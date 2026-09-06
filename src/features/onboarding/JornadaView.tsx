@@ -18,7 +18,7 @@ const FASE_ICONE: Record<string, string> = {
   'Ambiente técnico': 'computer',
   Padrões: 'square_foot',
   'Conheça o sistema': 'hub',
-  'Primeiro Card': 'emoji_events',
+  'Primeiro Card': 'assignment',
 }
 const iconeDaFase = (fase: string) => FASE_ICONE[fase] ?? 'flag'
 

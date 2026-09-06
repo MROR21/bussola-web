@@ -10,7 +10,7 @@ const FASE_ICONE: Record<string, string> = {
   'Ambiente técnico': 'computer',
   Padrões: 'square_foot',
   'Conheça o sistema': 'hub',
-  'Primeiro Card': 'emoji_events',
+  'Primeiro Card': 'assignment',
 }
 const iconeDaFase = (fase: string) => FASE_ICONE[fase] ?? 'flag'
 const FASE_FINAL = 'Primeiro Card'
@@ -119,7 +119,7 @@ export function TrilhaFasesLeitura({ passos }: { passos: PassoProgresso[] }) {
                       : atual
                         ? 'border-gold-400 text-gold-400 shadow-[0_0_0_5px_rgba(201,162,39,0.15)]'
                         : 'border-navy-600 text-gold-400 hover:border-gold-500/60',
-                  expandida && 'ring-2 ring-gold-300/60',
+                  expandida && 'anim-pulso',
                 )}
               >
                 <Icon name={bloqueada ? 'lock' : iconeDaFase(fase)} />
