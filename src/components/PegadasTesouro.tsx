@@ -14,9 +14,10 @@ const ROTA = 'M8 85 Q40 75 28 55 T60 32 T84 10'
 
 const PEGADAS = [
   { top: '67.8%', left: '31%', rotate: 12, atraso: 0 },
-  { top: '46.1%', left: '25.5%', rotate: 7, atraso: 0.3 },
-  { top: '34.1%', left: '43.4%', rotate: 78, atraso: 0.6 },
-  { top: '26.7%', left: '85.7%', rotate: 60, atraso: 0.9 },
+  { top: '46.1%', left: '25.5%', rotate: 7, atraso: 0.25 },
+  { top: '34.1%', left: '43.4%', rotate: 78, atraso: 0.5 },
+  { top: '30.7%', left: '71.8%', rotate: 81, atraso: 0.75 },
+  { top: '26.7%', left: '85.7%', rotate: 60, atraso: 1 },
 ] as const
 
 export function PegadasTesouro({ className = '' }: { className?: string }) {
@@ -25,7 +26,9 @@ export function PegadasTesouro({ className = '' }: { className?: string }) {
       <TreePalm className="absolute -left-2 -top-1 h-10 w-7 text-gold-500/25" />
       <TreePalm className="absolute -left-3 bottom-2 h-14 w-10 text-gold-500/30" />
       <TreePalm className="absolute -right-3 bottom-4 h-10 w-7 -scale-x-100 text-gold-500/20" />
+      <TreePalm className="absolute h-8 w-6 text-gold-500/25" style={{ top: '44%', left: '56%' }} />
       <Mountain className="absolute bottom-0 left-[24%] h-9 w-16 text-gold-500/20" />
+      <Mountain className="absolute -top-2 h-9 w-16 text-gold-500/20" style={{ left: '52%' }} />
 
       <svg
         viewBox="0 0 100 100"
