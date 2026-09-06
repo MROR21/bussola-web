@@ -144,6 +144,18 @@
   }
 }
 
+/* Pulso do selo "atual" no diário de bordo (JornadaView.tsx) — marca visualmente que é o item
+   aguardando o usuário, sem precisar de texto extra. */
+@keyframes bussola-pulso {
+  0%,
+  100% {
+    box-shadow: 0 0 0 4px rgba(201, 162, 39, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(201, 162, 39, 0.28);
+  }
+}
+
 /* Entrada de página/conteúdo (sobe suave). Sem fill-mode: o keyframe final já é
    idêntico ao estado normal (transform:none), então não precisa "segurar" — segurar
    deixaria um transform ativo, e isso quebra position:fixed dos filhos (viram
@@ -182,6 +194,10 @@
   animation: bussola-tesouro 1.6s ease-in-out infinite;
 }
 
+.anim-pulso {
+  animation: bussola-pulso 2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .anim-page,
   .anim-fade,
@@ -199,5 +215,9 @@
   .anim-tesouro {
     animation: none;
     opacity: 1;
+  }
+
+  .anim-pulso {
+    animation: none;
   }
 }

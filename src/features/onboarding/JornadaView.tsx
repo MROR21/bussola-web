@@ -33,12 +33,6 @@ const TRILHA_CIRCULO = 64
 const TRILHA_PASSO_Y = 168
 const TRILHA_AMPLITUDE = 25
 
-// Mesma técnica, só que pra trilha de PASSOS dentro de uma fase (marcos menores, mais próximos —
-// uma fase costuma ter mais itens do que a Jornada tem fases).
-const PASSO_CIRCULO = 48
-const PASSO_PASSO_Y = 110
-const PASSO_AMPLITUDE = 18
-
 // Home "Sua Jornada": progresso geral + próximo passo + fases em CARDS (clica e entra na fase).
 export function JornadaView({
   trail,
@@ -145,25 +139,6 @@ export function JornadaView({
         ? `/fluxo/${encodeURIComponent(item.title)}`
         : `/passo/${encodeURIComponent(item.title)}`
 
-    const pontosTrilhaItens = itens.map((_, i) => ({
-      x: i === 0 ? 50 : i % 2 === 1 ? 50 - PASSO_AMPLITUDE : 50 + PASSO_AMPLITUDE,
-      y: i * PASSO_PASSO_Y + PASSO_CIRCULO / 2,
-    }))
-    const alturaTrilhaItens =
-      pontosTrilhaItens.length > 0
-        ? pontosTrilhaItens[pontosTrilhaItens.length - 1].y + PASSO_CIRCULO / 2 + 60
-        : 0
-    let caminhoTrilhaItens = ''
-    if (pontosTrilhaItens.length >= 2) {
-      caminhoTrilhaItens = `M ${pontosTrilhaItens[0].x} ${pontosTrilhaItens[0].y}`
-      for (let i = 1; i < pontosTrilhaItens.length; i++) {
-        const anterior = pontosTrilhaItens[i - 1]
-        const atual = pontosTrilhaItens[i]
-        const meioY = (anterior.y + atual.y) / 2
-        caminhoTrilhaItens += ` C ${anterior.x} ${meioY}, ${atual.x} ${meioY}, ${atual.x} ${atual.y}`
-      }
-    }
-
     return (
       <div className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
         <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.06]" />
@@ -239,88 +214,98 @@ export function JornadaView({
                 </Link>
               </div>
 
-              <div
-                className="relative mx-auto w-full max-w-sm"
-                style={{ height: alturaTrilhaItens }}
-              >
-                <svg
-                  viewBox={`0 0 100 ${alturaTrilhaItens}`}
-                  preserveAspectRatio="none"
-                  className="pointer-events-none absolute inset-0 size-full text-navy-700"
-                  aria-hidden="true"
-                >
-                  <path
-                    d={caminhoTrilhaItens}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    strokeDasharray="3 7"
-                    strokeLinecap="round"
-                    vectorEffect="non-scaling-stroke"
-                  />
-                </svg>
-
+              {/* "Diário de bordo" — lista vertical de entradas de log ligadas por uma linha fina
+                  (não a trilha sinuosa da Jornada: um nível abaixo pede um registro mais discreto,
+                  tipo caderno de bordo, não outro mapa). Feito vira selo dourado preenchido; atual
+                  pulsa esperando ser carimbado; bloqueado fica opaco com cadeado e tracejado. */}
+              <ul className="relative flex flex-col">
                 {itens.map((item, i) => {
                   const feito = estaConcluido(item)
                   const atual = item.id === itemAtual.id
                   const bloqueado = i > itemAtualIndex
-                  const ponto = pontosTrilhaItens[i]
+                  const isLast = i === itens.length - 1
                   const conteudo = (
                     <>
-                      <span
-                        className={cx(
-                          'flex size-12 shrink-0 items-center justify-center rounded-full border-2 bg-navy-800 text-lg transition-colors duration-200',
-                          bloqueado
-                            ? 'border-dashed border-navy-600 text-neutral-600 opacity-60'
-                            : feito
-                              ? 'border-amber-400/70 text-amber-400'
-                              : atual
-                                ? 'border-gold-400 text-gold-400 shadow-[0_0_0_4px_rgba(201,162,39,0.15)]'
-                                : 'border-navy-600 text-gold-400',
-                        )}
-                      >
-                        <Icon
-                          name={
+                      <div className="flex shrink-0 flex-col items-center">
+                        <span
+                          className={cx(
+                            'flex size-11 shrink-0 items-center justify-center rounded-full border-2 bg-navy-800 text-base transition-colors duration-200',
                             bloqueado
-                              ? 'lock'
+                              ? 'border-dashed border-navy-600 text-neutral-600 opacity-60'
                               : feito
-                                ? 'military_tech'
-                                : item.tipo === 'fluxo'
-                                  ? 'hub'
-                                  : 'flag'
-                          }
-                          fill={feito}
-                        />
-                      </span>
-                      <span className="w-full max-w-[120px] truncate text-center text-[11px] text-neutral-400">
-                        {item.title}
-                      </span>
+                                ? 'border-amber-400/70 text-amber-400'
+                                : atual
+                                  ? 'anim-pulso border-gold-400 text-gold-400 shadow-[0_0_0_4px_rgba(201,162,39,0.15)]'
+                                  : 'border-navy-600 text-gold-400',
+                          )}
+                        >
+                          <Icon
+                            name={
+                              bloqueado
+                                ? 'lock'
+                                : feito
+                                  ? 'military_tech'
+                                  : item.tipo === 'fluxo'
+                                    ? 'hub'
+                                    : 'flag'
+                            }
+                            fill={feito}
+                          />
+                        </span>
+                        {!isLast && (
+                          <span
+                            className={cx(
+                              'my-1 min-h-[16px] w-px flex-1',
+                              bloqueado ? 'border-l border-dashed border-navy-600' : 'bg-navy-600',
+                            )}
+                          />
+                        )}
+                      </div>
+                      <div className="flex flex-1 flex-col gap-0.5 pb-6">
+                        <span className="text-xs text-neutral-500">
+                          {item.tipo === 'fluxo' ? 'Fluxo do squad' : `Passo ${i + 1}`}
+                        </span>
+                        <span
+                          className={cx(
+                            'text-sm font-medium leading-snug',
+                            bloqueado
+                              ? 'text-neutral-600'
+                              : atual
+                                ? 'text-gold-300'
+                                : 'text-neutral-200',
+                          )}
+                        >
+                          {item.title}
+                        </span>
+                        {atual && (
+                          <span className="w-fit rounded-full bg-gold-500/20 px-2 py-0.5 text-[11px] font-medium text-gold-300">
+                            Aguardando você
+                          </span>
+                        )}
+                        {feito && (
+                          <span className="w-fit rounded-full bg-amber-400/10 px-2 py-0.5 text-[11px] text-amber-400">
+                            Carimbado
+                          </span>
+                        )}
+                      </div>
                     </>
                   )
-                  const posicao = {
-                    left: `${ponto.x}%`,
-                    top: ponto.y - PASSO_CIRCULO / 2,
-                  }
                   return bloqueado ? (
-                    <div
-                      key={item.id}
-                      className="absolute flex w-[130px] -translate-x-1/2 flex-col items-center gap-1"
-                      style={posicao}
-                    >
+                    <li key={item.id} className="flex gap-3">
                       {conteudo}
-                    </div>
+                    </li>
                   ) : (
-                    <Link
-                      key={item.id}
-                      to={hrefDoItem(item)}
-                      className="absolute flex w-[130px] -translate-x-1/2 flex-col items-center gap-1 transition-transform duration-200 hover:-translate-y-0.5"
-                      style={posicao}
-                    >
-                      {conteudo}
-                    </Link>
+                    <li key={item.id}>
+                      <Link
+                        to={hrefDoItem(item)}
+                        className="flex gap-3 transition-opacity hover:opacity-80"
+                      >
+                        {conteudo}
+                      </Link>
+                    </li>
                   )
                 })}
-              </div>
+              </ul>
             </>
           )
         )}
