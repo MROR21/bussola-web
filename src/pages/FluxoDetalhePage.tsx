@@ -21,13 +21,17 @@ import {
   listarFluxos,
 } from '../features/fluxos/fluxosService'
 import type { Fluxo } from '../features/fluxos/types'
+import type { Perfil } from '../features/nivelamento/types'
+import { NavegacaoTrilha } from '../features/onboarding/NavegacaoTrilha'
+import { useTrailNavegacao } from '../features/onboarding/useTrailNavegacao'
 import { paraEmbed } from '../utils/video'
 
 // Página de um fluxo (rota /fluxo/:titulo): o conteúdo em Markdown, consulta pura.
-export function FluxoDetalhePage() {
+export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
   const { titulo: tituloParam = '' } = useParams()
   const navigate = useNavigate()
   const isGestor = useAuthStore((s) => s.usuario?.isGestor ?? false)
+  const { anterior, proximo } = useTrailNavegacao(perfil, tituloParam)
   const [fluxo, setFluxo] = useState<Fluxo | null>(null)
   const [concluido, setConcluido] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -302,6 +306,8 @@ export function FluxoDetalhePage() {
           'Marcar como concluído'
         )}
       </button>
+
+      <NavegacaoTrilha anterior={anterior} proximo={proximo} />
 
       {toastSalvoMontado && (
         <div

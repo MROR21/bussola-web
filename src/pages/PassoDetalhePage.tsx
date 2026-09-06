@@ -15,6 +15,7 @@ import { useAuthStore } from '../features/auth/authStore'
 import { useTitulo } from '../hooks/useTitulo'
 import { editarPasso, listarPassosAdmin } from '../features/admin/adminService'
 import type { PassoAdmin, PassoAdminInput } from '../features/admin/types'
+import { NavegacaoTrilha } from '../features/onboarding/NavegacaoTrilha'
 import { listarSteps } from '../features/onboarding/onboardingService'
 import {
   concluirPasso,
@@ -22,6 +23,8 @@ import {
   getComprovacao,
 } from '../features/onboarding/progressService'
 import type { OnboardingStep } from '../features/onboarding/types'
+import { useTrailNavegacao } from '../features/onboarding/useTrailNavegacao'
+import type { Perfil } from '../features/nivelamento/types'
 
 const inputCls =
   'rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500'
@@ -44,11 +47,12 @@ function Comprovacao({ texto }: { texto: string }) {
 }
 
 // Página de um passo (rota /passo/:titulo): conteúdo em Markdown + concluir com comprovação opcional.
-export function PassoDetalhePage() {
+export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
   const { titulo: tituloParam = '' } = useParams()
   const navigate = useNavigate()
   const usuario = useAuthStore((state) => state.usuario)
   const isGestor = usuario?.isGestor ?? false
+  const { anterior, proximo } = useTrailNavegacao(perfil, tituloParam)
 
   const [step, setStep] = useState<OnboardingStep | null>(null)
   const [concluido, setConcluido] = useState(false)
@@ -423,6 +427,8 @@ export function PassoDetalhePage() {
           </button>
         </section>
       )}
+
+      <NavegacaoTrilha anterior={anterior} proximo={proximo} />
 
       {toastSalvoMontado && (
         <div
