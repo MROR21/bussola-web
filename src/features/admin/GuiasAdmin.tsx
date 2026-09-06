@@ -215,69 +215,33 @@ export function GuiasAdmin() {
             </ul>
           )
 
-          // Cada Módulo é um dropdown próprio — dentro dele, um segundo nível de dropdown por
-          // Categoria (tag) só aparece quando o módulo realmente tem mais de uma (ex.: "Básico do
-          // dev" com "Git e PR"/"Jira"/etc.); com uma tag só, a lista já vem direto, sem nível
-          // extra à toa (mesma regra da tela pública de Guias).
+          // Só 2 níveis (Tópico → Módulo → lista) — nada de um 3º dropdown por Categoria dentro do
+          // módulo, isso ficou fundo demais. O módulo em si não ganha uma caixa própria (borda/
+          // fundo) pra não virar "caixa dentro de caixa" repetindo o mesmo visual do Tópico — é só
+          // uma linha expansível separada por um divisor dentro do card do Tópico.
           const conteudoModulos = (
-            <div className="flex flex-col gap-3">
-              {modulosComItens.map(([modulo, itens]) => {
-                const porTag = new Map<string, FluxoAdmin[]>()
-                for (const f of itens) {
-                  const tag = f.categoria || 'Outros'
-                  const lista = porTag.get(tag) ?? []
-                  lista.push(f)
-                  porTag.set(tag, lista)
-                }
-                const gruposTag = [...porTag.entries()]
-                return (
-                  <details
-                    key={modulo.id}
-                    className="group/modulo rounded-xl border border-navy-700 bg-navy-800 p-4"
-                  >
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium text-neutral-100">
-                      <span>
-                        {modulo.nome}{' '}
-                        <span className="text-xs font-normal text-neutral-500">
-                          ({itens.length})
-                        </span>
-                      </span>
-                      <Icon
-                        name="expand_more"
-                        className="text-neutral-500 transition-transform duration-200 group-open/modulo:rotate-180"
-                      />
-                    </summary>
-                    <div className="mt-3">
-                      {gruposTag.length > 1 ? (
-                        <div className="flex flex-col gap-3">
-                          {gruposTag.map(([tag, fluxosTag]) => (
-                            <details
-                              key={tag}
-                              className="group/tag rounded-lg border border-navy-600 bg-navy-900/40 p-3"
-                            >
-                              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-xs font-semibold uppercase tracking-wide text-neutral-400">
-                                <span>
-                                  {tag}{' '}
-                                  <span className="font-normal normal-case text-neutral-600">
-                                    ({fluxosTag.length})
-                                  </span>
-                                </span>
-                                <Icon
-                                  name="expand_more"
-                                  className="text-neutral-500 transition-transform duration-200 group-open/tag:rotate-180"
-                                />
-                              </summary>
-                              <div className="mt-2">{listaItens(fluxosTag)}</div>
-                            </details>
-                          ))}
-                        </div>
-                      ) : (
-                        listaItens(itens)
-                      )}
-                    </div>
-                  </details>
-                )
-              })}
+            <div className="flex flex-col">
+              {modulosComItens.map(([modulo, itens], i) => (
+                <details
+                  key={modulo.id}
+                  className={cx(
+                    'group/modulo py-3',
+                    i > 0 && 'border-t border-navy-700',
+                  )}
+                >
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium text-neutral-100">
+                    <span>
+                      {modulo.nome}{' '}
+                      <span className="text-xs font-normal text-neutral-500">({itens.length})</span>
+                    </span>
+                    <Icon
+                      name="expand_more"
+                      className="text-neutral-500 transition-transform duration-200 group-open/modulo:rotate-180"
+                    />
+                  </summary>
+                  <div className="mt-3">{listaItens(itens)}</div>
+                </details>
+              ))}
             </div>
           )
 
