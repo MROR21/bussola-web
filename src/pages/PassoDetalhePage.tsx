@@ -337,9 +337,6 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
               {concluido ? (
                 !exigeComprovacao ? (
                   <div className="anim-fade flex items-center justify-between gap-3">
-                    <span className="flex items-center gap-1 rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
-                      <Icon name="check" className="text-sm" /> Concluído
-                    </span>
                     <button
                       type="button"
                       onClick={desmarcar}
@@ -348,12 +345,25 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
                     >
                       Desmarcar
                     </button>
+                    <span className="flex items-center gap-1 rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
+                      <Icon name="check" className="text-sm" /> Concluído
+                    </span>
                   </div>
                 ) : (
                   <div className="anim-fade flex flex-col gap-3">
-                    <span className="flex items-center gap-1 self-start rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
-                      <Icon name="check" className="text-sm" /> Concluído
-                    </span>
+                    <div className="flex items-center justify-between gap-3">
+                      <button
+                        type="button"
+                        onClick={desmarcar}
+                        disabled={salvando}
+                        className="rounded-lg px-3 py-1.5 text-sm text-red-400 transition-all hover:bg-red-500/10 disabled:opacity-50"
+                      >
+                        Desmarcar
+                      </button>
+                      <span className="flex items-center gap-1 rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
+                        <Icon name="check" className="text-sm" /> Concluído
+                      </span>
+                    </div>
 
                     {editando ? (
                       <div className="anim-fade flex flex-col gap-3">
@@ -398,23 +408,13 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
                             <span className="text-sm text-neutral-500">Sem comprovação anexada.</span>
                           )}
                         </div>
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setEditando(true)}
-                            className="rounded-lg bg-navy-700 px-4 py-2 text-sm text-neutral-200 transition-colors hover:bg-navy-600"
-                          >
-                            {evidencia ? 'Editar comprovação' : 'Adicionar comprovação'}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={desmarcar}
-                            disabled={salvando}
-                            className="rounded-lg px-4 py-2 text-sm text-red-400 transition-all hover:bg-red-500/10 disabled:opacity-50"
-                          >
-                            Desmarcar
-                          </button>
-                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setEditando(true)}
+                          className="self-start rounded-lg bg-navy-700 px-4 py-2 text-sm text-neutral-200 transition-colors hover:bg-navy-600"
+                        >
+                          {evidencia ? 'Editar comprovação' : 'Adicionar comprovação'}
+                        </button>
                       </div>
                     )}
                   </div>
@@ -471,10 +471,13 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
         </div>
       )}
 
+      {/* "Próximo" (e o "fase concluída" no fim) só libera com o passo atual marcado como
+          concluído — só faz sentido na Jornada (é o que garante progresso de verdade); "anterior"
+          fica sempre livre. */}
       <NavegacaoTrilha
         anterior={anterior && { title: anterior.title, href: hrefDoTrailItem(anterior) }}
-        proximo={proximo && { title: proximo.title, href: hrefDoTrailItem(proximo) }}
-        faseTerminada={faseTerminada}
+        proximo={concluido && proximo ? { title: proximo.title, href: hrefDoTrailItem(proximo) } : undefined}
+        faseTerminada={concluido && faseTerminada}
         fase={faseDoItem}
         origemFase
       />

@@ -181,15 +181,18 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
     <article className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
       <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.06]" />
       <MapIllustration className="pointer-events-none absolute -bottom-10 -left-8 w-56 text-gold-500 opacity-[0.06]" />
-      {/* Quem entrou pela Jornada (`veioDaFase`, marcado pelo link de origem) sempre volta pra
-          visão geral da fase, igual o Passo. Quem entrou pelo Guia geral volta no histórico (pro
-          Guia) — mesmo fluxo, dois destinos diferentes, por isso não dá pra decidir só pelo fluxo
-          fazer parte ou não da trilha (um fluxo de "Conheça o sistema" aparece nos dois lugares;
-          isso foi um bug real: um fix anterior usava só a trilha e quebrou o Voltar do Guia). */}
+      {/* Destino FIXO nos dois casos (nunca histórico) — quem entrou pela Jornada (`veioDaFase`,
+          marcado pelo link de origem) sempre volta pra visão geral da fase, igual o Passo; quem
+          entrou pelo Guia geral sempre volta pra visão geral DO MÓDULO em que estava. Usar
+          `navigate(-1)` pro caso do Guia quebrava de novo: as próprias setinhas anterior/próximo
+          do Guia empilham histórico, então "Voltar" caía no fluxo anterior visitado, não no
+          módulo (mesma classe de bug já corrigida uma vez pro lado da Jornada). */}
       <button
         type="button"
         onClick={() =>
-          veioDaFase ? navigate(`/fase/${encodeURIComponent(faseDoItem)}`) : navigate(-1)
+          veioDaFase
+            ? navigate(`/fase/${encodeURIComponent(faseDoItem)}`)
+            : navigate(`/guias/${encodeURIComponent(fluxo.modulo)}`)
         }
         className="relative flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
       >
@@ -317,9 +320,6 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
             <div className="border-t border-navy-700 pt-4">
               {concluido ? (
                 <div className="anim-fade flex items-center justify-between gap-3">
-                  <span className="flex items-center gap-1 rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
-                    <Icon name="check" className="text-sm" /> Concluído
-                  </span>
                   <button
                     type="button"
                     onClick={toggle}
@@ -327,6 +327,9 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
                   >
                     Desmarcar
                   </button>
+                  <span className="flex items-center gap-1 rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
+                    <Icon name="check" className="text-sm" /> Concluído
+                  </span>
                 </div>
               ) : (
                 <div className="anim-fade flex items-center justify-between gap-3">
@@ -349,7 +352,9 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
           anterior/próximo é uma ou outra dependendo de onde veio (`veioDaFase`), nunca as duas
           juntas: pela Jornada, segue a trilha da fase (com "fase concluída" no fim); pelo Guia,
           segue a ordem do módulo (sem noção de fase nenhuma — bug real reportado pelo Miguel: a
-          1ª versão desse fix mostrava "fase concluída" mesmo navegando só pelo Guia). */}
+          1ª versão desse fix mostrava "fase concluída" mesmo navegando só pelo Guia). Só na
+          Jornada o "próximo"/"fase concluída" exige `concluido` primeiro (é o que garante
+          progresso de verdade); no Guia, livre — não é um fluxo obrigatório/sequencial. */}
       <NavegacaoTrilha
         anterior={
           veioDaFase
@@ -358,10 +363,12 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
         }
         proximo={
           veioDaFase
-            ? proximo && { title: proximo.title, href: hrefDoTrailItem(proximo) }
+            ? concluido && proximo
+              ? { title: proximo.title, href: hrefDoTrailItem(proximo) }
+              : undefined
             : proximoGuia && { title: proximoGuia.titulo, href: hrefDoFluxo(proximoGuia) }
         }
-        faseTerminada={veioDaFase ? faseTerminada : undefined}
+        faseTerminada={veioDaFase ? concluido && faseTerminada : undefined}
         fase={veioDaFase ? faseDoItem : undefined}
         origemFase={Boolean(veioDaFase)}
       />
