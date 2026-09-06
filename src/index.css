@@ -16,6 +16,44 @@
   --color-gold-300: #e8c968;
 }
 
+/* Modo claro — mesma identidade "carta de navegação", só troca o suporte físico: papel/pergaminho
+   claro no lugar da noite/navy. Reaproveita os MESMOS nomes de token (navy, gold, neutral, red,
+   green, amber) redefinindo as variáveis CSS por trás deles — nenhum componente muda de classe,
+   o atributo data-theme=light no elemento raiz (ver features/tema/temaStore.ts) já basta.
+   - navy: inverte o papel (900 era o fundo mais escuro, vira o mais claro).
+   - gold: aprofundado (o dourado original não tem contraste suficiente como texto em cima de
+     fundo claro — funciona bem só contra o navy escuro original).
+   - neutral: espelhado (100 com 900, 200 com 800, 300 com 700, 400 com 600, 500 fica) — o texto
+     que era quase branco vira quase preto, mantendo o mesmo peso visual relativo.
+   - red 300 e 400, green 300 e 400, amber 400: só esses (os usados como TEXTO) trocam pra tons
+     mais escuros da própria paleta — os usados como borda ou fundo (500, 600) já tinham contraste
+     adequado. */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --color-navy-900: #f6f1e7;
+  --color-navy-800: #ffffff;
+  --color-navy-700: #e2d9c4;
+  --color-navy-600: #cbbb92;
+  --color-navy-500: #a68f5c;
+
+  --color-gold-500: #8a6d1f;
+  --color-gold-400: #9c7a24;
+  --color-gold-300: #b08b2e;
+
+  --color-neutral-100: oklch(20.5% 0 none);
+  --color-neutral-200: oklch(26.9% 0 none);
+  --color-neutral-300: oklch(37.1% 0 none);
+  --color-neutral-400: oklch(43.9% 0 none);
+  --color-neutral-600: oklch(70.8% 0 none);
+  --color-neutral-700: oklch(87% 0 none);
+
+  --color-red-300: oklch(50.5% 0.213 27.518);
+  --color-red-400: oklch(57.7% 0.245 27.325);
+  --color-green-300: oklch(52.7% 0.154 150.069);
+  --color-green-400: oklch(62.7% 0.194 149.214);
+  --color-amber-400: oklch(66.6% 0.179 58.318);
+}
+
 /* Animações sutis do Bússola. Classes próprias (o projeto não usa os tokens ads-* da Agilean).
    Tudo é desligado pra quem prefere menos movimento. */
 @keyframes bussola-fade-in-up {

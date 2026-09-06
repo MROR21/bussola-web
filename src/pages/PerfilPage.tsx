@@ -12,6 +12,7 @@ import { Avatar } from '../features/perfil/Avatar'
 import { lerImagemReduzida } from '../features/perfil/imagem'
 import { trocarEmail, trocarFoto, trocarSenha } from '../features/perfil/perfilService'
 import type { Cargo, Squad } from '../features/nivelamento/types'
+import { useTemaStore, type Tema } from '../features/tema/temaStore'
 
 const SQUAD_LABEL: Record<Squad, string> = {
   MaoDeObra: 'Mão de Obra',
@@ -28,6 +29,8 @@ export function PerfilPage() {
   useTitulo('Perfil')
   const usuario = useAuthStore((s) => s.usuario)
   const atualizarUsuario = useAuthStore((s) => s.atualizarUsuario)
+  const tema = useTemaStore((s) => s.tema)
+  const definirTema = useTemaStore((s) => s.definir)
 
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
   const toastFeedback = useSaidaValor(feedback)
@@ -185,6 +188,29 @@ export function PerfilPage() {
               Remover
             </button>
           )}
+        </div>
+      </section>
+
+      {/* Aparência */}
+      <section className={cardCls}>
+        <h2 className="text-base font-semibold text-neutral-100">Aparência</h2>
+        <div className="flex gap-2">
+          {(['dark', 'light'] as Tema[]).map((opcao) => (
+            <button
+              key={opcao}
+              type="button"
+              onClick={() => definirTema(opcao)}
+              className={cx(
+                'flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-sm font-medium transition-colors',
+                tema === opcao
+                  ? 'bg-gold-500/20 text-gold-300'
+                  : 'text-neutral-400 hover:text-neutral-200',
+              )}
+            >
+              <Icon name={opcao === 'dark' ? 'dark_mode' : 'light_mode'} className="text-base" />
+              {opcao === 'dark' ? 'Escuro' : 'Claro'}
+            </button>
+          ))}
         </div>
       </section>
 
