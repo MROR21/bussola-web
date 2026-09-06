@@ -171,37 +171,39 @@ export function PassosAdmin() {
                   className="text-neutral-500 transition-transform duration-200 group-open/fase:rotate-180"
                 />
               </summary>
-              <ul className="mt-3 flex flex-col gap-2">
-                {itens.map((p) => (
-                  <li
-                    key={p.id}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
-                  >
-                    <div className="flex min-w-0 flex-col">
-                      <span className="truncate text-neutral-100">
-                        #{p.order} · {p.title}
-                      </span>
-                      <span className="text-xs text-neutral-500">{nomeDaFase(p.faseId)}</span>
-                    </div>
-                    <div className="flex shrink-0 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => abrirEdicao(p)}
-                        className="text-sm text-gold-400 transition-colors hover:text-gold-300"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setApagando(p)}
-                        className="text-sm text-red-400 transition-colors hover:text-red-300"
-                      >
-                        Apagar
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              <div className="anim-acordeao">
+                <ul className="mt-3 flex flex-col gap-2">
+                  {itens.map((p) => (
+                    <li
+                      key={p.id}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
+                    >
+                      <div className="flex min-w-0 flex-col">
+                        <span className="truncate text-neutral-100">
+                          #{p.order} · {p.title}
+                        </span>
+                        <span className="text-xs text-neutral-500">{nomeDaFase(p.faseId)}</span>
+                      </div>
+                      <div className="flex shrink-0 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => abrirEdicao(p)}
+                          className="text-sm text-gold-400 transition-colors hover:text-gold-300"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setApagando(p)}
+                          className="text-sm text-red-400 transition-colors hover:text-red-300"
+                        >
+                          Apagar
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </details>
           ),
         )}

@@ -239,7 +239,9 @@ export function GuiasAdmin() {
                       className="text-neutral-500 transition-transform duration-200 group-open/modulo:rotate-180"
                     />
                   </summary>
-                  <div className="mt-3">{listaItens(itens)}</div>
+                  <div className="anim-acordeao">
+                    <div className="mt-3">{listaItens(itens)}</div>
+                  </div>
                 </details>
               ))}
             </div>
@@ -262,7 +264,9 @@ export function GuiasAdmin() {
                   className="text-neutral-500 transition-transform duration-200 group-open/topico:rotate-180"
                 />
               </summary>
-              <div className="mt-3">{conteudoModulos}</div>
+              <div className="anim-acordeao">
+                <div className="mt-3">{conteudoModulos}</div>
+              </div>
             </details>
           ) : (
             <section key={topico} className="flex flex-col gap-3">

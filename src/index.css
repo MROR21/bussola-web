@@ -220,6 +220,31 @@
   animation: bussola-confete 1s ease-out 3 forwards;
 }
 
+/* Anima abrir/fechar de <details> (accordions do Admin — GuiasAdmin/PassosAdmin) via
+   grid-template-rows "0fr → 1fr", sem JS. O truque exige contornar o comportamento padrão do
+   navegador: filhos de um <details> FECHADO ganham `display:none` automático (não é algo que dê
+   pra transicionar), então forçamos esse filho a continuar como grid sempre — quem controla a
+   altura visível a partir daí é só a nossa transição de `grid-template-rows`. O `>` (filho direto,
+   não descendente) é o que permite empilhar isso em accordions ANINHADOS sem um nível "vazar" o
+   estado aberto/fechado pro outro (cada `<details>` só controla o PRÓPRIO filho direto). */
+.anim-acordeao {
+  display: grid !important;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.2s ease-out;
+}
+details[open] > .anim-acordeao {
+  grid-template-rows: 1fr;
+}
+.anim-acordeao > * {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-acordeao {
+    transition: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .anim-page,
   .anim-fade,
