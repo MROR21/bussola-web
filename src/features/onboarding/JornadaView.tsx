@@ -41,15 +41,24 @@ const FASE_RESUMO: Record<string, string> = {
 // dentro dele" pros lados de fora.
 const CONFETE = [
   { top: '-4%', left: '8%', rotate: -20, atraso: 0, cor: 'bg-gold-500' },
-  { top: '-6%', left: '28%', rotate: 15, atraso: 0.05, cor: 'bg-amber-400' },
-  { top: '-3%', left: '50%', rotate: -10, atraso: 0.1, cor: 'bg-gold-300' },
-  { top: '-6%', left: '70%', rotate: 25, atraso: 0.15, cor: 'bg-green-400' },
-  { top: '-4%', left: '90%', rotate: -15, atraso: 0.2, cor: 'bg-gold-500' },
+  { top: '-6%', left: '22%', rotate: 15, atraso: 0.05, cor: 'bg-amber-400' },
+  { top: '-3%', left: '36%', rotate: -10, atraso: 0.26, cor: 'bg-gold-300' },
+  { top: '-5%', left: '50%', rotate: 25, atraso: 0.1, cor: 'bg-green-400' },
+  { top: '-3%', left: '64%', rotate: -20, atraso: 0.2, cor: 'bg-gold-500' },
+  { top: '-6%', left: '78%', rotate: 10, atraso: 0.14, cor: 'bg-amber-400' },
+  { top: '-4%', left: '92%', rotate: -15, atraso: 0.02, cor: 'bg-gold-300' },
+  { top: '18%', left: '-5%', rotate: 30, atraso: 0.08, cor: 'bg-amber-400' },
+  { top: '18%', left: '103%', rotate: -25, atraso: 0.28, cor: 'bg-gold-500' },
   { top: '45%', left: '-4%', rotate: 30, atraso: 0.08, cor: 'bg-amber-400' },
   { top: '45%', left: '102%', rotate: -25, atraso: 0.12, cor: 'bg-gold-300' },
-  { top: '98%', left: '18%', rotate: 20, atraso: 0.18, cor: 'bg-green-400' },
-  { top: '100%', left: '45%', rotate: -30, atraso: 0.22, cor: 'bg-gold-500' },
-  { top: '98%', left: '75%', rotate: 10, atraso: 0.06, cor: 'bg-amber-400' },
+  { top: '72%', left: '-5%', rotate: -20, atraso: 0.24, cor: 'bg-green-400' },
+  { top: '72%', left: '103%', rotate: 15, atraso: 0.04, cor: 'bg-gold-500' },
+  { top: '98%', left: '10%', rotate: 20, atraso: 0.16, cor: 'bg-green-400' },
+  { top: '100%', left: '25%', rotate: -30, atraso: 0.22, cor: 'bg-gold-500' },
+  { top: '99%', left: '40%', rotate: 10, atraso: 0.3, cor: 'bg-amber-400' },
+  { top: '98%', left: '55%', rotate: -15, atraso: 0.06, cor: 'bg-gold-300' },
+  { top: '100%', left: '70%', rotate: 25, atraso: 0.18, cor: 'bg-green-400' },
+  { top: '98%', left: '85%', rotate: -10, atraso: 0.12, cor: 'bg-amber-400' },
 ] as const
 
 function ConfeteExplosao() {
@@ -308,7 +317,12 @@ export function JornadaView({
         >
           <Icon name="arrow_back" className="text-base" /> Voltar pra jornada
         </button>
-        <div className="relative flex flex-col gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-5">
+        <div
+          className={cx(
+            'relative flex flex-col gap-3 rounded-2xl border bg-navy-800 p-5 transition-colors',
+            faseCompleta ? 'border-gold-500/40' : 'border-navy-700',
+          )}
+        >
           <MapCorners tamanho={5} opacidade={20} />
           {faseCompleta && <ConfeteExplosao />}
           <div className="flex items-center gap-3">
@@ -316,7 +330,14 @@ export function JornadaView({
               <Icon name={iconeDaFase(faseNome)} className="text-2xl" />
             </span>
             <div className="flex flex-col gap-0.5">
-              <h2 className="text-2xl font-bold text-neutral-100">{faseNome}</h2>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-2xl font-bold text-neutral-100">{faseNome}</h2>
+                {faseCompleta && (
+                  <span className="flex items-center gap-1 rounded-full bg-gold-500/20 px-2 py-0.5 text-xs font-medium text-gold-300">
+                    <Icon name="check" className="text-sm" /> Concluída
+                  </span>
+                )}
+              </div>
               <span className="text-xs text-neutral-500">
                 {faseCompleta ? 'Fase concluída!' : `${feitosFase} de ${itens.length} itens concluídos`}
               </span>
