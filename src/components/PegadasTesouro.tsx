@@ -23,12 +23,12 @@ const PEGADAS = [
 export function PegadasTesouro({ className = '' }: { className?: string }) {
   return (
     <div className={`relative h-44 w-72 scale-90 ${className}`} aria-hidden="true">
-      <TreePalm className="absolute left-0 top-2 h-10 w-7 text-gold-500/25" />
-      <TreePalm className="absolute -left-3 bottom-2 h-14 w-10 text-gold-500/30" />
-      <TreePalm className="absolute right-0 bottom-6 h-10 w-7 -scale-x-100 text-gold-500/20" />
-      <TreePalm className="absolute h-8 w-6 text-gold-500/25" style={{ top: '44%', left: '56%' }} />
-      <Mountain className="absolute bottom-0 left-[24%] h-9 w-16 text-gold-500/20" />
-      <Mountain className="absolute -top-2 h-9 w-16 text-gold-500/20" style={{ left: '52%' }} />
+      <TreePalm className="absolute left-0 top-2 h-10 w-7 text-gold-500" />
+      <TreePalm className="absolute -left-3 bottom-2 h-14 w-10 text-gold-500" />
+      <TreePalm className="absolute right-0 bottom-6 h-10 w-7 -scale-x-100 text-gold-500" />
+      <TreePalm className="absolute h-8 w-6 text-gold-500" style={{ top: '44%', left: '56%' }} />
+      <Mountain className="absolute bottom-0 left-[24%] h-9 w-16 text-gold-500" />
+      <Mountain className="absolute -top-2 h-9 w-16 text-gold-500" style={{ left: '52%' }} />
 
       <svg
         viewBox="0 0 100 100"
@@ -41,7 +41,7 @@ export function PegadasTesouro({ className = '' }: { className?: string }) {
           fill="none"
           stroke="currentColor"
           strokeWidth={1.2}
-          strokeDasharray="2 3"
+          strokeDasharray="2 2"
           strokeLinecap="round"
           vectorEffect="non-scaling-stroke"
         />
@@ -63,7 +63,7 @@ export function PegadasTesouro({ className = '' }: { className?: string }) {
       ))}
       <span
         className="anim-tesouro absolute text-2xl text-gold-400"
-        style={{ top: '10%', left: '84%', transform: 'translate(-50%, -50%)' }}
+        style={{ top: '8.5%', left: '82.4%', transform: 'translate(-50%, -50%)' }}
       >
         <Icon name="close" />
       </span>
