@@ -35,5 +35,9 @@ export function useTrailNavegacao(perfil: Perfil | null, tituloAtual: string) {
   return {
     anterior: indice > 0 ? trail[indice - 1] : undefined,
     proximo: indice >= 0 && indice < trail.length - 1 ? trail[indice + 1] : undefined,
+    // Fase do item atual, só quando ele faz parte da trilha da Jornada — um Fluxo aberto pelo Guia
+    // geral (fora da trilha) não tem fase pra voltar, por isso undefined (quem usa cai pro
+    // navigate(-1) de sempre nesse caso).
+    faseDoItem: indice >= 0 ? trail[indice].phase : undefined,
   }
 }

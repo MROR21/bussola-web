@@ -31,7 +31,7 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
   const { titulo: tituloParam = '' } = useParams()
   const navigate = useNavigate()
   const isGestor = useAuthStore((s) => s.usuario?.isGestor ?? false)
-  const { anterior, proximo } = useTrailNavegacao(perfil, tituloParam)
+  const { anterior, proximo, faseDoItem } = useTrailNavegacao(perfil, tituloParam)
   const [fluxo, setFluxo] = useState<Fluxo | null>(null)
   const [concluido, setConcluido] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -159,11 +159,16 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
     <article className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
       <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.06]" />
       <MapIllustration className="pointer-events-none absolute -bottom-10 -left-8 w-56 text-gold-500 opacity-[0.06]" />
-      {/* Volta no histórico (não um destino fixo) — quem entrou pela Jornada (fase "Conheça o
-          sistema") retorna pra lá; quem entrou pelo Guia retorna pro Guia. */}
+      {/* Quem entrou pela Jornada (fluxo faz parte da trilha, `faseDoItem` definido) sempre volta
+          pra visão geral da fase, igual o Passo — antes usava navigate(-1) sempre, e como as
+          setinhas anterior/próximo empilham entradas no histórico, "Voltar" podia cair num OUTRO
+          item da trilha em vez da fase (bug real reportado pelo Miguel). Só cai pro histórico
+          quando o fluxo não tem fase (aberto direto pelo Guia geral, fora da trilha). */}
       <button
         type="button"
-        onClick={() => navigate(-1)}
+        onClick={() =>
+          faseDoItem ? navigate(`/fase/${encodeURIComponent(faseDoItem)}`) : navigate(-1)
+        }
         className="relative flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
       >
         <Icon name="arrow_back" className="text-base" /> Voltar
@@ -284,34 +289,38 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
 
           <div className="flex flex-col gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed">
             <Markdown>{fluxo.conteudo}</Markdown>
+
+            {/* Concluir/desmarcar mora no MESMO container da descrição — não é mais uma caixa à
+                parte só pra isso. */}
+            <div className="border-t border-navy-700 pt-4">
+              {concluido ? (
+                <div className="anim-fade flex items-center justify-between gap-3">
+                  <span className="flex items-center gap-1 rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
+                    <Icon name="check" className="text-sm" /> Concluído
+                  </span>
+                  <button
+                    type="button"
+                    onClick={toggle}
+                    className="rounded-lg px-3 py-1.5 text-sm text-red-400 transition-all hover:bg-red-500/10"
+                  >
+                    Desmarcar
+                  </button>
+                </div>
+              ) : (
+                <div className="anim-fade flex items-center justify-between gap-3">
+                  <span className="text-sm text-neutral-400">Terminou esse fluxo?</span>
+                  <button
+                    type="button"
+                    onClick={toggle}
+                    className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400"
+                  >
+                    Marcar como concluído
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      )}
-
-      {concluido ? (
-        <section className="anim-fade flex items-center justify-between gap-3 rounded-2xl border border-green-500/30 bg-navy-800 p-5">
-          <span className="flex items-center gap-1 rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
-            <Icon name="check" className="text-sm" /> Concluído
-          </span>
-          <button
-            type="button"
-            onClick={toggle}
-            className="rounded-lg px-3 py-1.5 text-sm text-red-400 transition-all hover:bg-red-500/10"
-          >
-            Desmarcar
-          </button>
-        </section>
-      ) : (
-        <section className="anim-fade flex items-center justify-between gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-5">
-          <span className="text-sm text-neutral-400">Terminou esse fluxo?</span>
-          <button
-            type="button"
-            onClick={toggle}
-            className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400"
-          >
-            Marcar como concluído
-          </button>
-        </section>
       )}
 
       <NavegacaoTrilha anterior={anterior} proximo={proximo} />
