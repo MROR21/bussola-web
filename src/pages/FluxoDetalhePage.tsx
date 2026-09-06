@@ -328,11 +328,15 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
         </div>
       )}
 
+      {/* Mesmo Fluxo pode aparecer no Guia geral SEM ter vindo de lá pela Jornada — as setinhas de
+          trilha (e o "fase concluída") só fazem sentido pra quem entrou pela Jornada de verdade
+          (`veioDaFase`), senão mostraria "fase concluída" pra quem só tava navegando pelo Guia,
+          sem nenhuma fase envolvida (bug real reportado pelo Miguel). */}
       <NavegacaoTrilha
-        anterior={anterior}
-        proximo={proximo}
-        faseTerminada={faseTerminada}
-        fase={faseDoItem}
+        anterior={veioDaFase ? anterior : undefined}
+        proximo={veioDaFase ? proximo : undefined}
+        faseTerminada={veioDaFase ? faseTerminada : undefined}
+        fase={veioDaFase ? faseDoItem : undefined}
       />
 
       {toastSalvoMontado && (
