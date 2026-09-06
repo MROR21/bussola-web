@@ -288,24 +288,31 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={toggle}
-        className={cx(
-          'flex items-center gap-1.5 self-start rounded-lg px-4 py-2 text-sm font-medium transition-colors',
-          concluido
-            ? 'bg-navy-700 text-neutral-300 hover:bg-navy-600'
-            : 'bg-gold-500 text-white hover:bg-gold-400',
-        )}
-      >
-        {concluido ? (
-          <>
-            <Icon name="check" className="text-base" /> Concluído · desmarcar
-          </>
-        ) : (
-          'Marcar como concluído'
-        )}
-      </button>
+      {concluido ? (
+        <section className="anim-fade flex items-center justify-between gap-3 rounded-2xl border border-green-500/30 bg-navy-800 p-5">
+          <span className="flex items-center gap-1 rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
+            <Icon name="check" className="text-sm" /> Concluído
+          </span>
+          <button
+            type="button"
+            onClick={toggle}
+            className="rounded-lg px-3 py-1.5 text-sm text-red-400 transition-all hover:bg-red-500/10"
+          >
+            Desmarcar
+          </button>
+        </section>
+      ) : (
+        <section className="anim-fade flex items-center justify-between gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-5">
+          <span className="text-sm text-neutral-400">Terminou esse fluxo?</span>
+          <button
+            type="button"
+            onClick={toggle}
+            className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400"
+          >
+            Marcar como concluído
+          </button>
+        </section>
+      )}
 
       <NavegacaoTrilha anterior={anterior} proximo={proximo} />
 
