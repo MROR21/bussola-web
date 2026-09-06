@@ -191,11 +191,10 @@ export function GuiasPage() {
       lista.push(f)
       porTag.set(tag, lista)
     }
-    // "Visão geral" sempre lidera; o resto em ordem alfabética.
-    const pesoTag = (t: string) => (t === 'Visão geral' ? '' : t)
-    const grupos = [...porTag.entries()].sort((a, b) =>
-      pesoTag(a[0]).localeCompare(pesoTag(b[0]), 'pt'),
-    )
+    // Ordem dos tópicos = ordem de aparição dos fluxos (que já vêm por `Order` da API) — não
+    // alfabética. Assim o tópico da aula 5 aparece antes do da aula 6, e por aí vai, em vez de
+    // depender do nome da tag. "Visão geral" lidera naturalmente por ser sempre o Order mais baixo.
+    const grupos = [...porTag.entries()]
 
     return (
       <div className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
