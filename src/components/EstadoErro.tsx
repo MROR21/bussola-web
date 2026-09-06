@@ -1,8 +1,9 @@
-import { Icon } from './Icon'
+import { PegadasTesouro } from './PegadasTesouro'
 
 // Estado de erro amigável (sem vazar mensagem técnica tipo "502 ao chamar /fluxos/meus").
-// O porquê já aparece no banner de offline; aqui a gente só oferece o retry. Reusa o mesmo ícone
-// da marca (explore) — a "bússola" que não achou o caminho dessa vez.
+// O porquê já aparece no banner de offline; aqui a gente só oferece o retry. Mesma animação de
+// pegadas até o X do ErrorBoundary (reaproveitada em todo estado de erro de carregamento do app) —
+// só o ícone/animação é compartilhado, a mensagem continua própria de cada tela via prop.
 export function EstadoErro({
   mensagem = 'Não consegui carregar agora. Verifique a conexão e tente de novo.',
   onRetry,
@@ -12,7 +13,7 @@ export function EstadoErro({
 }) {
   return (
     <div className="anim-fade flex w-full flex-col items-center gap-3 py-16 text-center">
-      <Icon name="explore" className="text-4xl text-neutral-600" />
+      <PegadasTesouro />
       <p className="max-w-xs text-sm text-neutral-400">{mensagem}</p>
       {onRetry && (
         <button
