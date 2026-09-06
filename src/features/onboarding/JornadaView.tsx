@@ -34,6 +34,42 @@ const FASE_RESUMO: Record<string, string> = {
   'Primeiro Card': 'Do primeiro card ao merge — o ciclo completo de uma entrega.',
 }
 
+// Confete saindo do card quando a fase é concluída — cada pedacinho "explode" (pop + queda leve +
+// sumiço) uma vez só, em vez de ficar num loop (usa `forwards` pra segurar invisível no final,
+// como as outras animações de saída do app). Posições espalhadas nas 4 bordas do card, pra dar a
+// sensação de "saindo de dentro dele" pros lados de fora.
+const CONFETE = [
+  { top: '-4%', left: '8%', rotate: -20, atraso: 0, cor: 'bg-gold-500' },
+  { top: '-6%', left: '28%', rotate: 15, atraso: 0.05, cor: 'bg-amber-400' },
+  { top: '-3%', left: '50%', rotate: -10, atraso: 0.1, cor: 'bg-gold-300' },
+  { top: '-6%', left: '70%', rotate: 25, atraso: 0.15, cor: 'bg-green-400' },
+  { top: '-4%', left: '90%', rotate: -15, atraso: 0.2, cor: 'bg-gold-500' },
+  { top: '45%', left: '-4%', rotate: 30, atraso: 0.08, cor: 'bg-amber-400' },
+  { top: '45%', left: '102%', rotate: -25, atraso: 0.12, cor: 'bg-gold-300' },
+  { top: '98%', left: '18%', rotate: 20, atraso: 0.18, cor: 'bg-green-400' },
+  { top: '100%', left: '45%', rotate: -30, atraso: 0.22, cor: 'bg-gold-500' },
+  { top: '98%', left: '75%', rotate: 10, atraso: 0.06, cor: 'bg-amber-400' },
+] as const
+
+function ConfeteExplosao() {
+  return (
+    <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+      {CONFETE.map((p, i) => (
+        <span
+          key={i}
+          className="absolute"
+          style={{ top: p.top, left: p.left, transform: `rotate(${p.rotate}deg)` }}
+        >
+          <span
+            className={cx('anim-confete block h-2 w-1 rounded-sm', p.cor)}
+            style={{ animationDelay: `${p.atraso}s` }}
+          />
+        </span>
+      ))}
+    </div>
+  )
+}
+
 // Uma entrada do "Diário de bordo" (lista vertical de Passos/Fluxos dentro de uma Fase) — usado
 // tanto na fase em andamento (mistura feito/atual/bloqueado) quanto na fase já concluída (revisão,
 // tudo feito e clicável). Selo dourado preenchido quando feito; atual pulsa esperando ser
@@ -271,15 +307,12 @@ export function JornadaView({
         >
           <Icon name="arrow_back" className="text-base" /> Voltar pra jornada
         </button>
-        <div className="relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-navy-700 bg-navy-800 p-5">
+        <div className="relative flex flex-col gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-5">
           <MapCorners tamanho={5} opacidade={20} />
+          {faseCompleta && <ConfeteExplosao />}
           <div className="flex items-center gap-3">
             <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gold-500/10 text-gold-400">
-              <Icon
-                name={faseCompleta ? 'military_tech' : iconeDaFase(faseNome)}
-                className="text-2xl"
-                fill={faseCompleta}
-              />
+              <Icon name={iconeDaFase(faseNome)} className="text-2xl" />
             </span>
             <div className="flex flex-col gap-0.5">
               <h2 className="text-2xl font-bold text-neutral-100">{faseNome}</h2>
