@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../../components/Icon'
 import { Carregando } from '../../components/Spinner'
+import { useAuthStore } from '../auth/authStore'
 import { useSaidaValor } from '../../hooks/useSaida'
 import { cx } from '../../utils/cx'
 import {
@@ -25,6 +26,7 @@ export function UsuariosAdmin() {
 }
 
 function ListaUsuarios() {
+  const usuarioLogado = useAuthStore((s) => s.usuario)
   const [itens, setItens] = useState<UsuarioAdmin[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -115,7 +117,9 @@ function ListaUsuarios() {
         {itens.length > 0 && itensFiltrados.length === 0 && (
           <p className="anim-fade text-sm text-neutral-500">Nenhum usuário encontrado.</p>
         )}
-        {itensFiltrados.map((usuario) => (
+        {itensFiltrados.map((usuario) => {
+          const souEuMesmo = usuario.id === usuarioLogado?.id
+          return (
           <li
             key={usuario.id}
             className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
@@ -123,6 +127,7 @@ function ListaUsuarios() {
             <div className="flex flex-col">
               <span className={cx(usuario.ativo ? 'text-neutral-100' : 'text-neutral-500 line-through')}>
                 {usuario.nome}
+                {souEuMesmo && <span className="ml-1.5 text-xs text-neutral-500">(você)</span>}
               </span>
               <span className="text-xs text-neutral-500">{usuario.email}</span>
             </div>
@@ -140,7 +145,8 @@ function ListaUsuarios() {
               <button
                 type="button"
                 onClick={() => setConfirmando({ usuario, acao: 'gestor' })}
-                disabled={alterando === usuario.id}
+                disabled={alterando === usuario.id || souEuMesmo}
+                title={souEuMesmo ? 'Você não pode alterar sua própria permissão de supervisor.' : undefined}
                 className="text-sm text-gold-400 transition-all hover:text-gold-300 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {usuario.isGestor ? 'Remover supervisor' : 'Tornar supervisor'}
@@ -148,7 +154,8 @@ function ListaUsuarios() {
               <button
                 type="button"
                 onClick={() => setConfirmando({ usuario, acao: 'ativo' })}
-                disabled={alterando === usuario.id}
+                disabled={alterando === usuario.id || souEuMesmo}
+                title={souEuMesmo ? 'Você não pode revogar o seu próprio acesso.' : undefined}
                 className={cx(
                   'text-sm transition-all disabled:cursor-not-allowed disabled:opacity-40',
                   usuario.ativo ? 'text-red-400 hover:text-red-300' : 'text-green-400 hover:text-green-300',
@@ -158,7 +165,8 @@ function ListaUsuarios() {
               </button>
             </div>
           </li>
-        ))}
+          )
+        })}
         {itens.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nenhum usuário ainda.</p>}
       </ul>
 
