@@ -8,7 +8,6 @@ import { TrailDivider } from '../../components/TrailDivider'
 import { useTitulo } from '../../hooks/useTitulo'
 import { cx } from '../../utils/cx'
 import { getFluxosConcluidos } from '../fluxos/fluxosService'
-import { TrailItemCard } from './TrailItemCard'
 import { ProgressRing } from './ProgressRing'
 import { getProgresso } from './progressService'
 import type { TrailStep } from './types'
@@ -22,6 +21,94 @@ const FASE_ICONE: Record<string, string> = {
   'Primeiro Card': 'emoji_events',
 }
 const iconeDaFase = (fase: string) => FASE_ICONE[fase] ?? 'flag'
+
+// Uma entrada do "Diário de bordo" (lista vertical de Passos/Fluxos dentro de uma Fase) — usado
+// tanto na fase em andamento (mistura feito/atual/bloqueado) quanto na fase já concluída (revisão,
+// tudo feito e clicável). Selo dourado preenchido quando feito; atual pulsa esperando ser
+// carimbado; bloqueado fica opaco com cadeado e tracejado.
+function ItemDiarioDeBordo({
+  item,
+  indice,
+  isLast,
+  feito,
+  atual,
+  bloqueado,
+  href,
+}: {
+  item: TrailStep
+  indice: number
+  isLast: boolean
+  feito: boolean
+  atual: boolean
+  bloqueado: boolean
+  href: string
+}) {
+  const conteudo = (
+    <>
+      <div className="flex shrink-0 flex-col items-center">
+        <span
+          className={cx(
+            'flex size-11 shrink-0 items-center justify-center rounded-full border-2 bg-navy-800 text-base transition-colors duration-200',
+            bloqueado
+              ? 'border-dashed border-navy-600 text-neutral-600 opacity-60'
+              : feito
+                ? 'border-amber-400/70 text-amber-400'
+                : atual
+                  ? 'anim-pulso border-gold-400 text-gold-400 shadow-[0_0_0_4px_rgba(201,162,39,0.15)]'
+                  : 'border-navy-600 text-gold-400',
+          )}
+        >
+          <Icon
+            name={
+              bloqueado ? 'lock' : feito ? 'military_tech' : item.tipo === 'fluxo' ? 'hub' : 'flag'
+            }
+            fill={feito}
+          />
+        </span>
+        {!isLast && (
+          <span
+            className={cx(
+              'my-1 min-h-[16px] w-px flex-1',
+              bloqueado ? 'border-l border-dashed border-navy-600' : 'bg-navy-600',
+            )}
+          />
+        )}
+      </div>
+      <div className="flex flex-1 flex-col gap-0.5 pb-6">
+        <span className="text-xs text-neutral-500">
+          {item.tipo === 'fluxo' ? 'Fluxo do squad' : `Passo ${indice + 1}`}
+        </span>
+        <span
+          className={cx(
+            'text-sm font-medium leading-snug',
+            bloqueado ? 'text-neutral-600' : atual ? 'text-gold-300' : 'text-neutral-200',
+          )}
+        >
+          {item.title}
+        </span>
+        {atual && (
+          <span className="w-fit rounded-full bg-gold-500/20 px-2 py-0.5 text-[11px] font-medium text-gold-300">
+            Aguardando você
+          </span>
+        )}
+        {feito && (
+          <span className="w-fit rounded-full bg-amber-400/10 px-2 py-0.5 text-[11px] text-amber-400">
+            Carimbado
+          </span>
+        )}
+      </div>
+    </>
+  )
+  return bloqueado ? (
+    <li className="flex gap-3">{conteudo}</li>
+  ) : (
+    <li>
+      <Link to={href} className="flex gap-3 transition-opacity hover:opacity-80">
+        {conteudo}
+      </Link>
+    </li>
+  )
+}
 
 // Cada fase só libera depois que a ANTERIOR estiver 100% concluída — gate rígido em sequência
 // (decisão do Miguel 2026-09-05, substituindo o gate suave que só travava a fase final).
@@ -183,9 +270,18 @@ export function JornadaView({
                 Você terminou todos os itens de {faseNome}.
               </p>
             </div>
-            <ul className="flex flex-col gap-2">
-              {itens.map((item) => (
-                <TrailItemCard key={item.id} step={item} concluido />
+            <ul className="relative flex flex-col">
+              {itens.map((item, i) => (
+                <ItemDiarioDeBordo
+                  key={item.id}
+                  item={item}
+                  indice={i}
+                  isLast={i === itens.length - 1}
+                  feito
+                  atual={false}
+                  bloqueado={false}
+                  href={hrefDoItem(item)}
+                />
               ))}
             </ul>
           </>
@@ -216,95 +312,20 @@ export function JornadaView({
 
               {/* "Diário de bordo" — lista vertical de entradas de log ligadas por uma linha fina
                   (não a trilha sinuosa da Jornada: um nível abaixo pede um registro mais discreto,
-                  tipo caderno de bordo, não outro mapa). Feito vira selo dourado preenchido; atual
-                  pulsa esperando ser carimbado; bloqueado fica opaco com cadeado e tracejado. */}
+                  tipo caderno de bordo, não outro mapa). */}
               <ul className="relative flex flex-col">
-                {itens.map((item, i) => {
-                  const feito = estaConcluido(item)
-                  const atual = item.id === itemAtual.id
-                  const bloqueado = i > itemAtualIndex
-                  const isLast = i === itens.length - 1
-                  const conteudo = (
-                    <>
-                      <div className="flex shrink-0 flex-col items-center">
-                        <span
-                          className={cx(
-                            'flex size-11 shrink-0 items-center justify-center rounded-full border-2 bg-navy-800 text-base transition-colors duration-200',
-                            bloqueado
-                              ? 'border-dashed border-navy-600 text-neutral-600 opacity-60'
-                              : feito
-                                ? 'border-amber-400/70 text-amber-400'
-                                : atual
-                                  ? 'anim-pulso border-gold-400 text-gold-400 shadow-[0_0_0_4px_rgba(201,162,39,0.15)]'
-                                  : 'border-navy-600 text-gold-400',
-                          )}
-                        >
-                          <Icon
-                            name={
-                              bloqueado
-                                ? 'lock'
-                                : feito
-                                  ? 'military_tech'
-                                  : item.tipo === 'fluxo'
-                                    ? 'hub'
-                                    : 'flag'
-                            }
-                            fill={feito}
-                          />
-                        </span>
-                        {!isLast && (
-                          <span
-                            className={cx(
-                              'my-1 min-h-[16px] w-px flex-1',
-                              bloqueado ? 'border-l border-dashed border-navy-600' : 'bg-navy-600',
-                            )}
-                          />
-                        )}
-                      </div>
-                      <div className="flex flex-1 flex-col gap-0.5 pb-6">
-                        <span className="text-xs text-neutral-500">
-                          {item.tipo === 'fluxo' ? 'Fluxo do squad' : `Passo ${i + 1}`}
-                        </span>
-                        <span
-                          className={cx(
-                            'text-sm font-medium leading-snug',
-                            bloqueado
-                              ? 'text-neutral-600'
-                              : atual
-                                ? 'text-gold-300'
-                                : 'text-neutral-200',
-                          )}
-                        >
-                          {item.title}
-                        </span>
-                        {atual && (
-                          <span className="w-fit rounded-full bg-gold-500/20 px-2 py-0.5 text-[11px] font-medium text-gold-300">
-                            Aguardando você
-                          </span>
-                        )}
-                        {feito && (
-                          <span className="w-fit rounded-full bg-amber-400/10 px-2 py-0.5 text-[11px] text-amber-400">
-                            Carimbado
-                          </span>
-                        )}
-                      </div>
-                    </>
-                  )
-                  return bloqueado ? (
-                    <li key={item.id} className="flex gap-3">
-                      {conteudo}
-                    </li>
-                  ) : (
-                    <li key={item.id}>
-                      <Link
-                        to={hrefDoItem(item)}
-                        className="flex gap-3 transition-opacity hover:opacity-80"
-                      >
-                        {conteudo}
-                      </Link>
-                    </li>
-                  )
-                })}
+                {itens.map((item, i) => (
+                  <ItemDiarioDeBordo
+                    key={item.id}
+                    item={item}
+                    indice={i}
+                    isLast={i === itens.length - 1}
+                    feito={estaConcluido(item)}
+                    atual={item.id === itemAtual.id}
+                    bloqueado={i > itemAtualIndex}
+                    href={hrefDoItem(item)}
+                  />
+                ))}
               </ul>
             </>
           )
