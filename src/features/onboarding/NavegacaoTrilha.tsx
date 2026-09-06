@@ -19,6 +19,7 @@ export function NavegacaoTrilha({
       {anterior ? (
         <Link
           to={hrefDoTrailItem(anterior)}
+          state={{ deFase: true }}
           className="flex min-w-0 items-center gap-1.5 text-sm text-neutral-400 transition-colors hover:text-neutral-200"
         >
           <Icon name="arrow_back" className="shrink-0 text-base" />
@@ -30,6 +31,7 @@ export function NavegacaoTrilha({
       {proximo && (
         <Link
           to={hrefDoTrailItem(proximo)}
+          state={{ deFase: true }}
           className="flex min-w-0 items-center gap-1.5 text-right text-sm text-gold-400 transition-colors hover:text-gold-300"
         >
           <span className="truncate">{proximo.title}</span>

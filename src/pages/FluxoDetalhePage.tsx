@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { CompassRose } from '../components/CompassRose'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
@@ -30,8 +30,13 @@ import { paraEmbed } from '../utils/video'
 export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
   const { titulo: tituloParam = '' } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const isGestor = useAuthStore((s) => s.usuario?.isGestor ?? false)
   const { anterior, proximo, faseDoItem } = useTrailNavegacao(perfil, tituloParam)
+  // O mesmo Fluxo pode ser aberto por dois caminhos (Guia geral OU trilha da Jornada) — só sabemos
+  // qual foi de verdade pelo estado que o link de origem deixou na navegação (`deFase`), não só
+  // por ele fazer parte da trilha (um fluxo da fase "Conheça o sistema" também aparece no Guia).
+  const veioDaFase = Boolean((location.state as { deFase?: boolean } | null)?.deFase) && faseDoItem
   const [fluxo, setFluxo] = useState<Fluxo | null>(null)
   const [concluido, setConcluido] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -159,15 +164,15 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
     <article className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
       <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.06]" />
       <MapIllustration className="pointer-events-none absolute -bottom-10 -left-8 w-56 text-gold-500 opacity-[0.06]" />
-      {/* Quem entrou pela Jornada (fluxo faz parte da trilha, `faseDoItem` definido) sempre volta
-          pra visão geral da fase, igual o Passo — antes usava navigate(-1) sempre, e como as
-          setinhas anterior/próximo empilham entradas no histórico, "Voltar" podia cair num OUTRO
-          item da trilha em vez da fase (bug real reportado pelo Miguel). Só cai pro histórico
-          quando o fluxo não tem fase (aberto direto pelo Guia geral, fora da trilha). */}
+      {/* Quem entrou pela Jornada (`veioDaFase`, marcado pelo link de origem) sempre volta pra
+          visão geral da fase, igual o Passo. Quem entrou pelo Guia geral volta no histórico (pro
+          Guia) — mesmo fluxo, dois destinos diferentes, por isso não dá pra decidir só pelo fluxo
+          fazer parte ou não da trilha (um fluxo de "Conheça o sistema" aparece nos dois lugares;
+          isso foi um bug real: um fix anterior usava só a trilha e quebrou o Voltar do Guia). */}
       <button
         type="button"
         onClick={() =>
-          faseDoItem ? navigate(`/fase/${encodeURIComponent(faseDoItem)}`) : navigate(-1)
+          veioDaFase ? navigate(`/fase/${encodeURIComponent(faseDoItem)}`) : navigate(-1)
         }
         className="relative flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
       >

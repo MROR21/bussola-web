@@ -147,6 +147,7 @@ function ItemDiarioDeBordo({
           {item.description && <p className="text-sm text-neutral-400">{item.description}</p>}
           <Link
             to={href}
+            state={{ deFase: true }}
             className="mt-2 inline-block rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
           >
             Ir para o {item.tipo === 'fluxo' ? 'fluxo' : 'passo'}
@@ -183,7 +184,7 @@ function ItemDiarioDeBordo({
     <li className="flex gap-3">{conteudo}</li>
   ) : (
     <li>
-      <Link to={href} className="flex gap-3 transition-opacity hover:opacity-80">
+      <Link to={href} state={{ deFase: true }} className="flex gap-3 transition-opacity hover:opacity-80">
         {conteudo}
       </Link>
     </li>
