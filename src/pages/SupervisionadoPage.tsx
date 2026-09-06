@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { Acordeao } from '../components/Acordeao'
 import { CompassRose } from '../components/CompassRose'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
@@ -21,6 +22,7 @@ export function SupervisionadoPage() {
   useTitulo(dados?.nome)
   const [fluxos, setFluxos] = useState<FluxoProgresso[]>([])
   const [aba, setAba] = useState<'passos' | 'fluxos'>('passos')
+  const [acessosAbertos, setAcessosAbertos] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [tentativa, setTentativa] = useState(0)
@@ -71,18 +73,17 @@ export function SupervisionadoPage() {
         </span>
       </div>
 
-      <details className="group rounded-2xl border border-navy-700 bg-navy-800 p-4">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium text-neutral-100">
-          <span className="flex items-center gap-2">
+      <Acordeao
+        titulo={
+          <span className="flex items-center gap-2 normal-case">
             <Icon name="key" className="text-base text-gold-400" /> Acessos a liberar (
             {NOME_CARGO[dados.cargo]})
           </span>
-          <Icon
-            name="expand_more"
-            className="text-neutral-500 transition-transform duration-200 group-open:rotate-180"
-          />
-        </summary>
-        <ul className="mt-3 flex flex-wrap gap-2">
+        }
+        aberto={acessosAbertos}
+        onToggle={() => setAcessosAbertos((a) => !a)}
+      >
+        <ul className="flex flex-wrap gap-2">
           {acessos.map((acesso) => (
             <li
               key={acesso}
@@ -95,7 +96,7 @@ export function SupervisionadoPage() {
         <p className="mt-3 text-xs text-neutral-500">
           Rascunho ilustrativo por cargo — lista definitiva a confirmar.
         </p>
-      </details>
+      </Acordeao>
 
       <div className="flex gap-2">
         {(['passos', 'fluxos'] as const).map((chave) => (
