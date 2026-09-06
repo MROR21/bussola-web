@@ -218,31 +218,42 @@ export function AppLayout() {
                   )}
                 </div>
 
-                {!colapsado && galhos.length > 0 && aberto && (
-                  <ul className="ml-4 flex flex-col gap-0.5 border-l border-navy-700 py-1 pl-3">
-                    {galhos.map((nome) => {
-                      // Fase e Módulo têm bases de path diferentes (fase vive fora da Jornada,
-                      // módulo é sub-rota do próprio Guia) — não dá pra derivar só de `item.to`.
-                      const base = item.arvore === 'fase' ? '/fase' : '/guias'
-                      const linkTo = `${base}/${encodeURIComponent(nome)}`
-                      const ativo = location.pathname === linkTo
-                      return (
-                        <li key={nome}>
-                          <Link
-                            to={linkTo}
-                            className={cx(
-                              'block truncate rounded-lg px-2 py-1 text-xs transition-colors',
-                              ativo
-                                ? 'text-gold-400'
-                                : 'text-neutral-500 hover:text-neutral-200',
-                            )}
-                          >
-                            {nome}
-                          </Link>
-                        </li>
-                      )
-                    })}
-                  </ul>
+                {/* Grid-rows em vez de montar/desmontar o <ul> na hora — o truque de "0fr → 1fr"
+                    dá uma transição suave de altura sem precisar medir pixel nenhum (só Tailwind,
+                    sem CSS próprio). O padding/gap fica DENTRO do <ul> (não no grid pai), assim ele
+                    encolhe junto com a linha em vez de deixar um respiro fixo quando fechado. */}
+                {!colapsado && galhos.length > 0 && (
+                  <div
+                    className={cx(
+                      'ml-4 grid border-l border-navy-700 pl-3 transition-[grid-template-rows] duration-200 ease-out',
+                      aberto ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+                    )}
+                  >
+                    <ul className="flex flex-col gap-0.5 overflow-hidden py-1">
+                      {galhos.map((nome) => {
+                        // Fase e Módulo têm bases de path diferentes (fase vive fora da Jornada,
+                        // módulo é sub-rota do próprio Guia) — não dá pra derivar só de `item.to`.
+                        const base = item.arvore === 'fase' ? '/fase' : '/guias'
+                        const linkTo = `${base}/${encodeURIComponent(nome)}`
+                        const ativo = location.pathname === linkTo
+                        return (
+                          <li key={nome}>
+                            <Link
+                              to={linkTo}
+                              className={cx(
+                                'block truncate rounded-lg px-2 py-1 text-xs transition-colors',
+                                ativo
+                                  ? 'text-gold-400'
+                                  : 'text-neutral-500 hover:text-neutral-200',
+                              )}
+                            >
+                              {nome}
+                            </Link>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
                 )}
               </div>
             )
