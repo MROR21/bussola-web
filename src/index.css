@@ -116,6 +116,34 @@
   }
 }
 
+/* Pegadas "andando" até o X (tesouro) — ver PegadasTesouro.tsx (telas de erro/espera). Looping,
+   diferente das outras animações aqui (que são de entrada/saída, uma vez só). */
+@keyframes bussola-pegada {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  20%,
+  45% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 0;
+  }
+}
+
+@keyframes bussola-tesouro {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
 /* Entrada de página/conteúdo (sobe suave). Sem fill-mode: o keyframe final já é
    idêntico ao estado normal (transform:none), então não precisa "segurar" — segurar
    deixaria um transform ativo, e isso quebra position:fixed dos filhos (viram
@@ -146,6 +174,14 @@
   animation: bussola-pop-out 0.15s ease-in forwards;
 }
 
+.anim-pegada {
+  animation: bussola-pegada 2.4s ease-in-out infinite;
+}
+
+.anim-tesouro {
+  animation: bussola-tesouro 1.6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .anim-page,
   .anim-fade,
@@ -153,5 +189,15 @@
   .anim-fade-out,
   .anim-pop-out {
     animation: none;
+  }
+
+  .anim-pegada {
+    animation: none;
+    opacity: 0.6;
+  }
+
+  .anim-tesouro {
+    animation: none;
+    opacity: 1;
   }
 }
