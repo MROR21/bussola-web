@@ -22,7 +22,7 @@ const PEGADAS = [
 
 export function PegadasTesouro({ className = '' }: { className?: string }) {
   return (
-    <div className={`relative h-44 w-72 ${className}`} aria-hidden="true">
+    <div className={`relative h-44 w-72 scale-90 ${className}`} aria-hidden="true">
       <TreePalm className="absolute left-0 top-2 h-10 w-7 text-gold-500/25" />
       <TreePalm className="absolute -left-3 bottom-2 h-14 w-10 text-gold-500/30" />
       <TreePalm className="absolute right-0 bottom-6 h-10 w-7 -scale-x-100 text-gold-500/20" />
@@ -62,7 +62,7 @@ export function PegadasTesouro({ className = '' }: { className?: string }) {
       ))}
       <span
         className="anim-tesouro absolute text-2xl text-gold-400"
-        style={{ top: '9%', left: '84%', transform: 'translate(-50%, -50%)' }}
+        style={{ top: '10%', left: '84%', transform: 'translate(-50%, -50%)' }}
       >
         <Icon name="close" />
       </span>
