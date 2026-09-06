@@ -353,8 +353,9 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
           juntas: pela Jornada, segue a trilha da fase (com "fase concluída" no fim); pelo Guia,
           segue a ordem do módulo (sem noção de fase nenhuma — bug real reportado pelo Miguel: a
           1ª versão desse fix mostrava "fase concluída" mesmo navegando só pelo Guia). Só na
-          Jornada o "próximo"/"fase concluída" exige `concluido` primeiro (é o que garante
-          progresso de verdade); no Guia, livre — não é um fluxo obrigatório/sequencial. */}
+          Jornada o "próximo"/"fase concluída" exige `concluido` primeiro pra ficar clicável (mas
+          continua aparecendo sem cor + tooltip, ver `proximoLiberado`); no Guia, sempre liberado —
+          não é um fluxo obrigatório/sequencial. */}
       <NavegacaoTrilha
         anterior={
           veioDaFase
@@ -363,14 +364,13 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
         }
         proximo={
           veioDaFase
-            ? concluido && proximo
-              ? { title: proximo.title, href: hrefDoTrailItem(proximo) }
-              : undefined
+            ? proximo && { title: proximo.title, href: hrefDoTrailItem(proximo) }
             : proximoGuia && { title: proximoGuia.titulo, href: hrefDoFluxo(proximoGuia) }
         }
-        faseTerminada={veioDaFase ? concluido && faseTerminada : undefined}
+        faseTerminada={veioDaFase ? faseTerminada : undefined}
         fase={veioDaFase ? faseDoItem : undefined}
         origemFase={Boolean(veioDaFase)}
+        proximoLiberado={veioDaFase ? concluido : true}
       />
 
       {toastSalvoMontado && (
