@@ -63,7 +63,7 @@ export function PegadasTesouro({ className = '' }: { className?: string }) {
       ))}
       <span
         className="anim-tesouro absolute text-2xl text-gold-400"
-        style={{ top: '8.5%', left: '82.4%', transform: 'translate(-50%, -50%)' }}
+        style={{ top: '10%', left: '84%', transform: 'translate(-50%, -50%)' }}
       >
         <Icon name="close" />
       </span>
