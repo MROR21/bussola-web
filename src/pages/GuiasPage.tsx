@@ -132,13 +132,24 @@ export function GuiasPage() {
     return [...grupos.entries()].sort((a, b) => pesoTopico(a[0]).localeCompare(pesoTopico(b[0]), 'pt'))
   }, [porModulo])
 
-  const resultadosBusca = useMemo(() => {
+  // Busca agrupada por módulo (mesma organização de "dentro de um módulo" — reaproveita `porModulo`,
+  // então sai na mesma ordem de módulos usada em todo o Guia) + concluídos primeiro dentro de cada
+  // grupo, pra achar rápido o que falta ver.
+  const resultadosBuscaPorModulo = useMemo(() => {
     const q = busca.trim().toLowerCase()
     if (!q) return []
-    return fluxos.filter((f) =>
-      `${f.titulo} ${f.descricao} ${f.categoria} ${f.modulo}`.toLowerCase().includes(q),
-    )
-  }, [busca, fluxos])
+    const concluidoPrimeiro = (a: Fluxo, b: Fluxo) =>
+      Number(concluidos.has(b.id)) - Number(concluidos.has(a.id))
+    return porModulo
+      .map((entrada): [string, Fluxo[]] => {
+        const [modulo, itens] = entrada
+        const filtrados = itens.filter((f) =>
+          `${f.titulo} ${f.descricao} ${f.categoria} ${f.modulo}`.toLowerCase().includes(q),
+        )
+        return [modulo, filtrados.sort(concluidoPrimeiro)]
+      })
+      .filter(([, itens]) => itens.length > 0)
+  }, [busca, porModulo, concluidos])
 
   // Um item de fluxo (card com link), reusado na busca e dentro do módulo.
   // ocultarTag: esconde o chip da categoria quando o item já está sob o cabeçalho da tag.
@@ -264,10 +275,44 @@ export function GuiasPage() {
       />
 
       {buscando ? (
-        resultadosBusca.length === 0 ? (
+        resultadosBuscaPorModulo.length === 0 ? (
           <p className="anim-fade text-neutral-500">Nenhum fluxo encontrado.</p>
         ) : (
-          <ul className="anim-fade flex flex-col gap-2">{resultadosBusca.map((f) => itemFluxo(f))}</ul>
+          <div className="anim-fade flex flex-col gap-6">
+            {resultadosBuscaPorModulo.map(([modulo, itensModulo]) => {
+              const porTagBusca = new Map<string, Fluxo[]>()
+              for (const f of itensModulo) {
+                const tag = f.categoria || 'Outros'
+                const lista = porTagBusca.get(tag) ?? []
+                lista.push(f)
+                porTagBusca.set(tag, lista)
+              }
+              const gruposBusca = [...porTagBusca.entries()]
+              return (
+                <section key={modulo} className="flex flex-col gap-3">
+                  <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+                    <Icon name={iconeDoModulo(modulo)} className="text-base text-gold-400" /> {modulo}
+                  </h2>
+                  {gruposBusca.length > 1 ? (
+                    <div className="flex flex-col gap-4">
+                      {gruposBusca.map(([tag, fluxosTag]) => (
+                        <div key={tag} className="flex flex-col gap-2">
+                          <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-600">
+                            {tag}
+                          </h3>
+                          <ul className="flex flex-col gap-2">
+                            {fluxosTag.map((f) => itemFluxo(f, true))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <ul className="flex flex-col gap-2">{itensModulo.map((f) => itemFluxo(f))}</ul>
+                  )}
+                </section>
+              )
+            })}
+          </div>
         )
       ) : (
         <div className="anim-fade flex flex-col gap-6">
