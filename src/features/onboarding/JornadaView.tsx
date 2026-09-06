@@ -33,6 +33,12 @@ const TRILHA_CIRCULO = 64
 const TRILHA_PASSO_Y = 168
 const TRILHA_AMPLITUDE = 25
 
+// Mesma técnica, só que pra trilha de PASSOS dentro de uma fase (marcos menores, mais próximos —
+// uma fase costuma ter mais itens do que a Jornada tem fases).
+const PASSO_CIRCULO = 48
+const PASSO_PASSO_Y = 110
+const PASSO_AMPLITUDE = 18
+
 // Home "Sua Jornada": progresso geral + próximo passo + fases em CARDS (clica e entra na fase).
 export function JornadaView({
   trail,
@@ -127,16 +133,36 @@ export function JornadaView({
     const [faseNome, itens] = faseEntry
     const feitosFase = itens.filter(estaConcluido).length
     const faseCompleta = feitosFase === itens.length
-    // Só o passo atual (o 1º ainda não concluído) e um preview do seguinte — nada de lista solta
-    // com tudo de uma vez. A conclusão só acontece de verdade dentro do próprio passo/fluxo.
+    // Passo atual (o 1º ainda não concluído) em destaque + uma trilha sinuosa com TODOS os itens
+    // da fase (feitos, atual, bloqueados) — mesma linguagem visual da trilha de Fases da Home, só
+    // que um nível abaixo (Passo em vez de Fase). A conclusão só acontece de verdade dentro do
+    // próprio passo/fluxo.
     const itemAtualIndex = itens.findIndex((item) => !estaConcluido(item))
     const itemAtual = itemAtualIndex >= 0 ? itens[itemAtualIndex] : undefined
-    const itemSeguinte = itemAtualIndex >= 0 ? itens[itemAtualIndex + 1] : undefined
     const pctFase = itens.length > 0 ? Math.round((feitosFase / itens.length) * 100) : 0
     const hrefDoItem = (item: TrailStep) =>
       item.tipo === 'fluxo'
         ? `/fluxo/${encodeURIComponent(item.title)}`
         : `/passo/${encodeURIComponent(item.title)}`
+
+    const pontosTrilhaItens = itens.map((_, i) => ({
+      x: i === 0 ? 50 : i % 2 === 1 ? 50 - PASSO_AMPLITUDE : 50 + PASSO_AMPLITUDE,
+      y: i * PASSO_PASSO_Y + PASSO_CIRCULO / 2,
+    }))
+    const alturaTrilhaItens =
+      pontosTrilhaItens.length > 0
+        ? pontosTrilhaItens[pontosTrilhaItens.length - 1].y + PASSO_CIRCULO / 2 + 60
+        : 0
+    let caminhoTrilhaItens = ''
+    if (pontosTrilhaItens.length >= 2) {
+      caminhoTrilhaItens = `M ${pontosTrilhaItens[0].x} ${pontosTrilhaItens[0].y}`
+      for (let i = 1; i < pontosTrilhaItens.length; i++) {
+        const anterior = pontosTrilhaItens[i - 1]
+        const atual = pontosTrilhaItens[i]
+        const meioY = (anterior.y + atual.y) / 2
+        caminhoTrilhaItens += ` C ${anterior.x} ${meioY}, ${atual.x} ${meioY}, ${atual.x} ${atual.y}`
+      }
+    }
 
     return (
       <div className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
@@ -213,17 +239,88 @@ export function JornadaView({
                 </Link>
               </div>
 
-              {itemSeguinte && (
-                <div className="relative flex items-center gap-3 rounded-xl border border-dashed border-navy-600 p-4 opacity-60">
-                  <Icon name="lock" className="text-lg text-neutral-500" />
-                  <div className="flex flex-col">
-                    <span className="text-xs uppercase tracking-wide text-neutral-500">
-                      A seguir
-                    </span>
-                    <span className="text-sm text-neutral-300">{itemSeguinte.title}</span>
-                  </div>
-                </div>
-              )}
+              <div
+                className="relative mx-auto w-full max-w-sm"
+                style={{ height: alturaTrilhaItens }}
+              >
+                <svg
+                  viewBox={`0 0 100 ${alturaTrilhaItens}`}
+                  preserveAspectRatio="none"
+                  className="pointer-events-none absolute inset-0 size-full text-navy-700"
+                  aria-hidden="true"
+                >
+                  <path
+                    d={caminhoTrilhaItens}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeDasharray="3 7"
+                    strokeLinecap="round"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                </svg>
+
+                {itens.map((item, i) => {
+                  const feito = estaConcluido(item)
+                  const atual = item.id === itemAtual.id
+                  const bloqueado = i > itemAtualIndex
+                  const ponto = pontosTrilhaItens[i]
+                  const conteudo = (
+                    <>
+                      <span
+                        className={cx(
+                          'flex size-12 shrink-0 items-center justify-center rounded-full border-2 bg-navy-800 text-lg transition-colors duration-200',
+                          bloqueado
+                            ? 'border-dashed border-navy-600 text-neutral-600 opacity-60'
+                            : feito
+                              ? 'border-amber-400/70 text-amber-400'
+                              : atual
+                                ? 'border-gold-400 text-gold-400 shadow-[0_0_0_4px_rgba(201,162,39,0.15)]'
+                                : 'border-navy-600 text-gold-400',
+                        )}
+                      >
+                        <Icon
+                          name={
+                            bloqueado
+                              ? 'lock'
+                              : feito
+                                ? 'military_tech'
+                                : item.tipo === 'fluxo'
+                                  ? 'hub'
+                                  : 'flag'
+                          }
+                          fill={feito}
+                        />
+                      </span>
+                      <span className="w-full max-w-[120px] truncate text-center text-[11px] text-neutral-400">
+                        {item.title}
+                      </span>
+                    </>
+                  )
+                  const posicao = {
+                    left: `${ponto.x}%`,
+                    top: ponto.y - PASSO_CIRCULO / 2,
+                  }
+                  return bloqueado ? (
+                    <div
+                      key={item.id}
+                      className="absolute flex w-[130px] -translate-x-1/2 flex-col items-center gap-1"
+                      style={posicao}
+                    >
+                      {conteudo}
+                    </div>
+                  ) : (
+                    <Link
+                      key={item.id}
+                      to={hrefDoItem(item)}
+                      className="absolute flex w-[130px] -translate-x-1/2 flex-col items-center gap-1 transition-transform duration-200 hover:-translate-y-0.5"
+                      style={posicao}
+                    >
+                      {conteudo}
+                    </Link>
+                  )
+                })}
+              </div>
             </>
           )
         )}
