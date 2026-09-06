@@ -13,16 +13,16 @@ import { Icon } from './Icon'
 const ROTA = 'M8 85 Q40 75 28 55 T60 32 T84 10'
 
 const PEGADAS = [
-  { top: '67.8%', left: '31%', rotate: 12, atraso: 0 },
-  { top: '46.1%', left: '25.5%', rotate: 7, atraso: 0.25 },
-  { top: '34.1%', left: '43.4%', rotate: 78, atraso: 0.5 },
-  { top: '30.7%', left: '71.8%', rotate: 81, atraso: 0.75 },
-  { top: '26.7%', left: '85.7%', rotate: 60, atraso: 1 },
+  { top: '79.5%', left: '21%', rotate: 60, atraso: 0 },
+  { top: '56.3%', left: '28.8%', rotate: -28, atraso: 0.25 },
+  { top: '35.6%', left: '37.7%', rotate: 72, atraso: 0.5 },
+  { top: '31.6%', left: '65.3%', rotate: 84, atraso: 0.75 },
+  { top: '21.9%', left: '90%', rotate: 16, atraso: 1 },
 ] as const
 
 export function PegadasTesouro({ className = '' }: { className?: string }) {
   return (
-    <div className={`relative h-36 w-56 ${className}`} aria-hidden="true">
+    <div className={`relative h-44 w-72 ${className}`} aria-hidden="true">
       <TreePalm className="absolute -left-2 -top-1 h-10 w-7 text-gold-500/25" />
       <TreePalm className="absolute -left-3 bottom-2 h-14 w-10 text-gold-500/30" />
       <TreePalm className="absolute -right-3 bottom-4 h-10 w-7 -scale-x-100 text-gold-500/20" />
