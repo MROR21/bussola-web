@@ -448,10 +448,8 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
           </button>
         </section>
       ) : (
-        <section className="anim-fade flex flex-col items-center gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-6 text-center">
-          <p className="text-sm text-neutral-400">
-            Terminou esse passo? Marque como concluído pra seguir na jornada.
-          </p>
+        <section className="anim-fade flex items-center justify-between gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-5">
+          <span className="text-sm text-neutral-400">Terminou esse passo?</span>
           <button
             type="button"
             onClick={concluir}
