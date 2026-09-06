@@ -23,7 +23,7 @@ import {
 import type { Fluxo } from '../features/fluxos/types'
 import type { Perfil } from '../features/nivelamento/types'
 import { NavegacaoTrilha } from '../features/onboarding/NavegacaoTrilha'
-import { useTrailNavegacao } from '../features/onboarding/useTrailNavegacao'
+import { hrefDoTrailItem, useTrailNavegacao } from '../features/onboarding/useTrailNavegacao'
 import { paraEmbed } from '../utils/video'
 
 // Página de um fluxo (rota /fluxo/:titulo): o conteúdo em Markdown, consulta pura.
@@ -38,6 +38,10 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
   // por ele fazer parte da trilha (um fluxo da fase "Conheça o sistema" também aparece no Guia).
   const veioDaFase = Boolean((location.state as { deFase?: boolean } | null)?.deFase) && faseDoItem
   const [fluxo, setFluxo] = useState<Fluxo | null>(null)
+  // Lista completa (todos os módulos) só pra calcular anterior/próximo DENTRO DO MÓDULO do Guia —
+  // navegação independente da trilha da Jornada, usada quando `veioDaFase` é false (mesma ordem
+  // que a GuiasPage mostra, já que vem do mesmo `listarFluxos()`).
+  const [todosFluxos, setTodosFluxos] = useState<Fluxo[]>([])
   const [concluido, setConcluido] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -69,6 +73,7 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
         }
         setFluxo(f)
         setConcluido(concluidos.includes(f.id))
+        setTodosFluxos(todos)
       })
       .catch((e) => {
         if (!cancelado) setError(e instanceof Error ? e.message : 'Erro ao carregar o fluxo')
@@ -159,6 +164,18 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
   if (loading) return <Carregando texto="Carregando o fluxo..." />
   if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
   if (!fluxo) return null
+
+  // Anterior/próximo dentro do módulo do Guia (mesma ordem da GuiasPage) — só usado quando NÃO
+  // veio da fase. Ao chegar no último item do módulo, não tem "fase concluída" nenhuma (não existe
+  // fase aqui), só some a seta de "próximo" e sobra a de "anterior".
+  const doMesmoModulo = todosFluxos.filter((f) => f.modulo === fluxo.modulo)
+  const indiceModulo = doMesmoModulo.findIndex((f) => f.titulo === fluxo.titulo)
+  const anteriorGuia = indiceModulo > 0 ? doMesmoModulo[indiceModulo - 1] : undefined
+  const proximoGuia =
+    indiceModulo >= 0 && indiceModulo < doMesmoModulo.length - 1
+      ? doMesmoModulo[indiceModulo + 1]
+      : undefined
+  const hrefDoFluxo = (f: Fluxo) => `/fluxo/${encodeURIComponent(f.titulo)}`
 
   return (
     <article className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
@@ -328,15 +345,25 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
         </div>
       )}
 
-      {/* Mesmo Fluxo pode aparecer no Guia geral SEM ter vindo de lá pela Jornada — as setinhas de
-          trilha (e o "fase concluída") só fazem sentido pra quem entrou pela Jornada de verdade
-          (`veioDaFase`), senão mostraria "fase concluída" pra quem só tava navegando pelo Guia,
-          sem nenhuma fase envolvida (bug real reportado pelo Miguel). */}
+      {/* Mesmo Fluxo pode aparecer no Guia geral SEM ter vindo de lá pela Jornada — a navegação
+          anterior/próximo é uma ou outra dependendo de onde veio (`veioDaFase`), nunca as duas
+          juntas: pela Jornada, segue a trilha da fase (com "fase concluída" no fim); pelo Guia,
+          segue a ordem do módulo (sem noção de fase nenhuma — bug real reportado pelo Miguel: a
+          1ª versão desse fix mostrava "fase concluída" mesmo navegando só pelo Guia). */}
       <NavegacaoTrilha
-        anterior={veioDaFase ? anterior : undefined}
-        proximo={veioDaFase ? proximo : undefined}
+        anterior={
+          veioDaFase
+            ? anterior && { title: anterior.title, href: hrefDoTrailItem(anterior) }
+            : anteriorGuia && { title: anteriorGuia.titulo, href: hrefDoFluxo(anteriorGuia) }
+        }
+        proximo={
+          veioDaFase
+            ? proximo && { title: proximo.title, href: hrefDoTrailItem(proximo) }
+            : proximoGuia && { title: proximoGuia.titulo, href: hrefDoFluxo(proximoGuia) }
+        }
         faseTerminada={veioDaFase ? faseTerminada : undefined}
         fase={veioDaFase ? faseDoItem : undefined}
+        origemFase={Boolean(veioDaFase)}
       />
 
       {toastSalvoMontado && (

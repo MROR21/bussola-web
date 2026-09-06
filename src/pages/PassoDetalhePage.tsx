@@ -23,7 +23,7 @@ import {
   getComprovacao,
 } from '../features/onboarding/progressService'
 import type { OnboardingStep } from '../features/onboarding/types'
-import { useTrailNavegacao } from '../features/onboarding/useTrailNavegacao'
+import { hrefDoTrailItem, useTrailNavegacao } from '../features/onboarding/useTrailNavegacao'
 import type { Perfil } from '../features/nivelamento/types'
 
 const inputCls =
@@ -472,10 +472,11 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
       )}
 
       <NavegacaoTrilha
-        anterior={anterior}
-        proximo={proximo}
+        anterior={anterior && { title: anterior.title, href: hrefDoTrailItem(anterior) }}
+        proximo={proximo && { title: proximo.title, href: hrefDoTrailItem(proximo) }}
         faseTerminada={faseTerminada}
         fase={faseDoItem}
+        origemFase
       />
 
       {toastSalvoMontado && (
