@@ -133,7 +133,7 @@ export function TrilhaFasesLeitura({ passos }: { passos: PassoProgresso[] }) {
                       : atual
                         ? 'border-gold-400 text-gold-400 shadow-[0_0_0_5px_rgba(201,162,39,0.15)]'
                         : 'border-navy-600 text-gold-400 hover:border-gold-500/60',
-                  (atual || expandida) && 'anim-pulso',
+                  expandida && 'anim-pulso',
                 )}
               >
                 <Icon name={bloqueada ? 'lock' : iconeDaFase(fase)} />

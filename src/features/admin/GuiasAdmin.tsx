@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Acordeao } from '../../components/Acordeao'
 import { Icon } from '../../components/Icon'
 import { MarkdownEditor } from '../../components/MarkdownEditor'
 import { Carregando, Spinner } from '../../components/Spinner'
@@ -35,6 +36,10 @@ export function GuiasAdmin() {
   const [salvando, setSalvando] = useState(false)
   const [apagando, setApagando] = useState<FluxoAdmin | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
+  // Estado de aberto/fechado dos accordions (Tópico e Módulo), por nome/id — cada nível é
+  // independente (abrir um Tópico não mexe no estado dos Módulos dentro dele).
+  const [topicosAbertos, setTopicosAbertos] = useState<Record<string, boolean>>({})
+  const [modulosAbertos, setModulosAbertos] = useState<Record<string, boolean>>({})
 
   const modalForm = useSaidaValor(form)
   const modalApagar = useSaidaValor(apagando)
@@ -222,52 +227,33 @@ export function GuiasAdmin() {
           const conteudoModulos = (
             <div className="flex flex-col">
               {modulosComItens.map(([modulo, itens], i) => (
-                <details
+                <Acordeao
                   key={modulo.id}
-                  className={cx(
-                    'group/modulo py-3',
-                    i > 0 && 'border-t border-navy-700',
-                  )}
+                  titulo={modulo.nome}
+                  contagem={itens.length}
+                  variante="linha"
+                  className={i > 0 ? 'border-t border-navy-700' : undefined}
+                  aberto={modulosAbertos[modulo.id] ?? false}
+                  onToggle={() =>
+                    setModulosAbertos((m) => ({ ...m, [modulo.id]: !m[modulo.id] }))
+                  }
                 >
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium text-neutral-100">
-                    <span>
-                      {modulo.nome}{' '}
-                      <span className="text-xs font-normal text-neutral-500">({itens.length})</span>
-                    </span>
-                    <Icon
-                      name="expand_more"
-                      className="text-neutral-500 transition-transform duration-200 group-open/modulo:rotate-180"
-                    />
-                  </summary>
-                  <div className="anim-acordeao">
-                    <div className="mt-3">{listaItens(itens)}</div>
-                  </div>
-                </details>
+                  {listaItens(itens)}
+                </Acordeao>
               ))}
             </div>
           )
 
           return porTopico.length > 1 ? (
-            <details
+            <Acordeao
               key={topico}
-              className="group/topico rounded-2xl border border-navy-700 bg-navy-800 p-4"
+              titulo={topico}
+              contagem={totalTopico}
+              aberto={topicosAbertos[topico] ?? false}
+              onToggle={() => setTopicosAbertos((t) => ({ ...t, [topico]: !t[topico] }))}
             >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-semibold uppercase tracking-wide text-neutral-300">
-                <span>
-                  {topico}{' '}
-                  <span className="text-xs font-normal normal-case text-neutral-500">
-                    ({totalTopico})
-                  </span>
-                </span>
-                <Icon
-                  name="expand_more"
-                  className="text-neutral-500 transition-transform duration-200 group-open/topico:rotate-180"
-                />
-              </summary>
-              <div className="anim-acordeao">
-                <div className="mt-3">{conteudoModulos}</div>
-              </div>
-            </details>
+              {conteudoModulos}
+            </Acordeao>
           ) : (
             <section key={topico} className="flex flex-col gap-3">
               {conteudoModulos}
