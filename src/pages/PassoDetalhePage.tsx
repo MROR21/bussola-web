@@ -335,83 +335,90 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
       )}
 
       {concluido ? (
-        <section className="anim-fade flex flex-col gap-3 rounded-2xl border border-green-500/30 bg-navy-800 p-5">
-          <span className="flex items-center gap-1 self-start rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
-            <Icon name="check" className="text-sm" /> Concluído
-          </span>
-
-          {!exigeComprovacao ? (
+        !exigeComprovacao ? (
+          <section className="anim-fade flex items-center justify-between gap-3 rounded-2xl border border-green-500/30 bg-navy-800 p-5">
+            <span className="flex items-center gap-1 rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
+              <Icon name="check" className="text-sm" /> Concluído
+            </span>
             <button
               type="button"
               onClick={desmarcar}
               disabled={salvando}
-              className="self-start rounded-lg px-4 py-2 text-sm text-neutral-400 transition-all hover:bg-navy-700 disabled:opacity-50"
+              className="rounded-lg px-3 py-1.5 text-sm text-red-400 transition-all hover:bg-red-500/10 disabled:opacity-50"
             >
               Desmarcar
             </button>
-          ) : editando ? (
-            <div className="anim-fade flex flex-col gap-3">
-              <textarea
-                value={evidencia}
-                onChange={(e) => setEvidencia(e.target.value)}
-                rows={2}
-                placeholder="Cole o link do PR, um print, ou uma nota (opcional)"
-                className={inputCls}
-              />
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={concluir}
-                  disabled={salvando}
-                  className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:opacity-50"
-                >
-                  {salvando ? (
-                    <>
-                      <Spinner /> Salvando...
-                    </>
+          </section>
+        ) : (
+          <section className="anim-fade flex flex-col gap-3 rounded-2xl border border-green-500/30 bg-navy-800 p-5">
+            <span className="flex items-center gap-1 self-start rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
+              <Icon name="check" className="text-sm" /> Concluído
+            </span>
+
+            {editando ? (
+              <div className="anim-fade flex flex-col gap-3">
+                <textarea
+                  value={evidencia}
+                  onChange={(e) => setEvidencia(e.target.value)}
+                  rows={2}
+                  placeholder="Cole o link do PR, um print, ou uma nota (opcional)"
+                  className={inputCls}
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={concluir}
+                    disabled={salvando}
+                    className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:opacity-50"
+                  >
+                    {salvando ? (
+                      <>
+                        <Spinner /> Salvando...
+                      </>
+                    ) : (
+                      'Salvar comprovação'
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditando(false)}
+                    className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="anim-fade flex flex-col gap-3">
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs text-neutral-500">Comprovação</span>
+                  {evidencia ? (
+                    <Comprovacao texto={evidencia} />
                   ) : (
-                    'Salvar comprovação'
+                    <span className="text-sm text-neutral-500">Sem comprovação anexada.</span>
                   )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditando(false)}
-                  className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
-                >
-                  Cancelar
-                </button>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditando(true)}
+                    className="rounded-lg bg-navy-700 px-4 py-2 text-sm text-neutral-200 transition-colors hover:bg-navy-600"
+                  >
+                    {evidencia ? 'Editar comprovação' : 'Adicionar comprovação'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={desmarcar}
+                    disabled={salvando}
+                    className="rounded-lg px-4 py-2 text-sm text-red-400 transition-all hover:bg-red-500/10 disabled:opacity-50"
+                  >
+                    Desmarcar
+                  </button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="anim-fade flex flex-col gap-3">
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-neutral-500">Comprovação</span>
-                {evidencia ? (
-                  <Comprovacao texto={evidencia} />
-                ) : (
-                  <span className="text-sm text-neutral-500">Sem comprovação anexada.</span>
-                )}
-              </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setEditando(true)}
-                  className="rounded-lg bg-navy-700 px-4 py-2 text-sm text-neutral-200 transition-colors hover:bg-navy-600"
-                >
-                  {evidencia ? 'Editar comprovação' : 'Adicionar comprovação'}
-                </button>
-                <button
-                  type="button"
-                  onClick={desmarcar}
-                  disabled={salvando}
-                  className="rounded-lg px-4 py-2 text-sm text-neutral-400 transition-all hover:bg-navy-700 disabled:opacity-50"
-                >
-                  Desmarcar
-                </button>
-              </div>
-            </div>
-          )}
-        </section>
+            )}
+          </section>
+        )
       ) : exigeComprovacao ? (
         <section className="anim-fade flex flex-col gap-2 rounded-2xl border border-navy-700 bg-navy-800 p-5">
           <span className="text-sm font-medium text-neutral-200">Comprovação (opcional)</span>
@@ -442,9 +449,6 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
         </section>
       ) : (
         <section className="anim-fade flex flex-col items-center gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-6 text-center">
-          <span className="flex size-10 items-center justify-center rounded-full bg-navy-700 text-gold-400">
-            <Icon name="task_alt" className="text-xl" />
-          </span>
           <p className="text-sm text-neutral-400">
             Terminou esse passo? Marque como concluído pra seguir na jornada.
           </p>
