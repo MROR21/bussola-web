@@ -10,7 +10,7 @@ import { Icon } from './Icon'
 // chutadas no olho) pra cada uma apontar na direção do trecho que está percorrendo. As classes
 // `anim-pegada`/`anim-tesouro` (keyframes em index.css) desligam sozinhas com
 // prefers-reduced-motion.
-const ROTA = 'M8 85 Q40 75 28 55 T60 32 T84 10'
+const ROTA = 'M8 85 Q40 75 28 55 T60 32 T84 10 L78 4'
 
 const PEGADAS = [
   { top: '82.6%', left: '14.7%', rotate: 68, atraso: 0 },
@@ -63,7 +63,7 @@ export function PegadasTesouro({ className = '' }: { className?: string }) {
       ))}
       <span
         className="anim-tesouro absolute text-2xl text-gold-400"
-        style={{ top: '10%', left: '84%', transform: 'translate(-50%, -50%)' }}
+        style={{ top: '4%', left: '78%', transform: 'translate(-50%, -50%)' }}
       >
         <Icon name="close" />
       </span>
