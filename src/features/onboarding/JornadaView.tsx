@@ -34,10 +34,11 @@ const FASE_RESUMO: Record<string, string> = {
   'Primeiro Card': 'Do primeiro card ao merge — o ciclo completo de uma entrega.',
 }
 
-// Confete saindo do card quando a fase é concluída — cada pedacinho "explode" (pop rápido) e
-// depois cai devagar por uns 10s até sumir, uma vez só, em vez de ficar num loop (usa `forwards`
-// pra segurar invisível no final, como as outras animações de saída do app). Posições espalhadas
-// nas 4 bordas do card, pra dar a sensação de "saindo de dentro dele" pros lados de fora.
+// Confete saindo do card quando a fase é concluída — cada pedacinho "explode" (pop + queda curta +
+// sumiço) e REPETE várias vezes seguidas (~10s no total, como se confetes novos fossem surgindo),
+// não é 1 pedaço caindo devagar. Depois da última repetição, `forwards` segura invisível (não fica
+// em loop pra sempre). Posições espalhadas nas 4 bordas do card, pra dar a sensação de "saindo de
+// dentro dele" pros lados de fora.
 const CONFETE = [
   { top: '-4%', left: '8%', rotate: -20, atraso: 0, cor: 'bg-gold-500' },
   { top: '-6%', left: '28%', rotate: 15, atraso: 0.05, cor: 'bg-amber-400' },
@@ -529,10 +530,7 @@ export function JornadaView({
                           : 'border-navy-600 text-gold-400 hover:border-gold-500/60',
                   )}
                 >
-                  <Icon
-                    name={bloqueada ? 'lock' : faseCompleta ? 'military_tech' : iconeDaFase(fase)}
-                    fill={faseCompleta}
-                  />
+                  <Icon name={bloqueada ? 'lock' : iconeDaFase(fase)} />
                 </span>
                 <span className="flex w-full flex-col items-center gap-1 rounded-xl border border-navy-700 bg-navy-800 px-3 py-2 text-center">
                   <span className="text-[10px] font-medium uppercase tracking-wide text-neutral-500">

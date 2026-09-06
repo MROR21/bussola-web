@@ -156,25 +156,21 @@
   }
 }
 
-/* Confete "explodindo" pra fora do card de fase concluída (JornadaView.tsx) — pop rápido, depois
-   caem devagar por uns 10s até sumir; uma vez só (não é loop, por isso o `forwards` na classe
-   abaixo segura o estado final invisível). */
+/* Confete "explodindo" pra fora do card de fase concluída (JornadaView.tsx) — pop rápido + queda
+   curta + sumiço, repetindo por umas 10 explosões seguidas (~10s no total, ver `animation` na
+   classe abaixo — `forwards` só segura invisível depois da última repetição, não é loop infinito). */
 @keyframes bussola-confete {
   0% {
     opacity: 0;
     transform: translateY(-4px) scale(0.4);
   }
-  5% {
+  15% {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
-  85% {
-    opacity: 1;
-    transform: translateY(180px) scale(1);
-  }
   100% {
     opacity: 0;
-    transform: translateY(220px) scale(0.9);
+    transform: translateY(28px) scale(0.9);
   }
 }
 
@@ -221,7 +217,7 @@
 }
 
 .anim-confete {
-  animation: bussola-confete 10s ease-out forwards;
+  animation: bussola-confete 1s ease-out 10 forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
