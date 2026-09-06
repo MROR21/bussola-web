@@ -22,6 +22,18 @@ const FASE_ICONE: Record<string, string> = {
 }
 const iconeDaFase = (fase: string) => FASE_ICONE[fase] ?? 'flag'
 
+// Resumo breve por fase, pro card de dentro da fase — a Fase (`Bussola.Domain.Entities.Fase`) só
+// tem Nome/Order no banco, sem campo de descrição, então isso fica fixo no front por enquanto
+// (mesmo espírito do FASE_ICONE acima: são só 5 fases do currículo, não conteúdo editável por
+// instância). Sem entrada = sem resumo (fase nova não quebra, só não mostra o texto).
+const FASE_RESUMO: Record<string, string> = {
+  Ambientação: 'Conheça a Agilean, o squad e como as coisas funcionam por aqui.',
+  Padrões: 'Os padrões de código e o fluxo de git que o time segue no dia a dia.',
+  'Ambiente técnico': 'Deixe o ambiente de desenvolvimento pronto pra codar.',
+  'Conheça o sistema': 'Entenda o produto do seu squad por dentro, na prática.',
+  'Primeiro Card': 'Do primeiro card ao merge — o ciclo completo de uma entrega.',
+}
+
 // Uma entrada do "Diário de bordo" (lista vertical de Passos/Fluxos dentro de uma Fase) — usado
 // tanto na fase em andamento (mistura feito/atual/bloqueado) quanto na fase já concluída (revisão,
 // tudo feito e clicável). Selo dourado preenchido quando feito; atual pulsa esperando ser
@@ -259,27 +271,31 @@ export function JornadaView({
         >
           <Icon name="arrow_back" className="text-base" /> Voltar pra jornada
         </button>
-        <div className="relative flex items-center gap-3 self-start p-5">
-          <MapCorners tamanho={5} opacidade={25} />
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gold-500/10 text-gold-400">
-            <Icon name={iconeDaFase(faseNome)} className="text-2xl" />
-          </span>
-          <div className="flex flex-col gap-0.5">
-            <h2 className="text-2xl font-bold text-neutral-100">{faseNome}</h2>
-            <span className="text-xs text-neutral-500">
-              {feitosFase} de {itens.length} itens concluídos
+        <div className="relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-navy-700 bg-navy-800 p-5">
+          <MapCorners tamanho={5} opacidade={20} />
+          <div className="flex items-center gap-3">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gold-500/10 text-gold-400">
+              <Icon name={iconeDaFase(faseNome)} className="text-2xl" />
             </span>
+            <div className="flex flex-col gap-0.5">
+              <h2 className="text-2xl font-bold text-neutral-100">{faseNome}</h2>
+              <span className="text-xs text-neutral-500">
+                {feitosFase} de {itens.length} itens concluídos
+              </span>
+            </div>
           </div>
-        </div>
-
-        <div className="relative flex items-center gap-3">
-          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-navy-700">
-            <div
-              className="h-full rounded-full bg-gold-500 transition-all"
-              style={{ width: `${pctFase}%` }}
-            />
+          {FASE_RESUMO[faseNome] && (
+            <p className="text-sm text-neutral-400">{FASE_RESUMO[faseNome]}</p>
+          )}
+          <div className="flex items-center gap-3">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-navy-700">
+              <div
+                className="h-full rounded-full bg-gold-500 transition-all"
+                style={{ width: `${pctFase}%` }}
+              />
+            </div>
+            <span className="shrink-0 text-xs text-neutral-500">{pctFase}%</span>
           </div>
-          <span className="shrink-0 text-xs text-neutral-500">{pctFase}%</span>
         </div>
 
         {faseCompleta ? (
