@@ -412,28 +412,47 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
             </div>
           )}
         </section>
-      ) : (
+      ) : exigeComprovacao ? (
         <section className="anim-fade flex flex-col gap-2 rounded-2xl border border-navy-700 bg-navy-800 p-5">
-          {exigeComprovacao && (
-            <>
-              <span className="text-sm font-medium text-neutral-200">Comprovação (opcional)</span>
-              <p className="text-xs text-neutral-500">
-                Cole o link do PR, um print, ou uma nota do que você fez.
-              </p>
-              <textarea
-                value={evidencia}
-                onChange={(e) => setEvidencia(e.target.value)}
-                rows={2}
-                placeholder="https://bitbucket.org/... ou uma nota"
-                className={inputCls}
-              />
-            </>
-          )}
+          <span className="text-sm font-medium text-neutral-200">Comprovação (opcional)</span>
+          <p className="text-xs text-neutral-500">
+            Cole o link do PR, um print, ou uma nota do que você fez.
+          </p>
+          <textarea
+            value={evidencia}
+            onChange={(e) => setEvidencia(e.target.value)}
+            rows={2}
+            placeholder="https://bitbucket.org/... ou uma nota"
+            className={inputCls}
+          />
           <button
             type="button"
             onClick={concluir}
             disabled={salvando}
             className="flex items-center gap-1.5 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:opacity-50"
+          >
+            {salvando ? (
+              <>
+                <Spinner /> Salvando...
+              </>
+            ) : (
+              'Marcar como concluído'
+            )}
+          </button>
+        </section>
+      ) : (
+        <section className="anim-fade flex flex-col items-center gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-6 text-center">
+          <span className="flex size-10 items-center justify-center rounded-full bg-navy-700 text-gold-400">
+            <Icon name="task_alt" className="text-xl" />
+          </span>
+          <p className="text-sm text-neutral-400">
+            Terminou esse passo? Marque como concluído pra seguir na jornada.
+          </p>
+          <button
+            type="button"
+            onClick={concluir}
+            disabled={salvando}
+            className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:opacity-50"
           >
             {salvando ? (
               <>
