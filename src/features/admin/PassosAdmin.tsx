@@ -152,14 +152,26 @@ export function PassosAdmin() {
 
       {passos.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nenhum passo cadastrado.</p>}
 
-      <div className="flex flex-col gap-5">
+      {/* Cada Fase é um dropdown próprio (mesmo padrão do Admin de Guias) — fechado por padrão, só
+          expande a fase certa em vez de listar todos os passos de todas as fases de uma vez. */}
+      <div className="flex flex-col gap-3">
         {porFase.map(([fase, itens]) =>
           itens.length === 0 ? null : (
-            <section key={fase.id} className="flex flex-col gap-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                {fase.nome}
-              </h3>
-              <ul className="flex flex-col gap-2">
+            <details
+              key={fase.id}
+              className="group/fase rounded-xl border border-navy-700 bg-navy-800 p-4"
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium text-neutral-100">
+                <span>
+                  {fase.nome}{' '}
+                  <span className="text-xs font-normal text-neutral-500">({itens.length})</span>
+                </span>
+                <Icon
+                  name="expand_more"
+                  className="text-neutral-500 transition-transform duration-200 group-open/fase:rotate-180"
+                />
+              </summary>
+              <ul className="mt-3 flex flex-col gap-2">
                 {itens.map((p) => (
                   <li
                     key={p.id}
@@ -190,7 +202,7 @@ export function PassosAdmin() {
                   </li>
                 ))}
               </ul>
-            </section>
+            </details>
           ),
         )}
       </div>
