@@ -13,19 +13,19 @@ import { Icon } from './Icon'
 const ROTA = 'M8 85 Q40 75 28 55 T60 32 T84 10'
 
 const PEGADAS = [
-  { top: '79.5%', left: '21%', rotate: 60, atraso: 0 },
-  { top: '56.3%', left: '28.8%', rotate: -28, atraso: 0.25 },
-  { top: '35.6%', left: '37.7%', rotate: 72, atraso: 0.5 },
-  { top: '31.6%', left: '65.3%', rotate: 84, atraso: 0.75 },
+  { top: '82.6%', left: '14.7%', rotate: 68, atraso: 0 },
+  { top: '61.1%', left: '30.7%', rotate: -15, atraso: 0.25 },
+  { top: '36.9%', left: '34.3%', rotate: 67, atraso: 0.5 },
+  { top: '31.7%', left: '63.4%', rotate: 85, atraso: 0.75 },
   { top: '21.9%', left: '90%', rotate: 16, atraso: 1 },
 ] as const
 
 export function PegadasTesouro({ className = '' }: { className?: string }) {
   return (
     <div className={`relative h-44 w-72 ${className}`} aria-hidden="true">
-      <TreePalm className="absolute -left-2 -top-1 h-10 w-7 text-gold-500/25" />
+      <TreePalm className="absolute left-0 top-2 h-10 w-7 text-gold-500/25" />
       <TreePalm className="absolute -left-3 bottom-2 h-14 w-10 text-gold-500/30" />
-      <TreePalm className="absolute -right-3 bottom-4 h-10 w-7 -scale-x-100 text-gold-500/20" />
+      <TreePalm className="absolute right-0 bottom-6 h-10 w-7 -scale-x-100 text-gold-500/20" />
       <TreePalm className="absolute h-8 w-6 text-gold-500/25" style={{ top: '44%', left: '56%' }} />
       <Mountain className="absolute bottom-0 left-[24%] h-9 w-16 text-gold-500/20" />
       <Mountain className="absolute -top-2 h-9 w-16 text-gold-500/20" style={{ left: '52%' }} />
