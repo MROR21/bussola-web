@@ -172,58 +172,137 @@ export function GuiasAdmin() {
 
       {fluxos.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nenhum fluxo cadastrado.</p>}
 
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4">
         {porTopico.map(([topico, modulosDoTopico]) => {
           const totalTopico = modulosDoTopico.reduce((n, [, itens]) => n + itens.length, 0)
           if (totalTopico === 0) return null
-          return (
-            <section key={topico} className="flex flex-col gap-3">
-              {porTopico.length > 1 && (
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                  {topico}
-                </h3>
-              )}
-              {modulosDoTopico.map(([modulo, itens]) =>
-                itens.length === 0 ? null : (
-                  <div key={modulo.id} className="flex flex-col gap-2">
-                    <h4 className="text-sm font-medium text-neutral-400">{modulo.nome}</h4>
-                    <ul className="flex flex-col gap-2">
-                      {itens.map((f) => (
-                        <li
-                          key={f.id}
-                          className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
-                        >
-                          <div className="flex min-w-0 flex-col">
-                            <span className="truncate text-neutral-100">
-                              #{f.order} · {f.titulo}
-                            </span>
-                            <span className="text-xs text-neutral-500">
-                              {nomeDoModulo(f.moduloId)}
-                              {f.squad ? ` · ${f.squad}` : ' · todos os squads'}
-                            </span>
-                          </div>
-                          <div className="flex shrink-0 gap-3">
-                            <button
-                              type="button"
-                              onClick={() => abrirEdicao(f)}
-                              className="text-sm text-gold-400 transition-colors hover:text-gold-300"
-                            >
-                              Editar
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setApagando(f)}
-                              className="text-sm text-red-400 transition-colors hover:text-red-300"
-                            >
-                              Apagar
-                            </button>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
+          const modulosComItens = modulosDoTopico.filter(([, itens]) => itens.length > 0)
+
+          const listaItens = (itens: FluxoAdmin[]) => (
+            <ul className="flex flex-col gap-2">
+              {itens.map((f) => (
+                <li
+                  key={f.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
+                >
+                  <div className="flex min-w-0 flex-col">
+                    <span className="truncate text-neutral-100">
+                      #{f.order} · {f.titulo}
+                    </span>
+                    <span className="text-xs text-neutral-500">
+                      {nomeDoModulo(f.moduloId)}
+                      {f.squad ? ` · ${f.squad}` : ' · todos os squads'}
+                    </span>
                   </div>
-                ),
-              )}
+                  <div className="flex shrink-0 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => abrirEdicao(f)}
+                      className="text-sm text-gold-400 transition-colors hover:text-gold-300"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setApagando(f)}
+                      className="text-sm text-red-400 transition-colors hover:text-red-300"
+                    >
+                      Apagar
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )
+
+          // Cada Módulo é um dropdown próprio — dentro dele, um segundo nível de dropdown por
+          // Categoria (tag) só aparece quando o módulo realmente tem mais de uma (ex.: "Básico do
+          // dev" com "Git e PR"/"Jira"/etc.); com uma tag só, a lista já vem direto, sem nível
+          // extra à toa (mesma regra da tela pública de Guias).
+          const conteudoModulos = (
+            <div className="flex flex-col gap-3">
+              {modulosComItens.map(([modulo, itens]) => {
+                const porTag = new Map<string, FluxoAdmin[]>()
+                for (const f of itens) {
+                  const tag = f.categoria || 'Outros'
+                  const lista = porTag.get(tag) ?? []
+                  lista.push(f)
+                  porTag.set(tag, lista)
+                }
+                const gruposTag = [...porTag.entries()]
+                return (
+                  <details
+                    key={modulo.id}
+                    className="group/modulo rounded-xl border border-navy-700 bg-navy-800 p-4"
+                  >
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium text-neutral-100">
+                      <span>
+                        {modulo.nome}{' '}
+                        <span className="text-xs font-normal text-neutral-500">
+                          ({itens.length})
+                        </span>
+                      </span>
+                      <Icon
+                        name="expand_more"
+                        className="text-neutral-500 transition-transform duration-200 group-open/modulo:rotate-180"
+                      />
+                    </summary>
+                    <div className="mt-3">
+                      {gruposTag.length > 1 ? (
+                        <div className="flex flex-col gap-3">
+                          {gruposTag.map(([tag, fluxosTag]) => (
+                            <details
+                              key={tag}
+                              className="group/tag rounded-lg border border-navy-600 bg-navy-900/40 p-3"
+                            >
+                              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-xs font-semibold uppercase tracking-wide text-neutral-400">
+                                <span>
+                                  {tag}{' '}
+                                  <span className="font-normal normal-case text-neutral-600">
+                                    ({fluxosTag.length})
+                                  </span>
+                                </span>
+                                <Icon
+                                  name="expand_more"
+                                  className="text-neutral-500 transition-transform duration-200 group-open/tag:rotate-180"
+                                />
+                              </summary>
+                              <div className="mt-2">{listaItens(fluxosTag)}</div>
+                            </details>
+                          ))}
+                        </div>
+                      ) : (
+                        listaItens(itens)
+                      )}
+                    </div>
+                  </details>
+                )
+              })}
+            </div>
+          )
+
+          return porTopico.length > 1 ? (
+            <details
+              key={topico}
+              className="group/topico rounded-2xl border border-navy-700 bg-navy-800 p-4"
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-semibold uppercase tracking-wide text-neutral-300">
+                <span>
+                  {topico}{' '}
+                  <span className="text-xs font-normal normal-case text-neutral-500">
+                    ({totalTopico})
+                  </span>
+                </span>
+                <Icon
+                  name="expand_more"
+                  className="text-neutral-500 transition-transform duration-200 group-open/topico:rotate-180"
+                />
+              </summary>
+              <div className="mt-3">{conteudoModulos}</div>
+            </details>
+          ) : (
+            <section key={topico} className="flex flex-col gap-3">
+              {conteudoModulos}
             </section>
           )
         })}
