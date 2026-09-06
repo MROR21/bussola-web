@@ -32,7 +32,7 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
   const navigate = useNavigate()
   const location = useLocation()
   const isGestor = useAuthStore((s) => s.usuario?.isGestor ?? false)
-  const { anterior, proximo, faseDoItem } = useTrailNavegacao(perfil, tituloParam)
+  const { anterior, proximo, faseDoItem, faseTerminada } = useTrailNavegacao(perfil, tituloParam)
   // O mesmo Fluxo pode ser aberto por dois caminhos (Guia geral OU trilha da Jornada) — só sabemos
   // qual foi de verdade pelo estado que o link de origem deixou na navegação (`deFase`), não só
   // por ele fazer parte da trilha (um fluxo da fase "Conheça o sistema" também aparece no Guia).
@@ -328,7 +328,12 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
         </div>
       )}
 
-      <NavegacaoTrilha anterior={anterior} proximo={proximo} />
+      <NavegacaoTrilha
+        anterior={anterior}
+        proximo={proximo}
+        faseTerminada={faseTerminada}
+        fase={faseDoItem}
+      />
 
       {toastSalvoMontado && (
         <div

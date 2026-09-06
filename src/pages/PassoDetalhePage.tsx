@@ -52,7 +52,7 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
   const navigate = useNavigate()
   const usuario = useAuthStore((state) => state.usuario)
   const isGestor = usuario?.isGestor ?? false
-  const { anterior, proximo } = useTrailNavegacao(perfil, tituloParam)
+  const { anterior, proximo, faseDoItem, faseTerminada } = useTrailNavegacao(perfil, tituloParam)
 
   const [step, setStep] = useState<OnboardingStep | null>(null)
   const [concluido, setConcluido] = useState(false)
@@ -471,7 +471,12 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
         </div>
       )}
 
-      <NavegacaoTrilha anterior={anterior} proximo={proximo} />
+      <NavegacaoTrilha
+        anterior={anterior}
+        proximo={proximo}
+        faseTerminada={faseTerminada}
+        fase={faseDoItem}
+      />
 
       {toastSalvoMontado && (
         <div

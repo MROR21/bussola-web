@@ -32,12 +32,24 @@ export function useTrailNavegacao(perfil: Perfil | null, tituloAtual: string) {
   }, [perfil])
 
   const indice = trail.findIndex((item) => item.title === tituloAtual)
+  const faseDoItem = indice >= 0 ? trail[indice].phase : undefined
+  // Anterior/próximo só DENTRO da mesma fase — antes pulava direto pro 1º item da fase seguinte
+  // sem avisar nada, e o usuário só percebia "clicando próximo" que já tinha trocado de fase
+  // (confuso, reportado pelo Miguel). Quando não tem mais próximo NA MESMA fase (é o último item
+  // dela), `faseTerminada` vira true — quem usa mostra um link pra visão geral da fase (que já
+  // exibe "Fase concluída!") no lugar do próximo item, em vez de continuar direto pra próxima fase.
+  const anterior = indice > 0 && trail[indice - 1].phase === faseDoItem ? trail[indice - 1] : undefined
+  const proximo =
+    indice >= 0 && indice < trail.length - 1 && trail[indice + 1].phase === faseDoItem
+      ? trail[indice + 1]
+      : undefined
   return {
-    anterior: indice > 0 ? trail[indice - 1] : undefined,
-    proximo: indice >= 0 && indice < trail.length - 1 ? trail[indice + 1] : undefined,
+    anterior,
+    proximo,
     // Fase do item atual, só quando ele faz parte da trilha da Jornada — um Fluxo aberto pelo Guia
     // geral (fora da trilha) não tem fase pra voltar, por isso undefined (quem usa cai pro
     // navigate(-1) de sempre nesse caso).
-    faseDoItem: indice >= 0 ? trail[indice].phase : undefined,
+    faseDoItem,
+    faseTerminada: indice >= 0 && !proximo,
   }
 }
