@@ -156,23 +156,28 @@ export function JornadaView({
     const [faseNome, itens] = faseEntry
     const feitosFase = itens.filter(estaConcluido).length
     return (
-      <div className="flex w-full max-w-2xl flex-col gap-5">
+      <div className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
+        <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.06]" />
+        <MapIllustration className="pointer-events-none absolute -bottom-10 -left-8 w-56 text-gold-500 opacity-[0.06]" />
         <button
           type="button"
           onClick={sairFase}
-          className="flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
+          className="relative flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
         >
           <Icon name="arrow_back" className="text-base" /> Voltar pra jornada
         </button>
-        <header className="flex items-center gap-3">
-          <Icon name={iconeDaFase(faseNome)} className="text-3xl text-gold-400" />
-          <div className="flex flex-col">
-            <h2 className="text-xl font-bold text-neutral-100">{faseNome}</h2>
-            <span className="text-sm text-neutral-500">
+        <div className="relative flex items-center gap-3 self-start p-5">
+          <MapCorners tamanho={5} opacidade={25} />
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gold-500/10 text-gold-400">
+            <Icon name={iconeDaFase(faseNome)} className="text-2xl" />
+          </span>
+          <div className="flex flex-col gap-0.5">
+            <h2 className="text-2xl font-bold text-neutral-100">{faseNome}</h2>
+            <span className="text-xs text-neutral-500">
               {feitosFase} de {itens.length} itens concluídos
             </span>
           </div>
-        </header>
+        </div>
         <ul className="flex flex-col gap-2">
           {itens.map((item) => (
             <TrailItemCard
