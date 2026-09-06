@@ -7,10 +7,10 @@ import { MapIllustration } from '../../components/MapIllustration'
 import { TrailDivider } from '../../components/TrailDivider'
 import { useTitulo } from '../../hooks/useTitulo'
 import { cx } from '../../utils/cx'
-import { concluirFluxo, desmarcarFluxo, getFluxosConcluidos } from '../fluxos/fluxosService'
+import { getFluxosConcluidos } from '../fluxos/fluxosService'
 import { TrailItemCard } from './TrailItemCard'
 import { ProgressRing } from './ProgressRing'
-import { concluirPasso, desmarcarPasso, getProgresso } from './progressService'
+import { getProgresso } from './progressService'
 import type { TrailStep } from './types'
 
 // Ícone por fase (fallback genérico se aparecer uma fase nova).
@@ -66,35 +66,6 @@ export function JornadaView({
 
   const estaConcluido = (item: TrailStep) =>
     item.tipo === 'fluxo' ? fluxosConcluidos.has(item.id) : passosConcluidos.has(item.id)
-
-  // Marca/desmarca de forma otimista (atualiza a UI na hora, desfaz se o back falhar).
-  async function toggle(item: TrailStep) {
-    const jaConcluido = estaConcluido(item)
-    const setConcluidos = item.tipo === 'fluxo' ? setFluxosConcluidos : setPassosConcluidos
-    setConcluidos((prev) => {
-      const next = new Set(prev)
-      if (jaConcluido) next.delete(item.id)
-      else next.add(item.id)
-      return next
-    })
-    try {
-      if (item.tipo === 'fluxo') {
-        if (jaConcluido) await desmarcarFluxo(item.id)
-        else await concluirFluxo(item.id)
-      } else if (jaConcluido) {
-        await desmarcarPasso(userId, item.id)
-      } else {
-        await concluirPasso(userId, item.id)
-      }
-    } catch {
-      setConcluidos((prev) => {
-        const next = new Set(prev)
-        if (jaConcluido) next.add(item.id)
-        else next.delete(item.id)
-        return next
-      })
-    }
-  }
 
   // Agrupa por fase preservando a ordem (o back já manda ordenado: fases guiadas, depois os
   // fluxos do squad, por fim o Primeiro Card).
@@ -155,6 +126,18 @@ export function JornadaView({
   if (podeEntrar) {
     const [faseNome, itens] = faseEntry
     const feitosFase = itens.filter(estaConcluido).length
+    const faseCompleta = feitosFase === itens.length
+    // Só o passo atual (o 1º ainda não concluído) e um preview do seguinte — nada de lista solta
+    // com tudo de uma vez. A conclusão só acontece de verdade dentro do próprio passo/fluxo.
+    const itemAtualIndex = itens.findIndex((item) => !estaConcluido(item))
+    const itemAtual = itemAtualIndex >= 0 ? itens[itemAtualIndex] : undefined
+    const itemSeguinte = itemAtualIndex >= 0 ? itens[itemAtualIndex + 1] : undefined
+    const pctFase = itens.length > 0 ? Math.round((feitosFase / itens.length) * 100) : 0
+    const hrefDoItem = (item: TrailStep) =>
+      item.tipo === 'fluxo'
+        ? `/fluxo/${encodeURIComponent(item.title)}`
+        : `/passo/${encodeURIComponent(item.title)}`
+
     return (
       <div className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
         <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.06]" />
@@ -178,17 +161,72 @@ export function JornadaView({
             </span>
           </div>
         </div>
-        <ul className="flex flex-col gap-2">
-          {itens.map((item) => (
-            <TrailItemCard
-              key={item.id}
-              step={item}
-              concluido={estaConcluido(item)}
-              destaque={item.id === proximo?.id}
-              onToggle={() => toggle(item)}
+
+        <div className="relative flex items-center gap-3">
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-navy-700">
+            <div
+              className="h-full rounded-full bg-gold-500 transition-all"
+              style={{ width: `${pctFase}%` }}
             />
-          ))}
-        </ul>
+          </div>
+          <span className="shrink-0 text-xs text-neutral-500">{pctFase}%</span>
+        </div>
+
+        {faseCompleta ? (
+          <>
+            <div className="anim-fade relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl border border-navy-700 bg-navy-800 p-6 text-center">
+              <MapCorners tamanho={5} opacidade={20} />
+              <Icon name="military_tech" className="text-4xl text-gold-400" fill />
+              <h3 className="text-lg font-semibold text-neutral-100">Fase concluída!</h3>
+              <p className="text-sm text-neutral-400">
+                Você terminou todos os itens de {faseNome}.
+              </p>
+            </div>
+            <ul className="flex flex-col gap-2">
+              {itens.map((item) => (
+                <TrailItemCard key={item.id} step={item} concluido />
+              ))}
+            </ul>
+          </>
+        ) : (
+          itemAtual && (
+            <>
+              <div className="relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-gold-500/50 bg-gold-500/10 p-5">
+                <MapCorners tamanho={5} opacidade={25} />
+                <div className="flex items-start gap-3">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-gold-400/50 bg-navy-800 text-gold-400">
+                    <Icon name={itemAtual.tipo === 'fluxo' ? 'hub' : 'flag'} className="text-lg" />
+                  </span>
+                  <div className="flex flex-col gap-1">
+                    <span className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-gold-400">
+                      <Icon name="play_arrow" className="text-sm" /> Passo atual
+                    </span>
+                    <h3 className="text-lg font-semibold text-neutral-100">{itemAtual.title}</h3>
+                    <p className="text-sm text-neutral-400">{itemAtual.description}</p>
+                  </div>
+                </div>
+                <Link
+                  to={hrefDoItem(itemAtual)}
+                  className="self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
+                >
+                  Ir para o {itemAtual.tipo === 'fluxo' ? 'fluxo' : 'passo'}
+                </Link>
+              </div>
+
+              {itemSeguinte && (
+                <div className="relative flex items-center gap-3 rounded-xl border border-dashed border-navy-600 p-4 opacity-60">
+                  <Icon name="lock" className="text-lg text-neutral-500" />
+                  <div className="flex flex-col">
+                    <span className="text-xs uppercase tracking-wide text-neutral-500">
+                      A seguir
+                    </span>
+                    <span className="text-sm text-neutral-300">{itemSeguinte.title}</span>
+                  </div>
+                </div>
+              )}
+            </>
+          )
+        )}
       </div>
     )
   }
