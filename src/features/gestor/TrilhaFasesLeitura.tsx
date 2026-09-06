@@ -130,9 +130,7 @@ export function TrilhaFasesLeitura({ passos }: { passos: PassoProgresso[] }) {
                     ? 'border-dashed border-navy-600 text-neutral-600 opacity-60'
                     : faseCompleta
                       ? 'border-amber-400/70 text-amber-400'
-                      : atual
-                        ? 'border-gold-400 text-gold-400 shadow-[0_0_0_5px_rgba(201,162,39,0.15)]'
-                        : 'border-navy-600 text-gold-400 hover:border-gold-500/60',
+                      : 'border-navy-600 text-gold-400 hover:border-gold-500/60',
                   expandida && 'anim-pulso',
                 )}
               >
@@ -165,15 +163,17 @@ export function TrilhaFasesLeitura({ passos }: { passos: PassoProgresso[] }) {
 
       {/* Grid-rows em vez de montar/desmontar na hora (mesma técnica do menu lateral) — guarda a
           última fase vista (`ultimaFaseVista`) pra ter conteúdo pra mostrar ENQUANTO encolhe até
-          0, já que `faseExpandida` vira null assim que fecha. */}
-      {itensExpandidos && (
-        <div
-          className={cx(
-            'grid transition-[grid-template-rows] duration-200 ease-out',
-            faseExpandida ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
-          )}
-        >
-          <div className="overflow-hidden">
+          0, já que `faseExpandida` vira null assim que fecha. O wrapper de fora fica SEMPRE
+          montado (não só quando `itensExpandidos` existe) — senão o 1º clique monta o elemento do
+          zero, sem nenhum estado "antes" pra transicionar, e a abertura fica brusca. */}
+      <div
+        className={cx(
+          'grid transition-[grid-template-rows] duration-200 ease-out',
+          faseExpandida ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+        )}
+      >
+        <div className="overflow-hidden">
+          {itensExpandidos && (
             <section className="flex flex-col gap-2 rounded-2xl border border-navy-700 bg-navy-800 p-4">
               <h4 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
                 {ultimaFaseVista}
@@ -217,9 +217,9 @@ export function TrilhaFasesLeitura({ passos }: { passos: PassoProgresso[] }) {
                 ))}
               </ul>
             </section>
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }

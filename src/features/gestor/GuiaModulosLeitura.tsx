@@ -77,15 +77,17 @@ export function GuiaModulosLeitura({ fluxos }: { fluxos: FluxoProgresso[] }) {
       </div>
 
       {/* Grid-rows em vez de montar/desmontar na hora (mesma técnica do menu lateral) — guarda o
-          último módulo visto pra ter conteúdo pra mostrar ENQUANTO encolhe até 0. */}
-      {ultimoModuloVisto && (
-        <div
-          className={cx(
-            'grid transition-[grid-template-rows] duration-200 ease-out',
-            moduloExpandido ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
-          )}
-        >
-          <div className="overflow-hidden">
+          último módulo visto pra ter conteúdo pra mostrar ENQUANTO encolhe até 0. O wrapper de fora
+          fica SEMPRE montado — senão o 1º clique monta o elemento do zero, sem estado "antes" pra
+          transicionar, e a abertura fica brusca. */}
+      <div
+        className={cx(
+          'grid transition-[grid-template-rows] duration-200 ease-out',
+          moduloExpandido ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+        )}
+      >
+        <div className="overflow-hidden">
+          {ultimoModuloVisto && (
             <section className="flex flex-col gap-2 rounded-2xl border border-navy-700 bg-navy-800 p-4">
               <h4 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
                 {ultimoModuloVisto}
@@ -118,9 +120,9 @@ export function GuiaModulosLeitura({ fluxos }: { fluxos: FluxoProgresso[] }) {
                   ))}
               </ul>
             </section>
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }
