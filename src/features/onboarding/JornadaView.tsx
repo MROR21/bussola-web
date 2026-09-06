@@ -275,12 +275,16 @@ export function JornadaView({
           <MapCorners tamanho={5} opacidade={20} />
           <div className="flex items-center gap-3">
             <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gold-500/10 text-gold-400">
-              <Icon name={iconeDaFase(faseNome)} className="text-2xl" />
+              <Icon
+                name={faseCompleta ? 'military_tech' : iconeDaFase(faseNome)}
+                className="text-2xl"
+                fill={faseCompleta}
+              />
             </span>
             <div className="flex flex-col gap-0.5">
               <h2 className="text-2xl font-bold text-neutral-100">{faseNome}</h2>
               <span className="text-xs text-neutral-500">
-                {feitosFase} de {itens.length} itens concluídos
+                {faseCompleta ? 'Fase concluída!' : `${feitosFase} de ${itens.length} itens concluídos`}
               </span>
             </div>
           </div>
@@ -299,30 +303,20 @@ export function JornadaView({
         </div>
 
         {faseCompleta ? (
-          <>
-            <div className="anim-fade relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl border border-navy-700 bg-navy-800 p-6 text-center">
-              <MapCorners tamanho={5} opacidade={20} />
-              <Icon name="military_tech" className="text-4xl text-gold-400" fill />
-              <h3 className="text-lg font-semibold text-neutral-100">Fase concluída!</h3>
-              <p className="text-sm text-neutral-400">
-                Você terminou todos os itens de {faseNome}.
-              </p>
-            </div>
-            <ul className="relative flex flex-col">
-              {itens.map((item, i) => (
-                <ItemDiarioDeBordo
-                  key={item.id}
-                  item={item}
-                  indice={i}
-                  isLast={i === itens.length - 1}
-                  feito
-                  atual={false}
-                  bloqueado={false}
-                  href={hrefDoItem(item)}
-                />
-              ))}
-            </ul>
-          </>
+          <ul className="relative flex flex-col">
+            {itens.map((item, i) => (
+              <ItemDiarioDeBordo
+                key={item.id}
+                item={item}
+                indice={i}
+                isLast={i === itens.length - 1}
+                feito
+                atual={false}
+                bloqueado={false}
+                href={hrefDoItem(item)}
+              />
+            ))}
+          </ul>
         ) : (
           itemAtual && (
             <>
