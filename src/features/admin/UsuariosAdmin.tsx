@@ -306,6 +306,7 @@ function ListaEmailsAutorizados() {
       await criarEmailAutorizado(novoEmail.trim())
       setNovoEmail('')
       await carregar()
+      setFeedback({ texto: 'E-mail adicionado à lista.', ok: true })
     } catch (e) {
       setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao salvar', ok: false })
     } finally {
@@ -320,6 +321,7 @@ function ListaEmailsAutorizados() {
     try {
       await apagarEmailAutorizado(alvo.id)
       await carregar()
+      setFeedback({ texto: 'E-mail removido da lista.', ok: true })
     } catch (e) {
       setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao apagar', ok: false })
     }
@@ -364,7 +366,7 @@ function ListaEmailsAutorizados() {
         className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500"
       />
 
-      <ul className="flex flex-col gap-2">
+      <ul key={busca} className="anim-fade flex flex-col gap-2">
         {itens.length > 0 && itensFiltrados.length === 0 && (
           <p className="anim-fade text-sm text-neutral-500">Nenhum e-mail encontrado.</p>
         )}
