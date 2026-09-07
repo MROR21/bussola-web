@@ -49,3 +49,12 @@ export interface FluxoProgresso {
   concluido: boolean
   doSquad: boolean
 }
+
+// Um acesso a liberar (já filtrado pelo Cargo do supervisionado) com a flag de concluído
+// (GET /gestor/usuarios/{id}/acessos).
+export interface AcessoProgresso {
+  id: string
+  nome: string
+  link: string
+  concluido: boolean
+}

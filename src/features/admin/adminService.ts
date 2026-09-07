@@ -9,6 +9,8 @@ import type {
   PassoAdminInput,
   UsuarioAdmin,
   EmailAutorizado,
+  AcessoAdmin,
+  AcessoAdminInput,
 } from './types'
 
 // Fases
@@ -47,6 +49,13 @@ export const definirGestor = (id: string, isGestor: boolean) =>
   apiSend('PUT', `/admin/usuarios/${id}/gestor`, { isGestor })
 export const definirAtivo = (id: string, ativo: boolean) =>
   apiSend('PUT', `/admin/usuarios/${id}/ativo`, { ativo })
+
+// Acessos (ex.: "E-mail Agilean", "Teams") a liberar por Cargo mínimo
+export const listarAcessosAdmin = () => apiGet<AcessoAdmin[]>('/admin/acessos')
+export const criarAcesso = (req: AcessoAdminInput) => apiPost<AcessoAdmin>('/admin/acessos', req)
+export const editarAcesso = (id: string, req: AcessoAdminInput) =>
+  apiSend('PUT', `/admin/acessos/${id}`, req)
+export const apagarAcesso = (id: string) => apiSend('DELETE', `/admin/acessos/${id}`)
 
 // E-mails pré-autorizados a virar gestor no cadastro
 export const listarEmailsAutorizados = () =>

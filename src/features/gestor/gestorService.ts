@@ -1,5 +1,6 @@
 import { apiGet, apiSend } from '../../services/api'
 import type {
+  AcessoProgresso,
   FluxoProgresso,
   ProgressoSupervisionado,
   UsuarioDisponivel,
@@ -32,4 +33,18 @@ export function adicionarSupervisionado(usuarioId: string): Promise<void> {
 
 export function removerSupervisionado(usuarioId: string): Promise<void> {
   return apiSend('DELETE', `/gestor/supervisionados/${usuarioId}`)
+}
+
+// Acessos a liberar pro supervisionado (já filtrados pelo Cargo dele) com a flag de concluído.
+export function getAcessosSupervisionado(usuarioId: string): Promise<AcessoProgresso[]> {
+  return apiGet<AcessoProgresso[]>(`/gestor/usuarios/${usuarioId}/acessos`)
+}
+
+// Marca (ou desmarca) um acesso como liberado pro supervisionado.
+export function marcarAcessoConcluido(
+  usuarioId: string,
+  acessoId: string,
+  concluido: boolean,
+): Promise<void> {
+  return apiSend('PUT', `/gestor/usuarios/${usuarioId}/acessos/${acessoId}`, { concluido })
 }

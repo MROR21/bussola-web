@@ -4,6 +4,7 @@ import { Icon } from '../components/Icon'
 import { MapCorners } from '../components/MapCorners'
 import { MapIllustration } from '../components/MapIllustration'
 import { useTitulo } from '../hooks/useTitulo'
+import { AcessosAdmin } from '../features/admin/AcessosAdmin'
 import { GuiasAdmin } from '../features/admin/GuiasAdmin'
 import { PassosAdmin } from '../features/admin/PassosAdmin'
 import { SimpleEntityCrud } from '../features/admin/SimpleEntityCrud'
@@ -33,7 +34,7 @@ function contarPor<T>(lista: T[], chaveDe: (item: T) => string): Record<string, 
   return contagem
 }
 
-const ABAS = ['fases', 'modulos', 'passos', 'guias', 'usuarios'] as const
+const ABAS = ['fases', 'modulos', 'passos', 'guias', 'acessos', 'usuarios'] as const
 type Aba = (typeof ABAS)[number]
 
 const LABEL: Record<Aba, string> = {
@@ -41,6 +42,7 @@ const LABEL: Record<Aba, string> = {
   modulos: 'Módulos',
   passos: 'Passos',
   guias: 'Guias',
+  acessos: 'Acessos',
   usuarios: 'Usuários',
 }
 
@@ -120,6 +122,11 @@ export function AdminPage() {
       {aba === 'guias' && (
         <div className="anim-page">
           <GuiasAdmin />
+        </div>
+      )}
+      {aba === 'acessos' && (
+        <div className="anim-page">
+          <AcessosAdmin />
         </div>
       )}
       {aba === 'usuarios' && (

@@ -58,3 +58,15 @@ export interface EmailAutorizado {
   id: string
   email: string
 }
+
+// Um acesso a liberar (ex.: "E-mail Agilean") como o admin edita (espelha AcessoRequest/a
+// projeção de GET /admin/acessos). `cargoMinimo` é cumulativo — ver Acesso.cs no back.
+export interface AcessoAdmin {
+  id: string
+  nome: string
+  link: string
+  cargoMinimo: Cargo
+  order: number
+}
+
+export type AcessoAdminInput = Omit<AcessoAdmin, 'id'>

@@ -7,13 +7,19 @@ import { Icon } from '../components/Icon'
 import { MapCorners } from '../components/MapCorners'
 import { MapIllustration } from '../components/MapIllustration'
 import { Carregando } from '../components/Spinner'
+import { useSaidaValor } from '../hooks/useSaida'
 import { useTitulo } from '../hooks/useTitulo'
 import { cx } from '../utils/cx'
-import { ACESSOS_POR_CARGO, NOME_CARGO } from '../features/gestor/acessosPorCargo'
-import { getFluxosSupervisionado, getProgressoDetalhado } from '../features/gestor/gestorService'
+import { NOME_CARGO } from '../features/gestor/acessosPorCargo'
+import {
+  getAcessosSupervisionado,
+  getFluxosSupervisionado,
+  getProgressoDetalhado,
+  marcarAcessoConcluido,
+} from '../features/gestor/gestorService'
 import { GuiaModulosLeitura } from '../features/gestor/GuiaModulosLeitura'
 import { TrilhaFasesLeitura } from '../features/gestor/TrilhaFasesLeitura'
-import type { FluxoProgresso, ProgressoSupervisionado } from '../features/gestor/types'
+import type { AcessoProgresso, FluxoProgresso, ProgressoSupervisionado } from '../features/gestor/types'
 
 // Tela de detalhe de um supervisionado, com abas: Passos (jornada) e Fluxos.
 export function SupervisionadoPage() {
@@ -21,21 +27,29 @@ export function SupervisionadoPage() {
   const [dados, setDados] = useState<ProgressoSupervisionado | null>(null)
   useTitulo(dados?.nome)
   const [fluxos, setFluxos] = useState<FluxoProgresso[]>([])
+  const [acessos, setAcessos] = useState<AcessoProgresso[]>([])
   const [aba, setAba] = useState<'passos' | 'fluxos'>('passos')
   const [acessosAbertos, setAcessosAbertos] = useState(false)
+  const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [tentativa, setTentativa] = useState(0)
+  const toastFeedback = useSaidaValor(feedback)
 
   useEffect(() => {
     let cancelado = false
     setLoading(true)
     setError(null)
-    Promise.all([getProgressoDetalhado(id), getFluxosSupervisionado(id)])
-      .then(([d, fs]) => {
+    Promise.all([
+      getProgressoDetalhado(id),
+      getFluxosSupervisionado(id),
+      getAcessosSupervisionado(id),
+    ])
+      .then(([d, fs, as_]) => {
         if (cancelado) return
         setDados(d)
         setFluxos(fs)
+        setAcessos(as_)
       })
       .catch((e) => {
         if (!cancelado) setError(e instanceof Error ? e.message : 'Erro ao carregar o progresso')
@@ -48,6 +62,28 @@ export function SupervisionadoPage() {
     }
   }, [id, tentativa])
 
+  useEffect(() => {
+    if (!feedback) return
+    const t = setTimeout(() => setFeedback(null), 3000)
+    return () => clearTimeout(t)
+  }, [feedback])
+
+  // Marca (ou desmarca) na hora do clique — não tem como saber quando a pessoa "volta" de um link
+  // externo aberto numa aba nova, então o clique já é o próprio ato de liberar. Otimista: desfaz se
+  // o back falhar.
+  async function alternarAcesso(acesso: AcessoProgresso) {
+    const novoValor = !acesso.concluido
+    setAcessos((prev) => prev.map((a) => (a.id === acesso.id ? { ...a, concluido: novoValor } : a)))
+    try {
+      await marcarAcessoConcluido(id, acesso.id, novoValor)
+    } catch (e) {
+      setAcessos((prev) =>
+        prev.map((a) => (a.id === acesso.id ? { ...a, concluido: acesso.concluido } : a)),
+      )
+      setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao salvar', ok: false })
+    }
+  }
+
   if (loading) return <Carregando texto="Carregando o progresso..." />
   if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
   if (!dados) return null
@@ -55,7 +91,7 @@ export function SupervisionadoPage() {
   const passosFeitos = dados.passos.filter((p) => p.concluido).length
   const passosTotal = dados.passos.length
   const fluxosFeitos = fluxos.filter((f) => f.concluido).length
-  const acessos = ACESSOS_POR_CARGO[dados.cargo]
+  const acessosFeitos = acessos.filter((a) => a.concluido).length
 
   return (
     <div className="relative flex w-full max-w-2xl flex-col gap-5">
@@ -83,19 +119,58 @@ export function SupervisionadoPage() {
         aberto={acessosAbertos}
         onToggle={() => setAcessosAbertos((a) => !a)}
       >
-        <ul className="flex flex-wrap gap-2">
-          {acessos.map((acesso) => (
-            <li
-              key={acesso}
-              className="rounded-full border border-navy-600 bg-navy-900 px-3 py-1 text-xs text-neutral-300"
-            >
-              {acesso}
-            </li>
-          ))}
-        </ul>
-        <p className="mt-3 text-xs text-neutral-500">
-          Rascunho ilustrativo por cargo — lista definitiva a confirmar.
-        </p>
+        {acessos.length === 0 ? (
+          <p className="text-xs text-neutral-500">Nenhum acesso cadastrado pra esse cargo ainda.</p>
+        ) : (
+          <>
+            <ul className="flex flex-wrap gap-2">
+              {acessos.map((acesso) => {
+                const classeBase =
+                  'flex items-center gap-1 rounded-full border px-3 py-1 text-xs transition-colors'
+                const classeEstado = acesso.concluido
+                  ? 'border-green-500/40 bg-green-500/10 text-green-300 hover:border-green-500/60'
+                  : 'border-navy-600 bg-navy-900 text-neutral-300 hover:border-gold-500/50'
+                const conteudo = (
+                  <>
+                    {acesso.concluido && <Icon name="check" className="text-sm" />}
+                    {acesso.nome}
+                  </>
+                )
+                return (
+                  <li key={acesso.id}>
+                    {acesso.link ? (
+                      <a
+                        href={acesso.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={() => {
+                          if (!acesso.concluido) alternarAcesso(acesso)
+                        }}
+                        title={acesso.concluido ? 'Já liberado — clique pra abrir o link de novo' : 'Abre o link e marca como liberado'}
+                        className={cx(classeBase, classeEstado)}
+                      >
+                        {conteudo}
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => alternarAcesso(acesso)}
+                        title={acesso.concluido ? 'Marcar como não liberado' : 'Marcar como liberado'}
+                        className={cx(classeBase, classeEstado)}
+                      >
+                        {conteudo}
+                      </button>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+            <p className="mt-3 text-xs text-neutral-500">
+              {acessosFeitos} de {acessos.length} liberados — clique num acesso pendente pra abrir o
+              link e marcar como feito.
+            </p>
+          </>
+        )}
       </Acordeao>
 
       <div className="flex gap-2">
@@ -129,6 +204,19 @@ export function SupervisionadoPage() {
             Guia de {dados.nome}
           </p>
           <GuiaModulosLeitura fluxos={fluxos} />
+        </div>
+      )}
+
+      {toastFeedback.montado && toastFeedback.valor && (
+        <div
+          className={cx(
+            'fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg',
+            toastFeedback.saindo ? 'anim-pop-out' : 'anim-pop',
+            toastFeedback.valor.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300',
+          )}
+        >
+          <Icon name={toastFeedback.valor.ok ? 'check_circle' : 'warning'} className="text-base" />
+          {toastFeedback.valor.texto}
         </div>
       )}
     </div>
