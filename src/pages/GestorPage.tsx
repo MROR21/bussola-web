@@ -28,7 +28,9 @@ export function GestorPage() {
   const [buscaDisponivel, setBuscaDisponivel] = useState('')
   const [confirmandoRemover, setConfirmandoRemover] = useState<UsuarioProgresso | null>(null)
   const [removendoId, setRemovendoId] = useState<string | null>(null)
+  const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
   const modalRemover = useSaidaValor(confirmandoRemover)
+  const toastFeedback = useSaidaValor(feedback)
   const navegar = useNavigate()
 
   const disponiveisFiltrados = disponiveis.filter((u) => {
@@ -58,9 +60,20 @@ export function GestorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  async function adicionar(id: string) {
-    await adicionarSupervisionado(id)
-    await carregar()
+  useEffect(() => {
+    if (!feedback) return
+    const t = setTimeout(() => setFeedback(null), 3000)
+    return () => clearTimeout(t)
+  }, [feedback])
+
+  async function adicionar(id: string, nome: string) {
+    try {
+      await adicionarSupervisionado(id)
+      await carregar()
+      setFeedback({ texto: `${nome} adicionado(a) aos seus supervisionados.`, ok: true })
+    } catch (e) {
+      setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao adicionar', ok: false })
+    }
   }
 
   // Espera a animação de saída (`anim-pop-out`, 150ms) tocar antes de tirar de verdade da lista —
@@ -74,6 +87,9 @@ export function GestorPage() {
       try {
         await removerSupervisionado(alvo.id)
         await carregar()
+        setFeedback({ texto: `${alvo.nome} removido(a) dos seus supervisionados.`, ok: true })
+      } catch (e) {
+        setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao remover', ok: false })
       } finally {
         setRemovendoId(null)
       }
@@ -202,7 +218,7 @@ export function GestorPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => adicionar(u.id)}
+                  onClick={() => adicionar(u.id, u.nome)}
                   className="shrink-0 text-sm text-gold-400 transition-colors hover:text-gold-300"
                 >
                   Adicionar
@@ -251,6 +267,19 @@ export function GestorPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {toastFeedback.montado && toastFeedback.valor && (
+        <div
+          className={cx(
+            'fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg',
+            toastFeedback.saindo ? 'anim-pop-out' : 'anim-pop',
+            toastFeedback.valor.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300',
+          )}
+        >
+          <Icon name={toastFeedback.valor.ok ? 'check_circle' : 'warning'} className="text-base" />
+          {toastFeedback.valor.texto}
         </div>
       )}
     </div>
