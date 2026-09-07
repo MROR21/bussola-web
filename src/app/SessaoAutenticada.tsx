@@ -17,107 +17,78 @@ import { PassoDetalhePage } from '../pages/PassoDetalhePage'
 import { PerfilPage } from '../pages/PerfilPage'
 import { SupervisionadoPage } from '../pages/SupervisionadoPage'
 
-type Estado = 'carregando' | 'nivelar' | 'pronto'
+type EstadoSessao = 'carregando' | 'erro' | 'pronto'
 
-function TelaCheia({ children }: { children: React.ReactNode }) {
-  return (
-    <main className="anim-fade flex min-h-screen items-center justify-center bg-navy-900 px-4 text-neutral-100">
-      {children}
-    </main>
-  )
-}
-
-// Decide, depois do login, entre a tela de nivelamento (sem menu) e a casca (com menu).
-// Só entra na casca quando o usuário já nivelou.
+// Decide, depois do login, entre a tela de nivelamento (sem menu) e a casca (com menu). A CASCA
+// (menu + rotas) monta assim que sabemos o papel — `isGestor` já vem do próprio login, persistido
+// em `authStore`, não depende dessa chamada. Só a rota "/" (Jornada Home, que precisa do perfil pra
+// montar a trilha) mostra carregando/erro CONTIDOS nela, com retry; o resto do menu (Guias, Perfil,
+// Admin, Supervisionados) fica navegável mesmo se essa chamada falhar ou travar. Antes, uma API
+// fora do ar no F5 bloqueava o app inteiro atrás de uma tela cheia sem navegação nenhuma — pro
+// gestor isso nem fazia sentido, já que nenhuma tela dele depende desse fetch.
 export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
-  const [estado, setEstado] = useState<Estado>('carregando')
+  const [estadoSessao, setEstadoSessao] = useState<EstadoSessao>('carregando')
   const [perfil, setPerfil] = useState<Perfil | null>(null)
   const [gestorNome, setGestorNome] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  // Nivelamento (1ª vez, ou "Refazer") é um fluxo próprio, sem menu — só é decidido depois que a
+  // sessão carrega de verdade (nunca durante 'carregando'/'erro', que não sabem essa resposta).
+  const [nivelamentoAtivo, setNivelamentoAtivo] = useState(false)
   const [tentativa, setTentativa] = useState(0)
 
   useEffect(() => {
     let cancelado = false
-    setEstado('carregando')
-    setError(null)
+    setEstadoSessao('carregando')
     getUser(usuario.id)
       .then((detalhe) => {
         if (cancelado) return
         setGestorNome(detalhe.gestorNome)
-        // Gestor não passa pelo nivelamento — cai direto na casca (e o "/" redireciona pro painel).
-        if (detalhe.isGestor || detalhe.nivelamentoConcluido) {
-          setPerfil(detalhe.perfil)
-          setEstado('pronto')
-        } else {
-          setEstado('nivelar')
-        }
+        setPerfil(detalhe.perfil)
+        setNivelamentoAtivo(!detalhe.isGestor && !detalhe.nivelamentoConcluido)
+        setEstadoSessao('pronto')
       })
-      .catch((e) => {
-        if (!cancelado) setError(e instanceof Error ? e.message : 'Erro ao carregar sua sessão')
+      .catch(() => {
+        if (!cancelado) setEstadoSessao('erro')
       })
     return () => {
       cancelado = true
     }
   }, [usuario.id, tentativa])
 
-  if (error) {
-    return (
-      <TelaCheia>
-        <EstadoErro
-          mensagem="Não consegui carregar sua sessão. Verifique a conexão e tente de novo."
-          onRetry={() => setTentativa((t) => t + 1)}
-        />
-      </TelaCheia>
-    )
-  }
-  if (estado === 'carregando') {
-    return <TelaCheia><Carregando texto="Carregando sua jornada..." /></TelaCheia>
-  }
-  if (estado === 'nivelar') {
+  if (nivelamentoAtivo) {
     return (
       <NivelamentoPage
         usuario={usuario}
         onConcluir={(p) => {
           setPerfil(p)
-          setEstado('pronto')
+          setNivelamentoAtivo(false)
         }}
       />
     )
   }
 
-  // pronto → casca com menu
+  const conteudoJornada = usuario.isGestor ? (
+    <Navigate to="/gestor" replace />
+  ) : estadoSessao === 'erro' ? (
+    <EstadoErro
+      mensagem="Não consegui carregar sua jornada. Verifique a conexão e tente de novo."
+      onRetry={() => setTentativa((t) => t + 1)}
+    />
+  ) : !perfil ? (
+    <Carregando texto="Carregando sua jornada..." />
+  ) : (
+    <JornadaPage
+      perfil={perfil}
+      gestorNome={gestorNome}
+      onRefazer={() => setNivelamentoAtivo(true)}
+    />
+  )
+
   return (
     <BrowserRouter>
       <Routes>
         <Route element={<AppLayout />}>
-          <Route
-            path="/"
-            element={
-              usuario.isGestor ? (
-                <Navigate to="/gestor" replace />
-              ) : (
-                <JornadaPage
-                  perfil={perfil!}
-                  gestorNome={gestorNome}
-                  onRefazer={() => setEstado('nivelar')}
-                />
-              )
-            }
-          />
-          <Route
-            path="/fase/:nome"
-            element={
-              usuario.isGestor ? (
-                <Navigate to="/gestor" replace />
-              ) : (
-                <JornadaPage
-                  perfil={perfil!}
-                  gestorNome={gestorNome}
-                  onRefazer={() => setEstado('nivelar')}
-                />
-              )
-            }
-          />
+          <Route path="/" element={conteudoJornada} />
+          <Route path="/fase/:nome" element={conteudoJornada} />
           <Route path="/passo/:titulo" element={<PassoDetalhePage perfil={perfil} />} />
           <Route path="/guias" element={<GuiasPage />} />
           <Route path="/guias/:modulo" element={<GuiasPage />} />
@@ -136,20 +107,7 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
             path="/admin"
             element={usuario.isGestor ? <AdminPage /> : <Navigate to="/" replace />}
           />
-          <Route
-            path="*"
-            element={
-              usuario.isGestor ? (
-                <Navigate to="/gestor" replace />
-              ) : (
-                <JornadaPage
-                  perfil={perfil!}
-                  gestorNome={gestorNome}
-                  onRefazer={() => setEstado('nivelar')}
-                />
-              )
-            }
-          />
+          <Route path="*" element={conteudoJornada} />
         </Route>
       </Routes>
     </BrowserRouter>
