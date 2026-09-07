@@ -181,15 +181,13 @@ export function GestorPage() {
         <button
           type="button"
           onClick={() => setAdicionando((v) => !v)}
-          className="flex items-center gap-1 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
+          className="flex items-center gap-1.5 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
         >
-          {adicionando ? (
-            'Fechar'
-          ) : (
-            <>
-              <Icon name="add" className="text-base" /> Adicionar supervisionado
-            </>
-          )}
+          <Icon name="add" className="text-base" /> Adicionar supervisionado
+          <Icon
+            name="expand_more"
+            className={cx('text-base transition-transform duration-200', adicionando && 'rotate-180')}
+          />
         </button>
 
         {/* Grid-rows em vez de montar/desmontar na hora (mesma técnica do menu lateral e dos
