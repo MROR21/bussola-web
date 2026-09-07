@@ -142,19 +142,16 @@ export function SupervisionadoPage() {
           <>
             <ul className="flex flex-wrap gap-2">
               {acessos.map((acesso) => {
+                // O selo de concluído é um badge SOBREPOSTO (absolute), não conteúdo dentro do
+                // pill — senão o pill cresce de tamanho só por ter o ícone dentro do fluxo normal.
+                // O tamanho do chip fica só por conta do texto, ligado ou não.
                 const classeBase =
-                  'flex items-center gap-1 rounded-full border px-3 py-1 text-xs transition-colors'
+                  'flex items-center rounded-full border px-3 py-1 text-xs transition-colors'
                 const classeEstado = acesso.concluido
                   ? 'border-green-500/40 bg-green-500/10 text-green-300 hover:border-green-500/60'
                   : 'border-navy-600 bg-navy-900 text-neutral-300 hover:border-gold-500/50'
-                const conteudo = (
-                  <>
-                    {acesso.nome}
-                    {acesso.concluido && <Icon name="verified" className="text-xs" fill />}
-                  </>
-                )
                 return (
-                  <li key={acesso.id}>
+                  <li key={acesso.id} className="relative">
                     {acesso.link ? (
                       <a
                         href={acesso.link}
@@ -166,7 +163,7 @@ export function SupervisionadoPage() {
                         title={acesso.concluido ? 'Já liberado — clique pra abrir o link de novo' : 'Abre o link e marca como liberado'}
                         className={cx(classeBase, classeEstado)}
                       >
-                        {conteudo}
+                        {acesso.nome}
                       </a>
                     ) : (
                       <button
@@ -175,8 +172,13 @@ export function SupervisionadoPage() {
                         title={acesso.concluido ? 'Marcar como não liberado' : 'Marcar como liberado'}
                         className={cx(classeBase, classeEstado)}
                       >
-                        {conteudo}
+                        {acesso.nome}
                       </button>
+                    )}
+                    {acesso.concluido && (
+                      <span className="pointer-events-none absolute -right-1.5 -top-1.5 flex size-4 items-center justify-center rounded-full bg-navy-800">
+                        <Icon name="verified" className="text-sm text-green-400" fill />
+                      </span>
                     )}
                   </li>
                 )
