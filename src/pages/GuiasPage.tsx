@@ -19,6 +19,17 @@ const MODULO_ICONE: Record<string, string> = {
 }
 const iconeDoModulo = (m: string) => MODULO_ICONE[m] ?? 'extension'
 
+// Resumo breve por módulo, pro cabeçalho de dentro dele — o Módulo (`Bussola.Domain.Entities.
+// Modulo`) só tem Nome/Order no banco, sem campo de descrição (mesmo caso do FASE_RESUMO em
+// JornadaView.tsx). Texto ilustrativo, Miguel pode ajustar a fonte à vontade. Sem entrada = sem
+// resumo (módulo novo criado pelo admin não quebra, só não mostra o texto).
+const MODULO_RESUMO: Record<string, string> = {
+  'Mão de Obra': 'Sistema de gestão de mão de obra e alocação de equipes em obra.',
+  'Básico do dev': 'Padrões, ferramentas e fluxo de trabalho que todo dev do time segue no dia a dia.',
+  'Quiz Quality': 'Sistema de inspeção e controle de qualidade em obra.',
+  'Agilean (desktop)': 'O aplicativo desktop da Agilean, usado direto na obra.',
+}
+
 // Tópico é só um agrupamento VISUAL por cima dos Módulos que já existem (sem entidade/migration
 // nova) — todo módulo cai em "Fluxos do sistema" por padrão, exceto os listados aqui.
 const TOPICO_POR_MODULO: Record<string, string> = {
@@ -223,7 +234,12 @@ export function GuiasPage() {
           <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gold-500/10 text-gold-400">
             <Icon name={iconeDoModulo(moduloSelecionado)} className="text-2xl" />
           </span>
-          <h1 className="text-2xl font-bold text-neutral-100">{moduloSelecionado}</h1>
+          <div className="flex flex-col gap-0.5">
+            <h1 className="text-2xl font-bold text-neutral-100">{moduloSelecionado}</h1>
+            {MODULO_RESUMO[moduloSelecionado] && (
+              <p className="text-sm text-neutral-400">{MODULO_RESUMO[moduloSelecionado]}</p>
+            )}
+          </div>
         </div>
         {grupos.length > 1 ? (
           <div className="flex flex-col gap-6">
