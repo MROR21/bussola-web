@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Icon } from '../../components/Icon'
 import { Spinner } from '../../components/Spinner'
@@ -34,6 +34,15 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false)
   const [carregandoMicrosoft, setCarregandoMicrosoft] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Mensagem de um logout FORÇADO (sessão expirada, acesso revogado) — captura o valor uma vez na
+  // montagem (o `persist` do authStore já reidratou síncrono do localStorage antes disso) e limpa
+  // no mesmo instante, senão ficaria persistido e reapareceria numa visita futura sem relação
+  // nenhuma com o motivo original.
+  const [mensagemSaida] = useState(() => useAuthStore.getState().motivoSaida)
+  useEffect(() => {
+    useAuthStore.getState().limparMotivoSaida()
+  }, [])
 
   const ehCadastro = location.pathname === '/cadastro'
   useTitulo(ehCadastro ? 'Criar conta' : 'Entrar')
@@ -94,6 +103,12 @@ export function LoginForm() {
           {ehCadastro ? 'Crie sua conta pra começar.' : 'Entre pra continuar sua jornada.'}
         </p>
       </div>
+
+      {mensagemSaida && (
+        <p className="anim-fade flex items-center gap-1.5 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+          <Icon name="warning" className="shrink-0 text-base" /> {mensagemSaida}
+        </p>
+      )}
 
       {ehCadastro && (
         <label className="anim-fade flex flex-col gap-1.5 text-sm">

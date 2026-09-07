@@ -129,6 +129,12 @@ function ListaUsuarios() {
         )}
         {itensFiltrados.map((usuario) => {
           const souEuMesmo = usuario.id === usuarioLogado?.id
+          // Promover pra supervisor exige acesso ativo (não faz sentido dar o papel pra quem nem
+          // consegue entrar). Revogar/reativar só pode quem já é o gestor DESSA pessoa — sem
+          // gestor vinculado, qualquer gestor pode (caso de off-boarding sem dono ainda).
+          const naoPodeTornarSupervisor = !usuario.isGestor && !usuario.ativo
+          const naoPodeMexerNoAcesso =
+            usuario.gestorId !== null && usuario.gestorId !== usuarioLogado?.id
           return (
           <li
             key={usuario.id}
@@ -155,8 +161,14 @@ function ListaUsuarios() {
               <button
                 type="button"
                 onClick={() => setConfirmando({ usuario, acao: 'gestor' })}
-                disabled={alterando === usuario.id || souEuMesmo}
-                title={souEuMesmo ? 'Você não pode alterar sua própria permissão de supervisor.' : undefined}
+                disabled={alterando === usuario.id || souEuMesmo || naoPodeTornarSupervisor}
+                title={
+                  souEuMesmo
+                    ? 'Você não pode alterar sua própria permissão de supervisor.'
+                    : naoPodeTornarSupervisor
+                      ? 'Não dá pra tornar supervisor alguém com o acesso revogado.'
+                      : undefined
+                }
                 className="text-sm text-gold-400 transition-all hover:text-gold-300 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {usuario.isGestor ? 'Remover supervisor' : 'Tornar supervisor'}
@@ -164,8 +176,14 @@ function ListaUsuarios() {
               <button
                 type="button"
                 onClick={() => setConfirmando({ usuario, acao: 'ativo' })}
-                disabled={alterando === usuario.id || souEuMesmo}
-                title={souEuMesmo ? 'Você não pode revogar o seu próprio acesso.' : undefined}
+                disabled={alterando === usuario.id || souEuMesmo || naoPodeMexerNoAcesso}
+                title={
+                  souEuMesmo
+                    ? 'Você não pode revogar o seu próprio acesso.'
+                    : naoPodeMexerNoAcesso
+                      ? 'Só o gestor desse supervisionado pode mexer no acesso dele.'
+                      : undefined
+                }
                 className={cx(
                   'text-sm transition-all disabled:cursor-not-allowed disabled:opacity-40',
                   usuario.ativo ? 'text-red-400 hover:text-red-300' : 'text-green-400 hover:text-green-300',

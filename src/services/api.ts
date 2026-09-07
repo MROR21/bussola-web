@@ -18,20 +18,26 @@ const ERRO_SEM_CONEXAO = 'Não foi possível falar com o servidor. Verifique sua
 // Se não vier JSON (ex.: 500 cru, ou o proxy do Vite respondendo no lugar do back que caiu), cai
 // numa mensagem genérica com só o status — nunca expõe o path interno da API pro usuário.
 async function extrairErro(response: Response, path: string): Promise<string> {
-  // 401 fora do login = token expirado/inválido → desloga e volta pro login (sem erro cru).
-  if (response.status === 401 && !path.startsWith('/auth/')) {
-    useAuthStore.getState().logout()
-    return 'Sua sessão expirou. Entre novamente.'
-  }
+  let mensagem: string | null = null
   try {
     const body = await response.json()
     if (body && typeof body.erro === 'string') {
-      return body.erro
+      mensagem = body.erro
     }
   } catch {
     // resposta sem corpo JSON — usa o fallback abaixo
   }
-  return `Ocorreu um erro no servidor (${response.status}). Tente novamente em instantes.`
+
+  // 401 fora do login = sessão inválida (token expirado, OU o back derrubou de propósito porque o
+  // acesso foi revogado — ver OnChallenge do JWT no back) → desloga e volta pro login. Usa a
+  // mensagem real do back quando ela vier (ex. "Seu acesso foi revogado."), senão cai no genérico.
+  if (response.status === 401 && !path.startsWith('/auth/')) {
+    const motivo = mensagem ?? 'Sua sessão expirou. Entre novamente.'
+    useAuthStore.getState().logout(motivo)
+    return motivo
+  }
+
+  return mensagem ?? `Ocorreu um erro no servidor (${response.status}). Tente novamente em instantes.`
 }
 
 // Envolve o fetch de verdade — se ele nem chegar a responder (servidor fora do ar), troca o erro

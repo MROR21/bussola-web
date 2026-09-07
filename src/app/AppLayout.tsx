@@ -441,7 +441,7 @@ export function AppLayout() {
               </button>
               <button
                 type="button"
-                onClick={logout}
+                onClick={() => logout()}
                 className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
               >
                 Sair

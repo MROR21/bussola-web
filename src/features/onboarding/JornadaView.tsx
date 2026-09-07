@@ -548,7 +548,7 @@ export function JornadaView({
                 onClick={() => entrarFase(proximo.phase)}
                 className="self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
               >
-                Ir para o passo
+                Ir para a fase
               </button>
             </div>
           )
