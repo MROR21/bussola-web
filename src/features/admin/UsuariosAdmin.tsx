@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { EstadoErro } from '../../components/EstadoErro'
 import { Icon } from '../../components/Icon'
 import { Carregando } from '../../components/Spinner'
 import { useAuthStore } from '../auth/authStore'
@@ -108,7 +109,7 @@ function ListaUsuarios() {
   }
 
   if (loading) return <Carregando texto="Carregando..." />
-  if (error) return <p className="text-red-400">Erro: {error}</p>
+  if (error) return <EstadoErro onRetry={carregar} />
 
   return (
     <div className="anim-fade flex flex-col gap-4">
@@ -346,7 +347,7 @@ function ListaEmailsAutorizados() {
   }
 
   if (loading) return <Carregando texto="Carregando..." />
-  if (error) return <p className="text-red-400">Erro: {error}</p>
+  if (error) return <EstadoErro onRetry={carregar} />
 
   return (
     <div className="anim-fade flex flex-col gap-4">

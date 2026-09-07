@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Acordeao } from '../../components/Acordeao'
+import { EstadoErro } from '../../components/EstadoErro'
 import { Icon } from '../../components/Icon'
 import { MarkdownEditor } from '../../components/MarkdownEditor'
 import { Carregando, Spinner } from '../../components/Spinner'
@@ -138,7 +139,7 @@ export function PassosAdmin() {
   })()
 
   if (loading) return <Carregando texto="Carregando..." />
-  if (error) return <p className="text-red-400">Erro: {error}</p>
+  if (error) return <EstadoErro onRetry={carregar} />
 
   return (
     <div className="anim-fade flex flex-col gap-4">

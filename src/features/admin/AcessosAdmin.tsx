@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Acordeao } from '../../components/Acordeao'
+import { EstadoErro } from '../../components/EstadoErro'
 import { Icon } from '../../components/Icon'
 import { Carregando, Spinner } from '../../components/Spinner'
 import { useSaidaValor } from '../../hooks/useSaida'
@@ -112,7 +113,7 @@ export function AcessosAdmin() {
   const porCargo = CARGOS.map((cargo) => [cargo, acessos.filter((a) => a.cargoMinimo === cargo)] as const)
 
   if (loading) return <Carregando texto="Carregando..." />
-  if (error) return <p className="text-red-400">Erro: {error}</p>
+  if (error) return <EstadoErro onRetry={carregar} />
 
   return (
     <div className="anim-fade flex flex-col gap-4">
