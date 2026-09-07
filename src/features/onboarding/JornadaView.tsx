@@ -306,6 +306,12 @@ export function JornadaView({
     const itemAtualIndex = itens.findIndex((item) => !estaConcluido(item))
     const itemAtual = itemAtualIndex >= 0 ? itens[itemAtualIndex] : undefined
     const pctFase = itens.length > 0 ? Math.round((feitosFase / itens.length) * 100) : 0
+    // Fase seguinte na sequência (se existir) — a fase atual acabou de ficar 100% completa, então
+    // ela já libera a próxima (mesmo gate `faseLiberada` de cima), sem precisar checar de novo.
+    const proximaFaseEntry =
+      faseSelecionadaIndex >= 0 && faseSelecionadaIndex < fases.length - 1
+        ? fases[faseSelecionadaIndex + 1]
+        : undefined
     const hrefDoItem = (item: TrailStep) =>
       item.tipo === 'fluxo'
         ? `/fluxo/${encodeURIComponent(item.title)}`
@@ -361,6 +367,55 @@ export function JornadaView({
             <span className="shrink-0 text-xs text-neutral-500">{pctFase}%</span>
           </div>
         </div>
+
+        {faseCompleta && (
+          <div className="anim-pop relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-gold-500/40 bg-gold-500/10 p-5 sm:flex-row sm:items-center">
+            <MapCorners tamanho={4} opacidade={20} />
+            {proximaFaseEntry ? (
+              <>
+                <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-navy-800 text-gold-400">
+                  <Icon name={iconeDaFase(proximaFaseEntry[0])} className="text-2xl" />
+                </span>
+                <div className="flex flex-1 flex-col gap-0.5">
+                  <span className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-gold-400">
+                    <Icon name="arrow_forward" className="text-sm" /> Próxima fase
+                  </span>
+                  <span className="text-base font-semibold text-neutral-100">{proximaFaseEntry[0]}</span>
+                  {FASE_RESUMO[proximaFaseEntry[0]] && (
+                    <span className="text-sm text-neutral-400">{FASE_RESUMO[proximaFaseEntry[0]]}</span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => entrarFase(proximaFaseEntry[0])}
+                  className="shrink-0 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400 sm:self-center"
+                >
+                  Ir para a próxima fase
+                </button>
+              </>
+            ) : (
+              <>
+                <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-navy-800 text-gold-400">
+                  <Icon name="emoji_events" className="text-2xl" fill />
+                </span>
+                <div className="flex flex-1 flex-col gap-0.5">
+                  <span className="text-base font-semibold text-neutral-100">
+                    Você concluiu toda a jornada!
+                  </span>
+                  <span className="text-sm text-neutral-400">
+                    Do clone ao primeiro card — bem-vindo(a) de verdade à Agilean.
+                  </span>
+                </div>
+                <Link
+                  to="/guias"
+                  className="shrink-0 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400 sm:self-center"
+                >
+                  Ir pro Guia pelo sistema
+                </Link>
+              </>
+            )}
+          </div>
+        )}
 
         {faseCompleta ? (
           <ul className="relative flex flex-col">
