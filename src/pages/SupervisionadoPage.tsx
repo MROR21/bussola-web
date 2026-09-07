@@ -117,14 +117,14 @@ export function SupervisionadoPage() {
       </div>
 
       {aba === 'passos' ? (
-        <div className="anim-fade flex flex-col gap-4">
+        <div key={aba} className="anim-page flex flex-col gap-4">
           <p className="self-center text-xs font-medium uppercase tracking-wide text-neutral-500">
             Progresso de {dados.nome}
           </p>
           <TrilhaFasesLeitura passos={dados.passos} />
         </div>
       ) : (
-        <div className="anim-fade flex flex-col gap-4">
+        <div key={aba} className="anim-page flex flex-col gap-4">
           <p className="self-center text-xs font-medium uppercase tracking-wide text-neutral-500">
             Guia de {dados.nome}
           </p>
