@@ -11,6 +11,7 @@ import { listarSteps } from '../features/onboarding/onboardingService'
 import type { OnboardingStep } from '../features/onboarding/types'
 import { Avatar } from '../features/perfil/Avatar'
 import { useApiStatus } from './useApiStatus'
+import { useRefetchOnFocus } from '../hooks/useAtualizarEmSegundoPlano'
 import { useSaida } from '../hooks/useSaida'
 import { cx } from '../utils/cx'
 
@@ -142,6 +143,11 @@ export function AppLayout() {
     if (veioDoAdmin && !estaNoAdmin) carregarArvore()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname])
+
+  // Cobre o caso de OUTRA sessão (gestor logado em outra aba/computador) editar Fase/Módulo — o
+  // fix acima só pega a própria aba saindo do Admin. Busca de novo quando essa aba volta a ficar em
+  // foco.
+  useRefetchOnFocus(carregarArvore)
 
   useLayoutEffect(() => {
     const antes = posicoesGalhosAntes.current

@@ -5,6 +5,7 @@ import { postTrail } from '../features/nivelamento/nivelamentoService'
 import type { Perfil } from '../features/nivelamento/types'
 import { JornadaView } from '../features/onboarding/JornadaView'
 import type { TrailStep } from '../features/onboarding/types'
+import { useRefetchOnFocus } from '../hooks/useAtualizarEmSegundoPlano'
 
 // Rota "/" — a home da jornada. Só é renderizada quando o usuário já nivelou, então aqui é só
 // montar a trilha do perfil e mostrar. "Refazer nivelamento" volta pra tela de nivelamento (no pai).
@@ -41,6 +42,15 @@ export function JornadaPage({
       cancelado = true
     }
   }, [perfil, tentativa])
+
+  // Um gestor pode renomear/reordenar/editar fase ou passo pela tela de Admin enquanto o
+  // colaborador já está com a Jornada aberta (é a tela que mais fica aberta por mais tempo) — busca
+  // de novo, em silêncio, quando a aba volta a ficar em foco (voltar de outra aba/janela).
+  useRefetchOnFocus(() => {
+    postTrail(perfil)
+      .then(setTrail)
+      .catch(() => {})
+  })
 
   if (!usuario) return null
   if (loading) return <p className="text-neutral-400">Montando sua trilha...</p>

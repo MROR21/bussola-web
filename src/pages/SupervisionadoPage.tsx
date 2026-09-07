@@ -7,6 +7,7 @@ import { Icon } from '../components/Icon'
 import { MapCorners } from '../components/MapCorners'
 import { MapIllustration } from '../components/MapIllustration'
 import { Carregando } from '../components/Spinner'
+import { usePolling } from '../hooks/useAtualizarEmSegundoPlano'
 import { useSaidaValor } from '../hooks/useSaida'
 import { useTitulo } from '../hooks/useTitulo'
 import { cx } from '../utils/cx'
@@ -67,6 +68,22 @@ export function SupervisionadoPage() {
     const t = setTimeout(() => setFeedback(null), 3000)
     return () => clearTimeout(t)
   }, [feedback])
+
+  // O supervisionado marca passo/fluxo concluído (ou anexa evidência) numa sessão separada — sem
+  // isso, essa tela (a que o gestor mais fica olhando esperando ver progresso) ficava parada até
+  // sair e voltar. Silencioso, igual GestorPage.tsx. `acessos` fica DE FORA de propósito: quem
+  // marca acesso é o PRÓPRIO gestor nessa mesma tela (`alternarAcesso`, otimista) — um poll
+  // pisando em cima do estado otimista podia fazer o chip "piscar" de volta pra cinza por um
+  // instante antes do PUT terminar.
+  usePolling(async () => {
+    try {
+      const [d, fs] = await Promise.all([getProgressoDetalhado(id), getFluxosSupervisionado(id)])
+      setDados(d)
+      setFluxos(fs)
+    } catch {
+      // silencioso
+    }
+  }, 15_000)
 
   // Marca (ou desmarca) na hora do clique — não tem como saber quando a pessoa "volta" de um link
   // externo aberto numa aba nova, então o clique já é o próprio ato de liberar. Otimista: desfaz se

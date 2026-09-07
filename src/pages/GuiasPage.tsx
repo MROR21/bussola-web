@@ -9,6 +9,7 @@ import { Carregando } from '../components/Spinner'
 import { useTitulo } from '../hooks/useTitulo'
 import { getFluxosConcluidos, listarFluxos } from '../features/fluxos/fluxosService'
 import type { Fluxo } from '../features/fluxos/types'
+import { useRefetchOnFocus } from '../hooks/useAtualizarEmSegundoPlano'
 
 // Ícone por módulo (fallback "extension" = peça/módulo genérico).
 const MODULO_ICONE: Record<string, string> = {
@@ -85,6 +86,18 @@ export function GuiasPage() {
       cancelado = true
     }
   }, [tentativa])
+
+  // Um gestor pode renomear/reordenar/criar módulo ou fluxo pela tela de Admin enquanto o
+  // colaborador já está navegando o Guia (às vezes por vários minutos, entre módulos) — busca de
+  // novo, em silêncio, quando a aba volta a ficar em foco.
+  useRefetchOnFocus(() => {
+    Promise.all([listarFluxos(), getFluxosConcluidos()])
+      .then(([f, ids]) => {
+        setFluxos(f)
+        setConcluidos(new Set(ids))
+      })
+      .catch(() => {})
+  })
 
   // Notificação (?destaque=): entra no módulo do fluxo e marca ele pra pulsar. Se ainda não estiver
   // no módulo certo, navega pra lá levando o `destaque` junto na URL nova — assim funciona igual

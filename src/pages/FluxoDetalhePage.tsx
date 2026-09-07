@@ -9,6 +9,7 @@ import { Markdown } from '../components/Markdown'
 import { MarkdownEditor } from '../components/MarkdownEditor'
 import { Carregando, Spinner } from '../components/Spinner'
 import { cx } from '../utils/cx'
+import { useRefetchOnFocus } from '../hooks/useAtualizarEmSegundoPlano'
 import { useSaida, useSaidaValor } from '../hooks/useSaida'
 import { useAuthStore } from '../features/auth/authStore'
 import { useTitulo } from '../hooks/useTitulo'
@@ -87,6 +88,19 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
       cancelado = true
     }
   }, [tituloParam, tentativa, navigate])
+
+  // Um gestor pode editar o conteúdo desse Fluxo pela tela de Admin enquanto o colaborador está
+  // vendo — busca de novo o CONTEÚDO (nunca `concluido`, que pode estar sendo alternado agora
+  // mesmo) quando a aba volta a ficar em foco.
+  useRefetchOnFocus(() => {
+    listarFluxos()
+      .then((todos) => {
+        const f = todos.find((x) => x.titulo === tituloParam)
+        if (f) setFluxo(f)
+        setTodosFluxos(todos)
+      })
+      .catch(() => {})
+  })
 
   useTitulo(fluxo?.titulo)
 

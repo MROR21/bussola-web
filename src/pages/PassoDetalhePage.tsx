@@ -8,6 +8,7 @@ import { MapIllustration } from '../components/MapIllustration'
 import { Markdown } from '../components/Markdown'
 import { MarkdownEditor } from '../components/MarkdownEditor'
 import { Carregando, Spinner } from '../components/Spinner'
+import { useRefetchOnFocus } from '../hooks/useAtualizarEmSegundoPlano'
 import { useSaida, useSaidaValor } from '../hooks/useSaida'
 import { cx } from '../utils/cx'
 import { paraEmbed } from '../utils/video'
@@ -108,6 +109,19 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
       cancelado = true
     }
   }, [tituloParam, usuario, tentativa, navigate])
+
+  // Um gestor pode editar o conteúdo desse Passo pela tela de Admin enquanto o colaborador está
+  // lendo — busca de novo o CONTEÚDO (não a comprovação: nunca mexe em `concluido`/`evidencia`,
+  // que podem estar sendo digitados agora mesmo) quando a aba volta a ficar em foco.
+  useRefetchOnFocus(() => {
+    if (!usuario) return
+    listarSteps()
+      .then((todos) => {
+        const passo = todos.find((s) => s.title === tituloParam)
+        if (passo) setStep(passo)
+      })
+      .catch(() => {})
+  })
 
   useTitulo(step?.title)
 

@@ -6,6 +6,7 @@ import { Icon } from '../components/Icon'
 import { MapCorners } from '../components/MapCorners'
 import { MapIllustration } from '../components/MapIllustration'
 import { Carregando } from '../components/Spinner'
+import { usePolling } from '../hooks/useAtualizarEmSegundoPlano'
 import { useSaidaValor } from '../hooks/useSaida'
 import { useTitulo } from '../hooks/useTitulo'
 import { cx } from '../utils/cx'
@@ -59,6 +60,21 @@ export function GestorPage() {
     carregar()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // O supervisionado avança (marca passo/fluxo, o gestor edita o cargo dele etc.) numa sessão
+  // separada, no navegador dele — sem isso, o gestor ficava olhando pra uma barra de progresso
+  // parada até sair e voltar pra essa tela. Atualização silenciosa: não mexe em loading/error de
+  // tela cheia, só troca os dados por trás se der certo (falha aqui não deve incomodar quem tá
+  // usando — tenta de novo sozinho no próximo poll).
+  usePolling(async () => {
+    try {
+      const [supervisionados, livres] = await Promise.all([getUsuariosProgresso(), getDisponiveis()])
+      setUsuarios(supervisionados)
+      setDisponiveis(livres)
+    } catch {
+      // silencioso
+    }
+  }, 15_000)
 
   useEffect(() => {
     if (!feedback) return
