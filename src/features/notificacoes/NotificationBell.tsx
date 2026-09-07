@@ -131,10 +131,12 @@ export function NotificationBell() {
   const naoLidas = itens.filter((n) => !n.lida).length
 
   // Um gestor com vários supervisionados recebe notificações misturadas de todo mundo — os
-  // autores distintos (com id, pra filtrar sem depender de nome igual) viram chips de filtro. Só
-  // aparece quando faz sentido: com 1 pessoa só (ou nenhuma), filtrar não ajudaria em nada. Fora
-  // da sessão do gestor (sem lista de supervisionados), cai no fallback de olhar quem já apareceu
-  // como autor nas próprias notificações carregadas.
+  // autores distintos (com id, pra filtrar sem depender de nome igual) viram chips de filtro. Na
+  // sessão do gestor, o filtro fica sempre visível (mesmo com só 1 supervisionado — pedido
+  // explícito, mais consistente do que sumir e reaparecer dependendo de quantos ele tem). Fora da
+  // sessão do gestor (sem lista de supervisionados), cai no fallback de olhar quem já apareceu
+  // como autor nas próprias notificações carregadas — aí sim só mostra com mais de 1 autor, senão
+  // filtrar não ajudaria em nada.
   const autoresDistintos = useMemo(() => {
     if (isGestor && supervisionados.length > 0) {
       return supervisionados.map(
@@ -150,6 +152,7 @@ export function NotificationBell() {
     return [...vistos.entries()]
   }, [itens, isGestor, supervisionados])
   const itensFiltrados = filtroAutorId ? itens.filter((n) => n.autorId === filtroAutorId) : itens
+  const mostrarFiltro = isGestor ? supervisionados.length > 0 : autoresDistintos.length > 1
 
   async function marcarTudo() {
     if (naoLidas === 0) return
@@ -248,7 +251,7 @@ export function NotificationBell() {
                 </button>
               ))}
           </div>
-          {autoresDistintos.length > 1 && (
+          {mostrarFiltro && (
             <div className="anim-fade flex items-center gap-1.5 overflow-x-auto border-b border-navy-700 px-3 py-2">
               <button
                 type="button"
