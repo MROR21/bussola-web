@@ -118,13 +118,15 @@ export function NotificationBell() {
     return () => document.removeEventListener('mousedown', aoClicarFora)
   }, [aberto])
 
-  // Pra um gestor, a lista de opções de filtro é a dos PRÓPRIOS supervisionados (busca uma vez) —
-  // assim o filtro já aparece mesmo que só um deles tenha notificado até agora (o outro simplesmente
-  // mostra "nenhuma notificação dessa pessoa" se escolhido, o que é o esperado).
+  // Pra um gestor, a lista de opções de filtro é a dos PRÓPRIOS supervisionados — assim o filtro já
+  // aparece mesmo que só um deles tenha notificado até agora (o outro simplesmente mostra "nenhuma
+  // notificação dessa pessoa" se escolhido). Busca de novo TODA VEZ que o sino abre (não só uma vez
+  // no mount) — senão um supervisionado removido no Painel do gestor continuava aparecendo aqui
+  // até a página recarregar, já que essa lista vivia só num estado próprio, sem saber da remoção.
   useEffect(() => {
-    if (!isGestor) return
+    if (!isGestor || !aberto) return
     getUsuariosProgresso().then(setSupervisionados).catch(() => {})
-  }, [isGestor])
+  }, [isGestor, aberto])
 
   const naoLidas = itens.filter((n) => !n.lida).length
 
