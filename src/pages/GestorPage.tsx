@@ -192,42 +192,53 @@ export function GestorPage() {
           )}
         </button>
 
-        {adicionando && (
-          <div className="anim-fade flex flex-col gap-2">
-            <input
-              value={buscaDisponivel}
-              onChange={(e) => setBuscaDisponivel(e.target.value)}
-              placeholder="Buscar por nome ou e-mail..."
-              className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500"
-            />
-            <ul className="flex flex-col gap-2">
-            {disponiveis.length === 0 && (
-              <li className="text-sm text-neutral-500">Nenhum colaborador disponível.</li>
-            )}
-            {disponiveis.length > 0 && disponiveisFiltrados.length === 0 && (
-              <li className="text-sm text-neutral-500">Nenhum colaborador encontrado.</li>
-            )}
-            {disponiveisFiltrados.map((u) => (
-              <li
-                key={u.id}
-                className="anim-pop flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
-              >
-                <div className="flex min-w-0 flex-col">
-                  <span className="truncate text-neutral-100">{u.nome}</span>
-                  <span className="truncate text-sm text-neutral-500">{u.email}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => adicionar(u.id, u.nome)}
-                  className="shrink-0 text-sm text-gold-400 transition-colors hover:text-gold-300"
+        {/* Grid-rows em vez de montar/desmontar na hora (mesma técnica do menu lateral e dos
+            accordions) — abrir já animava (`anim-fade`), mas fechar só sumia na hora, sem
+            transição nenhuma. O wrapper de fora fica SEMPRE montado, só o conteúdo interno
+            colapsa a altura até 0. */}
+        <div
+          className={cx(
+            'grid transition-[grid-template-rows] duration-200 ease-out',
+            adicionando ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+          )}
+        >
+          <div className="overflow-hidden">
+            <div className="flex flex-col gap-2 pt-0.5">
+              <input
+                value={buscaDisponivel}
+                onChange={(e) => setBuscaDisponivel(e.target.value)}
+                placeholder="Buscar por nome ou e-mail..."
+                className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500"
+              />
+              <ul className="flex flex-col gap-2">
+              {disponiveis.length === 0 && (
+                <li className="text-sm text-neutral-500">Nenhum colaborador disponível.</li>
+              )}
+              {disponiveis.length > 0 && disponiveisFiltrados.length === 0 && (
+                <li className="text-sm text-neutral-500">Nenhum colaborador encontrado.</li>
+              )}
+              {disponiveisFiltrados.map((u) => (
+                <li
+                  key={u.id}
+                  className="anim-pop flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
                 >
-                  Adicionar
-                </button>
-              </li>
-            ))}
-            </ul>
+                  <div className="flex min-w-0 flex-col">
+                    <span className="truncate text-neutral-100">{u.nome}</span>
+                    <span className="truncate text-sm text-neutral-500">{u.email}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => adicionar(u.id, u.nome)}
+                    className="shrink-0 text-sm text-gold-400 transition-colors hover:text-gold-300"
+                  >
+                    Adicionar
+                  </button>
+                </li>
+              ))}
+              </ul>
+            </div>
           </div>
-        )}
+        </div>
       </div>
 
       {modalRemover.montado && modalRemover.valor && (
