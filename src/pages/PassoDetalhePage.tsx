@@ -8,7 +8,7 @@ import { MapIllustration } from '../components/MapIllustration'
 import { Markdown } from '../components/Markdown'
 import { MarkdownEditor } from '../components/MarkdownEditor'
 import { Carregando, Spinner } from '../components/Spinner'
-import { useSaida } from '../hooks/useSaida'
+import { useSaida, useSaidaValor } from '../hooks/useSaida'
 import { cx } from '../utils/cx'
 import { paraEmbed } from '../utils/video'
 import { useAuthStore } from '../features/auth/authStore'
@@ -73,6 +73,8 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
   const [erroEdicao, setErroEdicao] = useState<string | null>(null)
   const [salvo, setSalvo] = useState(false)
   const { montado: toastSalvoMontado, saindo: toastSalvoSaindo } = useSaida(salvo)
+  const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
+  const toastFeedback = useSaidaValor(feedback)
 
   useEffect(() => {
     if (!usuario) return
@@ -117,7 +119,9 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
       setConcluido(true)
       setEditando(false)
     } catch {
-      // mantém o estado atual — o banner de offline sinaliza a queda
+      // sucesso já é visível na hora pelo próprio chip mudando — só a falha precisa de aviso
+      // explícito, senão o usuário via só nada acontecer, sem saber por quê
+      setFeedback({ texto: 'Não deu pra salvar. Tente de novo.', ok: false })
     } finally {
       setSalvando(false)
     }
@@ -131,7 +135,7 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
       setConcluido(false)
       setEditando(false)
     } catch {
-      // idem
+      setFeedback({ texto: 'Não deu pra salvar. Tente de novo.', ok: false })
     } finally {
       setSalvando(false)
     }
@@ -196,6 +200,12 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
     const t = setTimeout(() => setSalvo(false), 3000)
     return () => clearTimeout(t)
   }, [salvo])
+
+  useEffect(() => {
+    if (!feedback) return
+    const t = setTimeout(() => setFeedback(null), 3000)
+    return () => clearTimeout(t)
+  }, [feedback])
 
   if (loading) return <Carregando texto="Carregando o passo..." />
   if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
@@ -491,6 +501,19 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
           )}
         >
           <Icon name="check_circle" className="text-base" /> Salvo com sucesso
+        </div>
+      )}
+
+      {toastFeedback.montado && toastFeedback.valor && (
+        <div
+          className={cx(
+            'fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg',
+            toastFeedback.saindo ? 'anim-pop-out' : 'anim-pop',
+            toastFeedback.valor.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300',
+          )}
+        >
+          <Icon name={toastFeedback.valor.ok ? 'check_circle' : 'warning'} className="text-base" />
+          {toastFeedback.valor.texto}
         </div>
       )}
     </article>
