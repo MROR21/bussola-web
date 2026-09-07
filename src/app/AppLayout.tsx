@@ -114,6 +114,9 @@ export function AppLayout() {
   // mesma marcação `state.deFase` já usada pro botão Voltar (ver FluxoDetalhePage) diz de qual dos
   // dois contextos o usuário veio, então o menu lateral consegue destacar a aba (e o galho) certos
   // mesmo estando "fora" das rotas /fase ou /guias de verdade.
+  // `/supervisionado/:id` (o detalhe de um supervisionado) não começa com `/gestor` — a aba
+  // "Supervisionados" (que É `/gestor`) ficava sem marcar enquanto o gestor olhava alguém.
+  const emSupervisionado = location.pathname.startsWith('/supervisionado/')
   const emFluxo = location.pathname.startsWith('/fluxo/')
   const veioDaFaseNoFluxo = Boolean((location.state as { deFase?: boolean } | null)?.deFase)
   const tituloFluxoAtual = emFluxo
@@ -190,7 +193,8 @@ export function AppLayout() {
             // aba de origem (Jornada ou Guias) como ativa, igual o usuário esperaria vendo a URL.
             const ativoForcado =
               (item.to === '/' && emFluxo && veioDaFaseNoFluxo) ||
-              (item.to === '/guias' && emFluxo && !veioDaFaseNoFluxo)
+              (item.to === '/guias' && emFluxo && !veioDaFaseNoFluxo) ||
+              (item.to === '/gestor' && emSupervisionado)
 
             return (
               <div key={item.to}>
