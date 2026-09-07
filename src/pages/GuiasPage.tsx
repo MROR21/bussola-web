@@ -24,10 +24,10 @@ const iconeDoModulo = (m: string) => MODULO_ICONE[m] ?? 'extension'
 // JornadaView.tsx). Texto ilustrativo, Miguel pode ajustar a fonte à vontade. Sem entrada = sem
 // resumo (módulo novo criado pelo admin não quebra, só não mostra o texto).
 const MODULO_RESUMO: Record<string, string> = {
-  'Mão de Obra': 'Sistema de gestão de mão de obra e alocação de equipes em obra.',
-  'Básico do dev': 'Padrões, ferramentas e fluxo de trabalho que todo dev do time segue no dia a dia.',
-  'Quiz Quality': 'Sistema de inspeção e controle de qualidade em obra.',
-  'Agilean (desktop)': 'O aplicativo desktop da Agilean, usado direto na obra.',
+  'Mão de Obra': 'Sistema de gestão de mão de obra: alocação de equipes, apontamento de horas e acompanhamento da produtividade em obra.',
+  'Básico do dev': 'Os fundamentos que todo desenvolvedor do time precisa dominar — padrões de código, controle de versão e o fluxo de trabalho do dia a dia.',
+  'Quiz Quality': 'Sistema de inspeção e controle de qualidade em obra, do registro de não conformidades ao acompanhamento das correções.',
+  'Agilean (desktop)': 'Aplicativo desktop usado pelas equipes em campo para registrar e acompanhar o andamento da obra.',
 }
 
 // Tópico é só um agrupamento VISUAL por cima dos Módulos que já existem (sem entidade/migration
