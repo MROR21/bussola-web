@@ -8,6 +8,7 @@ import { listarFluxos } from '../features/fluxos/fluxosService'
 import type { Fluxo } from '../features/fluxos/types'
 import { NotificationBell } from '../features/notificacoes/NotificationBell'
 import { listarSteps } from '../features/onboarding/onboardingService'
+import type { OnboardingStep } from '../features/onboarding/types'
 import { Avatar } from '../features/perfil/Avatar'
 import { useApiStatus } from './useApiStatus'
 import { useSaida } from '../hooks/useSaida'
@@ -97,10 +98,14 @@ export function AppLayout() {
   const [fases, setFases] = useState<string[]>([])
   const [modulos, setModulos] = useState<string[]>([])
   const [todosFluxos, setTodosFluxos] = useState<Fluxo[]>([])
+  const [todosPassos, setTodosPassos] = useState<OnboardingStep[]>([])
 
   useEffect(() => {
     listarSteps()
-      .then((steps) => setFases(distintosEmOrdem(steps, (s) => s.phase)))
+      .then((steps) => {
+        setTodosPassos(steps)
+        setFases(distintosEmOrdem(steps, (s) => s.phase))
+      })
       .catch(() => {})
     listarFluxos()
       .then((fluxos) => {
@@ -126,13 +131,25 @@ export function AppLayout() {
     ? todosFluxos.find((f) => f.titulo === tituloFluxoAtual)?.modulo
     : undefined
 
+  // `/fase/:nome` também não bate com `to: '/'` (que é `end: true`) — e `/passo/:titulo` nem chega
+  // perto de `/fase`, mas todo Passo mora dentro de uma fase (só o Fluxo é ambíguo entre os dois
+  // contextos). A aba "Jornada" precisa marcar ativa nos dois, e o galho da fase certa no passo.
+  const emFase = location.pathname.startsWith('/fase/')
+  const emPasso = location.pathname.startsWith('/passo/')
+  const tituloPassoAtual = emPasso
+    ? decodeURIComponent(location.pathname.slice('/passo/'.length))
+    : null
+  const faseDoPassoAtual = tituloPassoAtual
+    ? todosPassos.find((p) => p.title === tituloPassoAtual)?.phase
+    : undefined
+
   const [expandido, setExpandido] = useState<Record<string, boolean>>({})
 
   // A que seção da árvore uma rota pertence (ou nenhuma). Usado só pra saber quando o usuário
   // ENTROU numa seção vindo de fora — não a cada navegação dentro dela. Um Fluxo entra na seção de
   // onde ele foi aberto (`viaFase`), não sempre em Guias.
   const regiaoDe = (pathname: string, viaFase: boolean): string | null => {
-    if (pathname === '/' || pathname.startsWith('/fase')) return '/'
+    if (pathname === '/' || pathname.startsWith('/fase') || pathname.startsWith('/passo')) return '/'
     if (pathname.startsWith('/fluxo')) return viaFase ? '/' : '/guias'
     if (pathname.startsWith('/guias')) return '/guias'
     return null
@@ -192,7 +209,7 @@ export function AppLayout() {
             // Dentro de um Fluxo não existe rota /fase ou /guias pra casar de verdade — força a
             // aba de origem (Jornada ou Guias) como ativa, igual o usuário esperaria vendo a URL.
             const ativoForcado =
-              (item.to === '/' && emFluxo && veioDaFaseNoFluxo) ||
+              (item.to === '/' && ((emFluxo && veioDaFaseNoFluxo) || emFase || emPasso)) ||
               (item.to === '/guias' && emFluxo && !veioDaFaseNoFluxo) ||
               (item.to === '/gestor' && emSupervisionado)
 
@@ -276,7 +293,8 @@ export function AppLayout() {
                           (item.to === '/' &&
                             emFluxo &&
                             veioDaFaseNoFluxo &&
-                            nome === FASE_FLUXO_NA_JORNADA)
+                            nome === FASE_FLUXO_NA_JORNADA) ||
+                          (item.to === '/' && emPasso && nome === faseDoPassoAtual)
                         const ativo = location.pathname === linkTo || galhoForcado
                         return (
                           <li key={nome}>
