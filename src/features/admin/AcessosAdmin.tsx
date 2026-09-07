@@ -154,9 +154,7 @@ export function AcessosAdmin() {
                     className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
                   >
                     <div className="flex min-w-0 flex-col">
-                      <span className="truncate text-neutral-100">
-                        #{a.order} · {a.nome}
-                      </span>
+                      <span className="truncate text-neutral-100">{a.nome}</span>
                       {a.link ? (
                         <span className="truncate text-xs text-neutral-500">{a.link}</span>
                       ) : (

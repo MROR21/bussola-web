@@ -177,9 +177,7 @@ export function PassosAdmin() {
                     className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
                   >
                     <div className="flex min-w-0 flex-col">
-                      <span className="truncate text-neutral-100">
-                        #{p.order} · {p.title}
-                      </span>
+                      <span className="truncate text-neutral-100">{p.title}</span>
                       <span className="text-xs text-neutral-500">{nomeDaFase(p.faseId)}</span>
                     </div>
                     <div className="flex shrink-0 gap-3">

@@ -230,7 +230,6 @@ export function SimpleEntityCrud({
                   </button>
                 </div>
               )}
-              <span className="text-xs text-neutral-500">#{item.order}</span>
               <span className="text-neutral-100">{item.nome}</span>
               {contarFilhos && (
                 <span className="rounded-full bg-navy-700 px-2 py-0.5 text-xs text-neutral-400">

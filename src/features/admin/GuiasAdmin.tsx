@@ -195,9 +195,7 @@ export function GuiasAdmin() {
                   className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
                 >
                   <div className="flex min-w-0 flex-col">
-                    <span className="truncate text-neutral-100">
-                      #{f.order} · {f.titulo}
-                    </span>
+                    <span className="truncate text-neutral-100">{f.titulo}</span>
                     <span className="text-xs text-neutral-500">
                       {nomeDoModulo(f.moduloId)}
                       {f.squad ? ` · ${f.squad}` : ' · todos os squads'}
