@@ -53,7 +53,10 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
   const navigate = useNavigate()
   const usuario = useAuthStore((state) => state.usuario)
   const isGestor = usuario?.isGestor ?? false
-  const { anterior, proximo, faseDoItem, faseTerminada } = useTrailNavegacao(perfil, tituloParam)
+  const { anterior, proximo, faseDoItem, faseTerminada, ultimoItemDaTrilha } = useTrailNavegacao(
+    perfil,
+    tituloParam,
+  )
 
   const [step, setStep] = useState<OnboardingStep | null>(null)
   const [concluido, setConcluido] = useState(false)
@@ -225,11 +228,11 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
   if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
   if (!step) return null
 
-  // Comprovação (link de PR/print/nota) só faz sentido na fase "Primeiro Card" — é a única onde o
-  // passo produz um artefato real pra linkar. Nas demais fases (Ambientação/Padrões/Ambiente
-  // técnico) o passo é leitura ou uma ação local pontual (instalar algo, clonar um repo) sem nada
-  // que valha a pena anexar, então ali o botão só marca concluído.
-  const exigeComprovacao = step.phase === 'Primeiro Card'
+  // Comprovação (link de PR/print/nota) só faz sentido no ÚLTIMO passo da ÚLTIMA fase — é o único
+  // que fecha a Jornada de verdade com um artefato real pra linkar (o PR do primeiro card). Os
+  // outros passos, mesmo dentro do "Primeiro Card", são leitura ou ação local pontual, sem nada
+  // que valha a pena anexar — ali o botão só marca concluído.
+  const exigeComprovacao = ultimoItemDaTrilha
 
   return (
     <article className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">

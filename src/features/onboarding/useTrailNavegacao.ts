@@ -51,5 +51,8 @@ export function useTrailNavegacao(perfil: Perfil | null, tituloAtual: string) {
     // navigate(-1) de sempre nesse caso).
     faseDoItem,
     faseTerminada: indice >= 0 && !proximo,
+    // Literalmente o ÚLTIMO item de TODA a trilha (não só da fase) — usado pra decidir onde faz
+    // sentido pedir comprovação (só o passo que fecha a Jornada de verdade).
+    ultimoItemDaTrilha: indice >= 0 && indice === trail.length - 1,
   }
 }
