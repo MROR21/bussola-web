@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { CompassRose } from '../components/CompassRose'
@@ -100,20 +100,67 @@ export function AppLayout() {
   const [todosFluxos, setTodosFluxos] = useState<Fluxo[]>([])
   const [todosPassos, setTodosPassos] = useState<OnboardingStep[]>([])
 
+  // FLIP pra animar o reordenar dos galhos (mesma técnica do `mover()` em SimpleEntityCrud.tsx):
+  // guarda a posição de cada `<li>` ANTES de trocar o array, e um layout effect abaixo anima cada
+  // um da posição antiga até a nova assim que o DOM já refletir a ordem certa.
+  const refsGalhos = useRef(new Map<string, HTMLLIElement>())
+  const posicoesGalhosAntes = useRef<Map<string, DOMRect> | null>(null)
+  const pathnameAnteriorAdmin = useRef(location.pathname.startsWith('/admin'))
+
+  function capturarPosicoesGalhos() {
+    const rects = new Map<string, DOMRect>()
+    refsGalhos.current.forEach((li, chave) => rects.set(chave, li.getBoundingClientRect()))
+    posicoesGalhosAntes.current = rects
+  }
+
+  async function carregarArvore() {
+    capturarPosicoesGalhos()
+    try {
+      const [steps, fluxos] = await Promise.all([listarSteps(), listarFluxos()])
+      setTodosPassos(steps)
+      setFases(distintosEmOrdem(steps, (s) => s.phase))
+      setTodosFluxos(fluxos)
+      setModulos(distintosEmOrdem(fluxos, (f) => f.modulo))
+    } catch {
+      // silencioso — o menu só não atualiza a árvore dessa vez, tenta de novo na próxima
+    }
+  }
+
   useEffect(() => {
-    listarSteps()
-      .then((steps) => {
-        setTodosPassos(steps)
-        setFases(distintosEmOrdem(steps, (s) => s.phase))
-      })
-      .catch(() => {})
-    listarFluxos()
-      .then((fluxos) => {
-        setTodosFluxos(fluxos)
-        setModulos(distintosEmOrdem(fluxos, (f) => f.modulo))
-      })
-      .catch(() => {})
+    carregarArvore()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // O menu lateral é um layout PERSISTENTE (não remonta ao navegar entre rotas), então a árvore de
+  // fase/módulo carregada uma vez no mount ficava desatualizada se o admin reordenasse Fases/
+  // Módulos numa aba do Admin — só se via a ordem nova recarregando a página inteira. Busca de
+  // novo ao SAIR do Admin (não a cada navegação — seria fetch demais à toa).
+  useEffect(() => {
+    const veioDoAdmin = pathnameAnteriorAdmin.current
+    const estaNoAdmin = location.pathname.startsWith('/admin')
+    pathnameAnteriorAdmin.current = estaNoAdmin
+    if (veioDoAdmin && !estaNoAdmin) carregarArvore()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname])
+
+  useLayoutEffect(() => {
+    const antes = posicoesGalhosAntes.current
+    if (!antes) return
+    posicoesGalhosAntes.current = null
+    refsGalhos.current.forEach((li, chave) => {
+      const rectAntes = antes.get(chave)
+      if (!rectAntes) return
+      const deltaY = rectAntes.top - li.getBoundingClientRect().top
+      if (Math.abs(deltaY) < 1) return
+      li.style.transition = 'none'
+      li.style.transform = `translateY(${deltaY}px)`
+      li.getBoundingClientRect() // força o navegador aplicar o transform acima antes da próxima linha
+      requestAnimationFrame(() => {
+        li.style.transition = 'transform 220ms ease-out'
+        li.style.transform = ''
+      })
+    })
+  }, [fases, modulos])
 
   // Um Fluxo pode ser aberto tanto de dentro de uma Fase (Jornada) quanto de um Módulo (Guias) — a
   // mesma marcação `state.deFase` já usada pro botão Voltar (ver FluxoDetalhePage) diz de qual dos
@@ -296,8 +343,15 @@ export function AppLayout() {
                             nome === FASE_FLUXO_NA_JORNADA) ||
                           (item.to === '/' && emPasso && nome === faseDoPassoAtual)
                         const ativo = location.pathname === linkTo || galhoForcado
+                        const chaveGalho = `${item.arvore}:${nome}`
                         return (
-                          <li key={nome}>
+                          <li
+                            key={nome}
+                            ref={(el) => {
+                              if (el) refsGalhos.current.set(chaveGalho, el)
+                              else refsGalhos.current.delete(chaveGalho)
+                            }}
+                          >
                             <Link
                               to={linkTo}
                               className={cx(
