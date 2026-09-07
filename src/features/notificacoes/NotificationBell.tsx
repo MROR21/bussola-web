@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { Icon } from '../../components/Icon'
 import { useSaida } from '../../hooks/useSaida'
 import { cx } from '../../utils/cx'
+import { useAuthStore } from '../auth/authStore'
+import { getUsuariosProgresso } from '../gestor/gestorService'
+import type { UsuarioProgresso } from '../gestor/types'
 import { Avatar } from '../perfil/Avatar'
 import { tempoRelativo } from '../../utils/tempoRelativo'
 import {
@@ -20,7 +23,9 @@ const POLL_MS = 20_000
 // toast ao chegar notificação nova. Busca em tempo (quase) real via polling, pausando em
 // segundo plano.
 export function NotificationBell() {
+  const isGestor = useAuthStore((s) => s.usuario?.isGestor ?? false)
   const [itens, setItens] = useState<Notificacao[]>([])
+  const [supervisionados, setSupervisionados] = useState<UsuarioProgresso[]>([])
   const [aberto, setAberto] = useState(false)
   const [toast, setToast] = useState(false)
   const [confirmandoLimpar, setConfirmandoLimpar] = useState(false)
@@ -113,12 +118,27 @@ export function NotificationBell() {
     return () => document.removeEventListener('mousedown', aoClicarFora)
   }, [aberto])
 
+  // Pra um gestor, a lista de opções de filtro é a dos PRÓPRIOS supervisionados (busca uma vez) —
+  // assim o filtro já aparece mesmo que só um deles tenha notificado até agora (o outro simplesmente
+  // mostra "nenhuma notificação dessa pessoa" se escolhido, o que é o esperado).
+  useEffect(() => {
+    if (!isGestor) return
+    getUsuariosProgresso().then(setSupervisionados).catch(() => {})
+  }, [isGestor])
+
   const naoLidas = itens.filter((n) => !n.lida).length
 
   // Um gestor com vários supervisionados recebe notificações misturadas de todo mundo — os
   // autores distintos (com id, pra filtrar sem depender de nome igual) viram chips de filtro. Só
-  // aparece quando faz sentido: com 1 autor só (ou nenhum), filtrar não ajudaria em nada.
+  // aparece quando faz sentido: com 1 pessoa só (ou nenhuma), filtrar não ajudaria em nada. Fora
+  // da sessão do gestor (sem lista de supervisionados), cai no fallback de olhar quem já apareceu
+  // como autor nas próprias notificações carregadas.
   const autoresDistintos = useMemo(() => {
+    if (isGestor && supervisionados.length > 0) {
+      return supervisionados.map(
+        (u) => [u.id, { nome: u.nome, foto: u.foto }] as [string, { nome: string; foto?: string | null }],
+      )
+    }
     const vistos = new Map<string, { nome: string; foto?: string | null }>()
     for (const n of itens) {
       if (n.autorId && n.autorNome && !vistos.has(n.autorId)) {
@@ -126,7 +146,7 @@ export function NotificationBell() {
       }
     }
     return [...vistos.entries()]
-  }, [itens])
+  }, [itens, isGestor, supervisionados])
   const itensFiltrados = filtroAutorId ? itens.filter((n) => n.autorId === filtroAutorId) : itens
 
   async function marcarTudo() {

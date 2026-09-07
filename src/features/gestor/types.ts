@@ -11,6 +11,7 @@ export interface UsuarioProgresso {
   nivelamentoConcluido: boolean
   passosConcluidos: number
   totalPassos: number
+  foto?: string | null
 }
 
 // Colaborador disponível pra virar supervisionado (GET /gestor/disponiveis).
