@@ -149,8 +149,8 @@ export function SupervisionadoPage() {
                   : 'border-navy-600 bg-navy-900 text-neutral-300 hover:border-gold-500/50'
                 const conteudo = (
                   <>
-                    {acesso.concluido && <Icon name="check" className="text-sm" />}
                     {acesso.nome}
+                    {acesso.concluido && <Icon name="verified" className="text-xs" fill />}
                   </>
                 )
                 return (
