@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Icon } from '../../components/Icon'
 import { useSaida } from '../../hooks/useSaida'
@@ -24,6 +24,7 @@ export function NotificationBell() {
   const [aberto, setAberto] = useState(false)
   const [toast, setToast] = useState(false)
   const [confirmandoLimpar, setConfirmandoLimpar] = useState(false)
+  const [filtroAutorId, setFiltroAutorId] = useState<string | null>(null)
   const { montado: painelMontado, saindo: painelSaindo } = useSaida(aberto)
   const { montado: toastMontado, saindo: toastSaindo } = useSaida(toast)
   const ref = useRef<HTMLDivElement>(null)
@@ -84,9 +85,13 @@ export function NotificationBell() {
     }
   }, [])
 
-  // Fechar o dropdown desarma a confirmação de "limpar tudo" pendente.
+  // Fechar o dropdown desarma a confirmação de "limpar tudo" pendente e reseta o filtro por
+  // pessoa — reabrir sempre começa mostrando tudo de novo.
   useEffect(() => {
-    if (!aberto) setConfirmandoLimpar(false)
+    if (!aberto) {
+      setConfirmandoLimpar(false)
+      setFiltroAutorId(null)
+    }
   }, [aberto])
 
   // O toast some sozinho depois de alguns segundos.
@@ -109,6 +114,20 @@ export function NotificationBell() {
   }, [aberto])
 
   const naoLidas = itens.filter((n) => !n.lida).length
+
+  // Um gestor com vários supervisionados recebe notificações misturadas de todo mundo — os
+  // autores distintos (com id, pra filtrar sem depender de nome igual) viram chips de filtro. Só
+  // aparece quando faz sentido: com 1 autor só (ou nenhum), filtrar não ajudaria em nada.
+  const autoresDistintos = useMemo(() => {
+    const vistos = new Map<string, { nome: string; foto?: string | null }>()
+    for (const n of itens) {
+      if (n.autorId && n.autorNome && !vistos.has(n.autorId)) {
+        vistos.set(n.autorId, { nome: n.autorNome, foto: n.autorFoto })
+      }
+    }
+    return [...vistos.entries()]
+  }, [itens])
+  const itensFiltrados = filtroAutorId ? itens.filter((n) => n.autorId === filtroAutorId) : itens
 
   async function marcarTudo() {
     if (naoLidas === 0) return
@@ -207,13 +226,49 @@ export function NotificationBell() {
                 </button>
               ))}
           </div>
+          {autoresDistintos.length > 1 && (
+            <div className="anim-fade flex items-center gap-1.5 overflow-x-auto border-b border-navy-700 px-3 py-2">
+              <button
+                type="button"
+                onClick={() => setFiltroAutorId(null)}
+                className={cx(
+                  'shrink-0 rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
+                  filtroAutorId === null
+                    ? 'bg-gold-500/20 text-gold-300'
+                    : 'text-neutral-500 hover:text-neutral-300',
+                )}
+              >
+                Todos
+              </button>
+              {autoresDistintos.map(([id, autor]) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setFiltroAutorId(id)}
+                  title={autor.nome}
+                  className={cx(
+                    'shrink-0 rounded-full transition-all',
+                    filtroAutorId === id
+                      ? 'opacity-100 ring-2 ring-gold-400'
+                      : 'opacity-50 hover:opacity-90',
+                  )}
+                >
+                  <Avatar nome={autor.nome} foto={autor.foto ?? undefined} className="size-6 text-[9px]" />
+                </button>
+              ))}
+            </div>
+          )}
           {itens.length === 0 ? (
             <p className="anim-fade px-4 py-6 text-center text-sm text-neutral-500">
               Nenhuma notificação por aqui.
             </p>
+          ) : itensFiltrados.length === 0 ? (
+            <p className="anim-fade px-4 py-6 text-center text-sm text-neutral-500">
+              Nenhuma notificação dessa pessoa.
+            </p>
           ) : (
-            <ul className="anim-fade max-h-80 overflow-y-auto">
-              {itens.map((n) => (
+            <ul key={filtroAutorId ?? 'todos'} className="anim-fade max-h-80 overflow-y-auto">
+              {itensFiltrados.map((n) => (
                 <li
                   key={n.id}
                   className="flex items-center gap-1 border-b border-navy-700/60 last:border-0"
