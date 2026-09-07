@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Icon } from '../../components/Icon'
-import { useSaida } from '../../hooks/useSaida'
+import { useSaida, useSaidaValor } from '../../hooks/useSaida'
 import { cx } from '../../utils/cx'
 import { useAuthStore } from '../auth/authStore'
 import { getUsuariosProgresso } from '../gestor/gestorService'
@@ -30,8 +30,11 @@ export function NotificationBell() {
   const [toast, setToast] = useState(false)
   const [confirmandoLimpar, setConfirmandoLimpar] = useState(false)
   const [filtroAutorId, setFiltroAutorId] = useState<string | null>(null)
+  const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
   const { montado: painelMontado, saindo: painelSaindo } = useSaida(aberto)
   const { montado: toastMontado, saindo: toastSaindo } = useSaida(toast)
+  const { montado: modalLimparMontado, saindo: modalLimparSaindo } = useSaida(confirmandoLimpar)
+  const toastFeedback = useSaidaValor(feedback)
   const ref = useRef<HTMLDivElement>(null)
   // Ids que já dispararam toast — garante um aviso por notificação, sem repetir a cada poll.
   const jaAvisadasRef = useRef<Set<string>>(new Set())
@@ -105,6 +108,12 @@ export function NotificationBell() {
     const t = setTimeout(() => setToast(false), 5000)
     return () => clearTimeout(t)
   }, [toast])
+
+  useEffect(() => {
+    if (!feedback) return
+    const t = setTimeout(() => setFeedback(null), 3000)
+    return () => clearTimeout(t)
+  }, [feedback])
 
   // Fecha o dropdown ao clicar fora dele.
   useEffect(() => {
@@ -180,7 +189,9 @@ export function NotificationBell() {
     try {
       await apagarNotificacao(id)
     } catch {
-      // se falhar, o próximo carregar() da lista traz de volta — não vale a pena complicar aqui
+      // a lista já mudou na hora (otimista) — sem revert, só avisa que não colou de verdade; o
+      // próximo carregar() periódico acaba trazendo ela de volta se continuar existindo no back
+      setFeedback({ texto: 'Não deu pra apagar a notificação. Tente de novo.', ok: false })
     }
   }
 
@@ -190,7 +201,7 @@ export function NotificationBell() {
     try {
       await apagarTodasNotificacoes()
     } catch {
-      // idem
+      setFeedback({ texto: 'Não deu pra limpar as notificações. Tente de novo.', ok: false })
     }
   }
 
@@ -222,34 +233,15 @@ export function NotificationBell() {
         >
           <div className="flex items-center justify-between border-b border-navy-700 px-4 py-2">
             <p className="text-sm font-medium text-neutral-200">Notificações</p>
-            {itens.length > 0 &&
-              (confirmandoLimpar ? (
-                <span className="anim-fade flex items-center gap-2 text-xs">
-                  <span className="text-neutral-400">Apagar tudo?</span>
-                  <button
-                    type="button"
-                    onClick={confirmarLimparTudo}
-                    className="font-medium text-red-400 transition-colors hover:text-red-300"
-                  >
-                    Sim
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setConfirmandoLimpar(false)}
-                    className="text-neutral-400 transition-colors hover:text-neutral-200"
-                  >
-                    Não
-                  </button>
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setConfirmandoLimpar(true)}
-                  className="anim-fade text-xs text-neutral-500 transition-colors hover:text-red-400"
-                >
-                  Limpar tudo
-                </button>
-              ))}
+            {itens.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setConfirmandoLimpar(true)}
+                className="anim-fade text-xs text-neutral-500 transition-colors hover:text-red-400"
+              >
+                Limpar tudo
+              </button>
+            )}
           </div>
           {mostrarFiltro && (
             <div className="anim-fade flex items-center gap-1.5 overflow-x-auto border-b border-navy-700 px-3 py-2">
@@ -347,6 +339,43 @@ export function NotificationBell() {
         </div>
       )}
 
+      {modalLimparMontado && (
+        <div
+          className={cx(
+            'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
+            modalLimparSaindo ? 'anim-fade-out' : 'anim-fade',
+          )}
+          onClick={() => setConfirmandoLimpar(false)}
+        >
+          <div
+            className={cx(
+              'flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6',
+              modalLimparSaindo ? 'anim-pop-out' : 'anim-pop',
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold text-neutral-100">Apagar todas as notificações?</h3>
+            <p className="text-sm text-neutral-400">Essa ação não pode ser desfeita.</p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmandoLimpar(false)}
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={confirmarLimparTudo}
+                className="rounded-lg bg-red-500/90 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-500"
+              >
+                Apagar tudo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {toastMontado && (
         <button
           type="button"
@@ -360,6 +389,19 @@ export function NotificationBell() {
           {naoLidas === 1 ? 'nova notificação' : 'novas notificações'}
           <span className="absolute -right-1 top-1/2 size-2 -translate-y-1/2 rotate-45 border-r border-t border-gold-500/40 bg-navy-800" />
         </button>
+      )}
+
+      {toastFeedback.montado && toastFeedback.valor && (
+        <div
+          className={cx(
+            'fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg',
+            toastFeedback.saindo ? 'anim-pop-out' : 'anim-pop',
+            toastFeedback.valor.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300',
+          )}
+        >
+          <Icon name={toastFeedback.valor.ok ? 'check_circle' : 'warning'} className="text-base" />
+          {toastFeedback.valor.texto}
+        </div>
       )}
     </div>
   )
