@@ -103,6 +103,7 @@ export function GuiasAdmin() {
 
   async function salvar() {
     if (!form || !form.titulo.trim()) return
+    const criando = !editando
     setSalvando(true)
     try {
       if (editando) {
@@ -113,6 +114,7 @@ export function GuiasAdmin() {
       setForm(null)
       setEditando(null)
       await carregar()
+      setFeedback({ texto: criando ? 'Fluxo criado.' : 'Fluxo salvo.', ok: true })
     } catch (e) {
       setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao salvar', ok: false })
     } finally {
@@ -127,6 +129,7 @@ export function GuiasAdmin() {
     try {
       await apagarFluxo(alvo.id)
       await carregar()
+      setFeedback({ texto: 'Fluxo apagado.', ok: true })
     } catch (e) {
       setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao apagar', ok: false })
     }

@@ -91,6 +91,7 @@ export function PassosAdmin() {
 
   async function salvar() {
     if (!form || !form.title.trim()) return
+    const criando = !editando
     setSalvando(true)
     try {
       if (editando) {
@@ -101,6 +102,7 @@ export function PassosAdmin() {
       setForm(null)
       setEditando(null)
       await carregar()
+      setFeedback({ texto: criando ? 'Passo criado.' : 'Passo salvo.', ok: true })
     } catch (e) {
       setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao salvar', ok: false })
     } finally {
@@ -115,6 +117,7 @@ export function PassosAdmin() {
     try {
       await apagarPasso(alvo.id)
       await carregar()
+      setFeedback({ texto: 'Passo apagado.', ok: true })
     } catch (e) {
       setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao apagar', ok: false })
     }

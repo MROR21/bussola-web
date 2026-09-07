@@ -7,6 +7,9 @@ import type { EntidadeSimples } from './types'
 
 // CRUD de Fase ou Módulo — a mesma forma (nome+ordem) serve pros dois, só troca os services e os
 // textos. Cria/edita num modal; apaga com confirmação (o back já bloqueia se houver vínculo).
+function comMaiuscula(texto: string): string {
+  return texto.charAt(0).toUpperCase() + texto.slice(1)
+}
 export function SimpleEntityCrud({
   titulo,
   icone,
@@ -136,15 +139,20 @@ export function SimpleEntityCrud({
 
   async function salvar() {
     if (!nome.trim()) return
+    const criando = editando === 'novo'
     setSalvando(true)
     try {
-      if (editando === 'novo') {
+      if (criando) {
         await criar(nome.trim(), order)
       } else if (editando) {
         await editar(editando.id, nome.trim(), order)
       }
       setEditando(null)
       await carregar()
+      setFeedback({
+        texto: criando ? `${comMaiuscula(singular)} criado(a).` : `${comMaiuscula(singular)} salvo(a).`,
+        ok: true,
+      })
     } catch (e) {
       setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao salvar', ok: false })
     } finally {
@@ -159,6 +167,7 @@ export function SimpleEntityCrud({
     try {
       await apagar(alvo.id)
       await carregar()
+      setFeedback({ texto: `${comMaiuscula(singular)} apagado(a).`, ok: true })
     } catch (e) {
       setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao apagar', ok: false })
     }

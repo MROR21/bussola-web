@@ -70,6 +70,12 @@ function ListaUsuarios() {
     try {
       await definirGestor(usuario.id, !usuario.isGestor)
       await carregar()
+      setFeedback({
+        texto: usuario.isGestor
+          ? `${usuario.nome} não é mais supervisor.`
+          : `${usuario.nome} agora é supervisor.`,
+        ok: true,
+      })
     } catch (e) {
       setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao salvar', ok: false })
     } finally {
@@ -82,6 +88,10 @@ function ListaUsuarios() {
     try {
       await definirAtivo(usuario.id, !usuario.ativo)
       await carregar()
+      setFeedback({
+        texto: usuario.ativo ? `Acesso de ${usuario.nome} revogado.` : `Acesso de ${usuario.nome} reativado.`,
+        ok: true,
+      })
     } catch (e) {
       setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao salvar', ok: false })
     } finally {
