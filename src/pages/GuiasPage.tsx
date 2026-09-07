@@ -276,9 +276,11 @@ export function GuiasPage() {
 
       {buscando ? (
         resultadosBuscaPorModulo.length === 0 ? (
-          <p className="anim-fade text-neutral-500">Nenhum fluxo encontrado.</p>
+          <p key={busca} className="anim-fade text-neutral-500">
+            Nenhum fluxo encontrado.
+          </p>
         ) : (
-          <div className="anim-fade flex flex-col gap-6">
+          <div key={busca} className="anim-fade flex flex-col gap-6">
             {resultadosBuscaPorModulo.map(([modulo, itensModulo]) => {
               const porTagBusca = new Map<string, Fluxo[]>()
               for (const f of itensModulo) {
