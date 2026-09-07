@@ -48,7 +48,9 @@ function ListaUsuarios() {
     setLoading(true)
     setError(null)
     try {
-      setItens(await listarUsuariosAdmin())
+      // Supervisor primeiro (sort estável — dentro de cada grupo continua em ordem alfabética,
+      // que já vem pronta do back).
+      setItens([...(await listarUsuariosAdmin())].sort((a, b) => Number(b.isGestor) - Number(a.isGestor)))
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao carregar')
     } finally {
