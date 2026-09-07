@@ -11,10 +11,14 @@ interface AuthState {
   // uma vez, depois limpa. `undefined` = não mexe nele (usado no logout manual, por opção do
   // usuário, que não deve deixar nenhuma mensagem pra trás).
   motivoSaida: string | null
-  login: (usuario: UsuarioLogado, token: string) => void
+  // Só true na primeira vez, logo após um CADASTRO novo (não em todo login) — o modal de boas-
+  // vindas lê 1x e fecha sozinho.
+  boasVindasPendente: boolean
+  login: (usuario: UsuarioLogado, token: string, novoCadastro?: boolean) => void
   atualizarUsuario: (patch: Partial<UsuarioLogado>) => void
   logout: (motivo?: string) => void
   limparMotivoSaida: () => void
+  fecharBoasVindas: () => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -23,12 +27,15 @@ export const useAuthStore = create<AuthState>()(
       usuario: null,
       token: null,
       motivoSaida: null,
-      login: (usuario, token) => set({ usuario, token, motivoSaida: null }),
+      boasVindasPendente: false,
+      login: (usuario, token, novoCadastro) =>
+        set({ usuario, token, motivoSaida: null, boasVindasPendente: Boolean(novoCadastro) }),
       // Atualiza campos do usuário na sessão sem relogar (ex.: squad ao refazer o nivelamento).
       atualizarUsuario: (patch) =>
         set((s) => (s.usuario ? { usuario: { ...s.usuario, ...patch } } : {})),
       logout: (motivo) => set({ usuario: null, token: null, motivoSaida: motivo ?? null }),
       limparMotivoSaida: () => set({ motivoSaida: null }),
+      fecharBoasVindas: () => set({ boasVindasPendente: false }),
     }),
     { name: 'bussola-auth' },
   ),

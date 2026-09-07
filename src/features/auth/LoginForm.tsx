@@ -54,7 +54,7 @@ export function LoginForm() {
       const resposta = ehCadastro
         ? await register(nome.trim(), email.trim(), senha)
         : await login(email.trim(), senha)
-      entrar(resposta.usuario, resposta.token)
+      entrar(resposta.usuario, resposta.token, ehCadastro)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao entrar')
     } finally {

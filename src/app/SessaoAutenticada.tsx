@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { EstadoErro } from '../components/EstadoErro'
 import { Carregando } from '../components/Spinner'
+import { useAuthStore } from '../features/auth/authStore'
 import { getUser } from '../features/auth/userService'
 import type { UsuarioLogado } from '../features/auth/types'
+import { BoasVindasModal } from '../features/onboarding/BoasVindasModal'
 import type { Perfil } from '../features/nivelamento/types'
 import { AppLayout } from './AppLayout'
 import { AdminPage } from '../pages/AdminPage'
@@ -34,6 +36,8 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
   // sessão carrega de verdade (nunca durante 'carregando'/'erro', que não sabem essa resposta).
   const [nivelamentoAtivo, setNivelamentoAtivo] = useState(false)
   const [tentativa, setTentativa] = useState(0)
+  const boasVindasPendente = useAuthStore((s) => s.boasVindasPendente)
+  const fecharBoasVindas = useAuthStore((s) => s.fecharBoasVindas)
 
   useEffect(() => {
     let cancelado = false
@@ -54,15 +58,23 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
     }
   }, [usuario.id, tentativa])
 
+  // Único uso desse modal: logo depois de um CADASTRO novo (`boasVindasPendente` no authStore) —
+  // por isso mora aqui, ANTES da decisão nivelamento-vs-casca, e não dentro do AppLayout (que só
+  // existe depois do nivelamento — o modal precisa aparecer mesmo antes disso).
+  const modalBoasVindas = <BoasVindasModal aberto={boasVindasPendente} onFechar={fecharBoasVindas} />
+
   if (nivelamentoAtivo) {
     return (
-      <NivelamentoPage
-        usuario={usuario}
-        onConcluir={(p) => {
-          setPerfil(p)
-          setNivelamentoAtivo(false)
-        }}
-      />
+      <>
+        <NivelamentoPage
+          usuario={usuario}
+          onConcluir={(p) => {
+            setPerfil(p)
+            setNivelamentoAtivo(false)
+          }}
+        />
+        {modalBoasVindas}
+      </>
     )
   }
 
@@ -84,32 +96,35 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
   )
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<AppLayout />}>
-          <Route path="/" element={conteudoJornada} />
-          <Route path="/fase/:nome" element={conteudoJornada} />
-          <Route path="/passo/:titulo" element={<PassoDetalhePage perfil={perfil} />} />
-          <Route path="/guias" element={<GuiasPage />} />
-          <Route path="/guias/:modulo" element={<GuiasPage />} />
-          <Route path="/fluxo/:titulo" element={<FluxoDetalhePage perfil={perfil} />} />
-          <Route path="/chat" element={<ChatPage />} />
-          <Route path="/perfil" element={<PerfilPage />} />
-          <Route
-            path="/gestor"
-            element={usuario.isGestor ? <GestorPage /> : <Navigate to="/" replace />}
-          />
-          <Route
-            path="/supervisionado/:id"
-            element={usuario.isGestor ? <SupervisionadoPage /> : <Navigate to="/" replace />}
-          />
-          <Route
-            path="/admin"
-            element={usuario.isGestor ? <AdminPage /> : <Navigate to="/" replace />}
-          />
-          <Route path="*" element={conteudoJornada} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<AppLayout />}>
+            <Route path="/" element={conteudoJornada} />
+            <Route path="/fase/:nome" element={conteudoJornada} />
+            <Route path="/passo/:titulo" element={<PassoDetalhePage perfil={perfil} />} />
+            <Route path="/guias" element={<GuiasPage />} />
+            <Route path="/guias/:modulo" element={<GuiasPage />} />
+            <Route path="/fluxo/:titulo" element={<FluxoDetalhePage perfil={perfil} />} />
+            <Route path="/chat" element={<ChatPage />} />
+            <Route path="/perfil" element={<PerfilPage />} />
+            <Route
+              path="/gestor"
+              element={usuario.isGestor ? <GestorPage /> : <Navigate to="/" replace />}
+            />
+            <Route
+              path="/supervisionado/:id"
+              element={usuario.isGestor ? <SupervisionadoPage /> : <Navigate to="/" replace />}
+            />
+            <Route
+              path="/admin"
+              element={usuario.isGestor ? <AdminPage /> : <Navigate to="/" replace />}
+            />
+            <Route path="*" element={conteudoJornada} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+      {modalBoasVindas}
+    </>
   )
 }
