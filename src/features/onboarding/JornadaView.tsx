@@ -407,10 +407,10 @@ export function JornadaView({
                   </span>
                 </div>
                 <Link
-                  to="/guias"
+                  to="/"
                   className="shrink-0 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400 sm:self-center"
                 >
-                  Ir pro Guia pelo sistema
+                  Ver visão geral da jornada
                 </Link>
               </>
             )}
