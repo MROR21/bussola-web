@@ -6,7 +6,9 @@ import { Icon } from '../components/Icon'
 import { MapCorners } from '../components/MapCorners'
 import { MapIllustration } from '../components/MapIllustration'
 import { Carregando } from '../components/Spinner'
+import { useSaidaValor } from '../hooks/useSaida'
 import { useTitulo } from '../hooks/useTitulo'
+import { cx } from '../utils/cx'
 import {
   adicionarSupervisionado,
   getDisponiveis,
@@ -24,6 +26,9 @@ export function GestorPage() {
   const [error, setError] = useState<string | null>(null)
   const [adicionando, setAdicionando] = useState(false)
   const [buscaDisponivel, setBuscaDisponivel] = useState('')
+  const [confirmandoRemover, setConfirmandoRemover] = useState<UsuarioProgresso | null>(null)
+  const [removendoId, setRemovendoId] = useState<string | null>(null)
+  const modalRemover = useSaidaValor(confirmandoRemover)
   const navegar = useNavigate()
 
   const disponiveisFiltrados = disponiveis.filter((u) => {
@@ -58,9 +63,21 @@ export function GestorPage() {
     await carregar()
   }
 
-  async function remover(id: string) {
-    await removerSupervisionado(id)
-    await carregar()
+  // Espera a animação de saída (`anim-pop-out`, 150ms) tocar antes de tirar de verdade da lista —
+  // senão o item some na hora, sem chance de animar.
+  async function confirmarRemocao() {
+    if (!confirmandoRemover) return
+    const alvo = confirmandoRemover
+    setConfirmandoRemover(null)
+    setRemovendoId(alvo.id)
+    setTimeout(async () => {
+      try {
+        await removerSupervisionado(alvo.id)
+        await carregar()
+      } finally {
+        setRemovendoId(null)
+      }
+    }, 150)
   }
 
   if (loading) return <Carregando texto="Carregando o painel..." />
@@ -95,7 +112,10 @@ export function GestorPage() {
             <li
               key={u.id}
               onClick={() => navegar(`/supervisionado/${u.id}`)}
-              className="flex cursor-pointer flex-col gap-2 rounded-xl border border-navy-700 bg-navy-800 p-4 transition-colors hover:border-gold-500/50"
+              className={cx(
+                'flex cursor-pointer flex-col gap-2 rounded-xl border border-navy-700 bg-navy-800 p-4 transition-colors hover:border-gold-500/50',
+                removendoId === u.id ? 'anim-pop-out' : 'anim-pop',
+              )}
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 flex-col">
@@ -110,7 +130,7 @@ export function GestorPage() {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation()
-                      remover(u.id)
+                      setConfirmandoRemover(u)
                     }}
                     className="text-sm text-neutral-500 transition-colors hover:text-red-400"
                   >
@@ -174,7 +194,7 @@ export function GestorPage() {
             {disponiveisFiltrados.map((u) => (
               <li
                 key={u.id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
+                className="anim-pop flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
               >
                 <div className="flex min-w-0 flex-col">
                   <span className="truncate text-neutral-100">{u.nome}</span>
@@ -193,6 +213,46 @@ export function GestorPage() {
           </div>
         )}
       </div>
+
+      {modalRemover.montado && modalRemover.valor && (
+        <div
+          className={cx(
+            'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
+            modalRemover.saindo ? 'anim-fade-out' : 'anim-fade',
+          )}
+          onClick={() => setConfirmandoRemover(null)}
+        >
+          <div
+            className={cx(
+              'flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6',
+              modalRemover.saindo ? 'anim-pop-out' : 'anim-pop',
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold text-neutral-100">Remover supervisionado?</h3>
+            <p className="text-sm text-neutral-400">
+              "{modalRemover.valor.nome}" deixa de ser supervisionado por você — o progresso dele
+              não é apagado, só o vínculo.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmandoRemover(null)}
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={confirmarRemocao}
+                className="rounded-lg bg-red-500/90 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-500"
+              >
+                Remover
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
