@@ -5,6 +5,7 @@ import { CompassRose } from '../components/CompassRose'
 import { Icon } from '../components/Icon'
 import { useAuthStore } from '../features/auth/authStore'
 import { listarFluxos } from '../features/fluxos/fluxosService'
+import type { Fluxo } from '../features/fluxos/types'
 import { NotificationBell } from '../features/notificacoes/NotificationBell'
 import { listarSteps } from '../features/onboarding/onboardingService'
 import { Avatar } from '../features/perfil/Avatar'
@@ -13,6 +14,10 @@ import { useSaida } from '../hooks/useSaida'
 import { cx } from '../utils/cx'
 
 const CHAVE_MENU_COLAPSADO = 'bussola-menu-colapsado'
+
+// Fluxo aberto pela Jornada sempre entra na fase "Conheça o sistema" (constante espelhando
+// `FaseConhecaOSistema` do back) — não precisa buscar nada extra pra saber qual galho destacar.
+const FASE_FLUXO_NA_JORNADA = 'Conheça o sistema'
 
 // Nomes distintos, na ordem de aparição (Set preserva ordem de inserção) — usado pra montar os
 // "galhos" da árvore (fases da Jornada, módulos do Guia) a partir do que o back já devolve
@@ -91,23 +96,42 @@ export function AppLayout() {
   // sem depender da página atual ter buscado isso (o menu é sempre visível).
   const [fases, setFases] = useState<string[]>([])
   const [modulos, setModulos] = useState<string[]>([])
+  const [todosFluxos, setTodosFluxos] = useState<Fluxo[]>([])
 
   useEffect(() => {
     listarSteps()
       .then((steps) => setFases(distintosEmOrdem(steps, (s) => s.phase)))
       .catch(() => {})
     listarFluxos()
-      .then((fluxos) => setModulos(distintosEmOrdem(fluxos, (f) => f.modulo)))
+      .then((fluxos) => {
+        setTodosFluxos(fluxos)
+        setModulos(distintosEmOrdem(fluxos, (f) => f.modulo))
+      })
       .catch(() => {})
   }, [])
+
+  // Um Fluxo pode ser aberto tanto de dentro de uma Fase (Jornada) quanto de um Módulo (Guias) — a
+  // mesma marcação `state.deFase` já usada pro botão Voltar (ver FluxoDetalhePage) diz de qual dos
+  // dois contextos o usuário veio, então o menu lateral consegue destacar a aba (e o galho) certos
+  // mesmo estando "fora" das rotas /fase ou /guias de verdade.
+  const emFluxo = location.pathname.startsWith('/fluxo/')
+  const veioDaFaseNoFluxo = Boolean((location.state as { deFase?: boolean } | null)?.deFase)
+  const tituloFluxoAtual = emFluxo
+    ? decodeURIComponent(location.pathname.slice('/fluxo/'.length))
+    : null
+  const moduloDoFluxoAtual = tituloFluxoAtual
+    ? todosFluxos.find((f) => f.titulo === tituloFluxoAtual)?.modulo
+    : undefined
 
   const [expandido, setExpandido] = useState<Record<string, boolean>>({})
 
   // A que seção da árvore uma rota pertence (ou nenhuma). Usado só pra saber quando o usuário
-  // ENTROU numa seção vindo de fora — não a cada navegação dentro dela.
-  const regiaoDe = (pathname: string): string | null => {
+  // ENTROU numa seção vindo de fora — não a cada navegação dentro dela. Um Fluxo entra na seção de
+  // onde ele foi aberto (`viaFase`), não sempre em Guias.
+  const regiaoDe = (pathname: string, viaFase: boolean): string | null => {
     if (pathname === '/' || pathname.startsWith('/fase')) return '/'
-    if (pathname.startsWith('/fluxo') || pathname.startsWith('/guias')) return '/guias'
+    if (pathname.startsWith('/fluxo')) return viaFase ? '/' : '/guias'
+    if (pathname.startsWith('/guias')) return '/guias'
     return null
   }
   const regiaoAnterior = useRef<string | null>(null)
@@ -117,13 +141,13 @@ export function AppLayout() {
   // e a lista de galhos empurrando o resto do menu na mesma hora). Quem quiser ver os galhos da
   // aba nova clica de novo, manualmente (ou na seta, ou na própria label).
   useEffect(() => {
-    const atual = regiaoDe(location.pathname)
+    const atual = regiaoDe(location.pathname, veioDaFaseNoFluxo)
     const anterior = regiaoAnterior.current
     if (anterior && anterior !== atual) {
       setExpandido((e) => ({ ...e, [anterior]: false }))
     }
     regiaoAnterior.current = atual
-  }, [location.pathname])
+  }, [location.pathname, veioDaFaseNoFluxo])
 
   return (
     <div className="relative flex h-screen overflow-hidden bg-navy-900 text-neutral-100">
@@ -162,6 +186,11 @@ export function AppLayout() {
           {itensMenu.map((item) => {
             const galhos = item.arvore === 'fase' ? fases : item.arvore === 'modulo' ? modulos : []
             const aberto = expandido[item.to] ?? false
+            // Dentro de um Fluxo não existe rota /fase ou /guias pra casar de verdade — força a
+            // aba de origem (Jornada ou Guias) como ativa, igual o usuário esperaria vendo a URL.
+            const ativoForcado =
+              (item.to === '/' && emFluxo && veioDaFaseNoFluxo) ||
+              (item.to === '/guias' && emFluxo && !veioDaFaseNoFluxo)
 
             return (
               <div key={item.to}>
@@ -187,7 +216,7 @@ export function AppLayout() {
                       cx(
                         'flex items-center rounded-lg text-sm transition-colors',
                         colapsado ? 'size-10 shrink-0 justify-center' : 'flex-1 gap-3 px-3 py-2',
-                        isActive
+                        isActive || ativoForcado
                           ? 'bg-gold-500/10 text-gold-400'
                           : 'text-neutral-400 hover:bg-navy-700 hover:text-neutral-200',
                       )
@@ -235,7 +264,16 @@ export function AppLayout() {
                         // módulo é sub-rota do próprio Guia) — não dá pra derivar só de `item.to`.
                         const base = item.arvore === 'fase' ? '/fase' : '/guias'
                         const linkTo = `${base}/${encodeURIComponent(nome)}`
-                        const ativo = location.pathname === linkTo
+                        const galhoForcado =
+                          (item.to === '/guias' &&
+                            emFluxo &&
+                            !veioDaFaseNoFluxo &&
+                            nome === moduloDoFluxoAtual) ||
+                          (item.to === '/' &&
+                            emFluxo &&
+                            veioDaFaseNoFluxo &&
+                            nome === FASE_FLUXO_NA_JORNADA)
+                        const ativo = location.pathname === linkTo || galhoForcado
                         return (
                           <li key={nome}>
                             <Link
