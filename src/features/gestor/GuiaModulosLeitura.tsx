@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from '../../components/Icon'
 import { MapCorners } from '../../components/MapCorners'
 import { cx } from '../../utils/cx'
@@ -24,6 +24,31 @@ export function GuiaModulosLeitura({ fluxos }: { fluxos: FluxoProgresso[] }) {
     if (moduloExpandido) setUltimoModuloVisto(moduloExpandido)
   }, [moduloExpandido])
 
+  // Mesma técnica da TrilhaFasesLeitura: trocar direto de um módulo aberto pra outro não animava
+  // nada (o grid já estava em 1fr dos dois lados). Fechando primeiro e só abrindo o novo depois dos
+  // 200ms da transição CSS, o efeito de "drop" acontece de novo a cada troca.
+  const trocaPendente = useRef<number | null>(null)
+  useEffect(() => () => {
+    if (trocaPendente.current !== null) window.clearTimeout(trocaPendente.current)
+  }, [])
+  function alternarModulo(modulo: string) {
+    if (trocaPendente.current !== null) {
+      window.clearTimeout(trocaPendente.current)
+      trocaPendente.current = null
+    }
+    if (moduloExpandido === modulo) {
+      setModuloExpandido(null)
+    } else if (moduloExpandido) {
+      setModuloExpandido(null)
+      trocaPendente.current = window.setTimeout(() => {
+        setModuloExpandido(modulo)
+        trocaPendente.current = null
+      }, 200)
+    } else {
+      setModuloExpandido(modulo)
+    }
+  }
+
   const porModulo = useMemo(() => {
     const grupos = new Map<string, FluxoProgresso[]>()
     for (const f of fluxos) {
@@ -47,7 +72,7 @@ export function GuiaModulosLeitura({ fluxos }: { fluxos: FluxoProgresso[] }) {
             <button
               key={modulo}
               type="button"
-              onClick={() => setModuloExpandido(expandido ? null : modulo)}
+              onClick={() => alternarModulo(modulo)}
               className={cx(
                 'relative flex flex-col gap-2 rounded-2xl border bg-navy-800 p-4 text-left transition-all duration-200 hover:-translate-y-0.5',
                 expandido ? 'border-gold-500/60' : 'border-navy-700 hover:border-gold-500/50',

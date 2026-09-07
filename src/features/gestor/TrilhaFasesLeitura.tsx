@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from '../../components/Icon'
 import { cx } from '../../utils/cx'
 import type { PassoProgresso } from './types'
@@ -31,6 +31,31 @@ export function TrilhaFasesLeitura({ passos }: { passos: PassoProgresso[] }) {
   useEffect(() => {
     if (faseExpandida) setUltimaFaseVista(faseExpandida)
   }, [faseExpandida])
+
+  // Trocar direto de uma fase aberta pra outra não animava nada — o grid já estava em 1fr dos dois
+  // lados, então o conteúdo só trocava na hora. Fechando primeiro (0fr) e só then abrindo a nova
+  // (depois dos mesmos 200ms da transição CSS), o efeito de "drop" acontece de novo a cada troca.
+  const trocaPendente = useRef<number | null>(null)
+  useEffect(() => () => {
+    if (trocaPendente.current !== null) window.clearTimeout(trocaPendente.current)
+  }, [])
+  function alternarFase(fase: string) {
+    if (trocaPendente.current !== null) {
+      window.clearTimeout(trocaPendente.current)
+      trocaPendente.current = null
+    }
+    if (faseExpandida === fase) {
+      setFaseExpandida(null)
+    } else if (faseExpandida) {
+      setFaseExpandida(null)
+      trocaPendente.current = window.setTimeout(() => {
+        setFaseExpandida(fase)
+        trocaPendente.current = null
+      }, 200)
+    } else {
+      setFaseExpandida(fase)
+    }
+  }
 
   const fases = useMemo(() => {
     const grupos = new Map<string, PassoProgresso[]>()
@@ -116,7 +141,7 @@ export function TrilhaFasesLeitura({ passos }: { passos: PassoProgresso[] }) {
             <button
               key={fase}
               type="button"
-              onClick={() => setFaseExpandida(expandida ? null : fase)}
+              onClick={() => alternarFase(fase)}
               className={cx(
                 'absolute flex w-[152px] -translate-x-1/2 flex-col items-center gap-2 transition-transform duration-200',
                 'hover:-translate-y-0.5',
