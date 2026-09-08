@@ -146,9 +146,10 @@ export function GestorPage() {
         <button
           type="button"
           onClick={() => setMostrarBoasVindas(true)}
-          className="self-start text-xs text-neutral-500 transition-colors hover:text-neutral-300"
+          title="Como funciona o Bússola?"
+          className="mt-1 flex w-fit items-center gap-1 rounded-full border border-gold-500/40 bg-navy-900/80 px-2.5 py-1 text-xs font-medium text-gold-400 backdrop-blur-sm transition-colors hover:border-gold-500/70 hover:text-gold-300"
         >
-          Como funciona o Bússola?
+          <Icon name="help" className="text-sm" /> Guia rápido
         </button>
       </header>
 
