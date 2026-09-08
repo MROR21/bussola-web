@@ -245,8 +245,9 @@ export function AcessosAdmin() {
                     Ordem
                     <input
                       type="number"
+                      min={1}
                       value={form.order}
-                      onChange={(e) => setForm({ ...form, order: Number(e.target.value) })}
+                      onChange={(e) => setForm({ ...form, order: Math.max(1, Number(e.target.value)) })}
                       className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                     />
                   </label>

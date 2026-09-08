@@ -289,8 +289,9 @@ export function SimpleEntityCrud({
               Ordem
               <input
                 type="number"
+                min={1}
                 value={order}
-                onChange={(e) => setOrder(Number(e.target.value))}
+                onChange={(e) => setOrder(Math.max(1, Number(e.target.value)))}
                 className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
               />
             </label>
