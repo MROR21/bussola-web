@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Acordeao } from '../../components/Acordeao'
 import { EstadoErro } from '../../components/EstadoErro'
 import { Icon } from '../../components/Icon'
 import { Carregando, Spinner } from '../../components/Spinner'
@@ -25,7 +24,6 @@ export function AcessosAdmin() {
   const [salvando, setSalvando] = useState(false)
   const [apagando, setApagando] = useState<AcessoAdmin | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
-  const [cargosAbertos, setCargosAbertos] = useState<Record<string, boolean>>({})
 
   const modalForm = useSaidaValor(form)
   const modalApagar = useSaidaValor(apagando)
@@ -107,11 +105,6 @@ export function AcessosAdmin() {
     }
   }
 
-  // Agrupa por Cargo mínimo — cumulativo por natureza (um acesso do Estagiário também vale pro
-  // Júnior/Pleno), mas aqui cada um aparece só uma vez, sob o cargo onde foi introduzido (mesma
-  // leitura de "a partir de qual cargo").
-  const porCargo = CARGOS.map((cargo) => [cargo, acessos.filter((a) => a.cargoMinimo === cargo)] as const)
-
   if (loading) return <Carregando texto="Carregando..." />
   if (error) return <EstadoErro onRetry={carregar} />
 
@@ -137,53 +130,45 @@ export function AcessosAdmin() {
 
       {acessos.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nenhum acesso cadastrado.</p>}
 
-      <div className="flex flex-col gap-3">
-        {porCargo.map(([cargo, itens]) =>
-          itens.length === 0 ? null : (
-            <Acordeao
-              key={cargo}
-              titulo={`A partir de ${CARGO_LABEL[cargo]}`}
-              contagem={itens.length}
-              aberto={cargosAbertos[cargo] ?? false}
-              onToggle={() => setCargosAbertos((c) => ({ ...c, [cargo]: !c[cargo] }))}
-            >
-              <ul className="flex flex-col gap-2">
-                {itens.map((a) => (
-                  <li
-                    key={a.id}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
-                  >
-                    <div className="flex min-w-0 flex-col">
-                      <span className="truncate text-neutral-100">{a.nome}</span>
-                      {a.link ? (
-                        <span className="truncate text-xs text-neutral-500">{a.link}</span>
-                      ) : (
-                        <span className="text-xs text-neutral-600">Sem link</span>
-                      )}
-                    </div>
-                    <div className="flex shrink-0 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => abrirEdicao(a)}
-                        className="text-sm text-gold-400 transition-colors hover:text-gold-300"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setApagando(a)}
-                        className="text-sm text-red-400 transition-colors hover:text-red-300"
-                      >
-                        Apagar
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </Acordeao>
-          ),
-        )}
-      </div>
+      {/* Lista solta, sem agrupar por cargo — o vínculo já fica definido no próprio acesso (campo
+          "Cargo mínimo" do form), então não precisa de mais um nível de organização visual por
+          cima disso. */}
+      <ul className="flex flex-col gap-2">
+        {acessos.map((a) => (
+          <li
+            key={a.id}
+            className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
+          >
+            <div className="flex min-w-0 flex-col">
+              <span className="truncate text-neutral-100">{a.nome}</span>
+              {a.link ? (
+                <span className="truncate text-xs text-neutral-500">{a.link}</span>
+              ) : (
+                <span className="text-xs text-neutral-600">Sem link</span>
+              )}
+            </div>
+            <div className="flex shrink-0 items-center gap-3">
+              <span className="rounded-full bg-navy-700 px-2 py-0.5 text-xs text-neutral-400">
+                A partir de {CARGO_LABEL[a.cargoMinimo]}
+              </span>
+              <button
+                type="button"
+                onClick={() => abrirEdicao(a)}
+                className="text-sm text-gold-400 transition-colors hover:text-gold-300"
+              >
+                Editar
+              </button>
+              <button
+                type="button"
+                onClick={() => setApagando(a)}
+                className="text-sm text-red-400 transition-colors hover:text-red-300"
+              >
+                Apagar
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
 
       {modalForm.montado && (
         <div
