@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { BoasVindasModal } from '../../components/BoasVindasModal'
 import { CompassRose } from '../../components/CompassRose'
 import { Icon } from '../../components/Icon'
 import { MapCorners } from '../../components/MapCorners'
@@ -9,7 +10,6 @@ import { useTitulo } from '../../hooks/useTitulo'
 import { cx } from '../../utils/cx'
 import { useAuthStore } from '../auth/authStore'
 import { getFluxosConcluidos } from '../fluxos/fluxosService'
-import { BoasVindasModal } from './BoasVindasModal'
 import { ProgressRing } from './ProgressRing'
 import { getProgresso } from './progressService'
 import type { TrailStep } from './types'
@@ -219,10 +219,19 @@ export function JornadaView({
 }) {
   const [passosConcluidos, setPassosConcluidos] = useState<Set<string>>(new Set())
   const [fluxosConcluidos, setFluxosConcluidos] = useState<Set<string>>(new Set())
-  // Só dispara depois do nivelamento, na primeira vez que a pessoa entra na Home da Jornada de
-  // verdade (não mais logo no cadastro/durante o nivelamento) — pedido explícito do Miguel.
-  const boasVindasPendente = useAuthStore((s) => s.boasVindasPendente)
-  const fecharBoasVindas = useAuthStore((s) => s.fecharBoasVindas)
+  // Dispara sozinho na 1ª vez que ESSE usuário entra na Home da Jornada (chaveado por id, não uma
+  // flag solta — ver comentário em authStore.ts) + pode ser reaberto a qualquer momento pelo botão
+  // "Como funciona o Bússola?" lá embaixo.
+  const jaViuBoasVindas = useAuthStore((s) => s.boasVindasVistas[userId]?.jornada)
+  const marcarBoasVindasVista = useAuthStore((s) => s.marcarBoasVindasVista)
+  const [mostrarBoasVindas, setMostrarBoasVindas] = useState(false)
+  useEffect(() => {
+    if (!jaViuBoasVindas) setMostrarBoasVindas(true)
+  }, [jaViuBoasVindas])
+  function fecharBoasVindas() {
+    setMostrarBoasVindas(false)
+    marcarBoasVindasVista(userId, 'jornada')
+  }
   // A fase aberta vive no PATH (/fase/:nome) — assim o "voltar" do navegador sai da fase
   // (em vez de sair da página), igual entrar/sair funcionasse por rota de verdade.
   const { nome: faseParam } = useParams<{ nome?: string }>()
@@ -471,7 +480,7 @@ export function JornadaView({
   // ---- Home: hero + próximo passo + cards das fases ----
   return (
     <div className="relative flex w-full max-w-2xl flex-col gap-8">
-      <BoasVindasModal aberto={boasVindasPendente} onFechar={fecharBoasVindas} />
+      <BoasVindasModal aberto={mostrarBoasVindas} onFechar={fecharBoasVindas} papel="colaborador" />
       {/* Atmosfera da página inteira — igual à técnica do hero (absoluto + DOM antes dos
           irmãos "opacos", sem z-index negativo): um `position:fixed` com z negativo parecia
           funcionar, mas quebrou quando o `AppLayout` ganhou `position:relative` lá em cima (o
@@ -646,13 +655,25 @@ export function JornadaView({
         </div>
       </section>
 
-      <button
-        type="button"
-        onClick={onRestart}
-        className="self-center text-sm text-neutral-500 transition-colors hover:text-neutral-300"
-      >
-        Refazer nivelamento
-      </button>
+      <div className="flex items-center justify-center gap-4">
+        <button
+          type="button"
+          onClick={() => setMostrarBoasVindas(true)}
+          className="text-sm text-neutral-500 transition-colors hover:text-neutral-300"
+        >
+          Como funciona o Bússola?
+        </button>
+        <span className="text-neutral-700" aria-hidden="true">
+          ·
+        </span>
+        <button
+          type="button"
+          onClick={onRestart}
+          className="text-sm text-neutral-500 transition-colors hover:text-neutral-300"
+        >
+          Refazer nivelamento
+        </button>
+      </div>
     </div>
   )
 }

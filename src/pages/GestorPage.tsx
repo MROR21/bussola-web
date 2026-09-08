@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { BoasVindasModal } from '../components/BoasVindasModal'
 import { CompassRose } from '../components/CompassRose'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
 import { MapCorners } from '../components/MapCorners'
 import { MapIllustration } from '../components/MapIllustration'
 import { Carregando } from '../components/Spinner'
+import { useAuthStore } from '../features/auth/authStore'
 import { usePolling } from '../hooks/useAtualizarEmSegundoPlano'
 import { useSaidaValor } from '../hooks/useSaida'
 import { useTitulo } from '../hooks/useTitulo'
@@ -21,6 +23,10 @@ import type { UsuarioDisponivel, UsuarioProgresso } from '../features/gestor/typ
 // Painel do gestor: progresso dos supervisionados + adicionar/remover supervisionados.
 export function GestorPage() {
   useTitulo('Supervisionados')
+  const usuarioLogado = useAuthStore((s) => s.usuario)
+  const jaViuBoasVindas = useAuthStore((s) => (usuarioLogado ? s.boasVindasVistas[usuarioLogado.id]?.supervisor : true))
+  const marcarBoasVindasVista = useAuthStore((s) => s.marcarBoasVindasVista)
+  const [mostrarBoasVindas, setMostrarBoasVindas] = useState(false)
   const [usuarios, setUsuarios] = useState<UsuarioProgresso[]>([])
   const [disponiveis, setDisponiveis] = useState<UsuarioDisponivel[]>([])
   const [loading, setLoading] = useState(true)
@@ -33,6 +39,14 @@ export function GestorPage() {
   const modalRemover = useSaidaValor(confirmandoRemover)
   const toastFeedback = useSaidaValor(feedback)
   const navegar = useNavigate()
+
+  useEffect(() => {
+    if (!jaViuBoasVindas) setMostrarBoasVindas(true)
+  }, [jaViuBoasVindas])
+  function fecharBoasVindas() {
+    setMostrarBoasVindas(false)
+    if (usuarioLogado) marcarBoasVindasVista(usuarioLogado.id, 'supervisor')
+  }
 
   const disponiveisFiltrados = disponiveis.filter((u) => {
     const q = buscaDisponivel.trim().toLowerCase()
@@ -117,6 +131,7 @@ export function GestorPage() {
 
   return (
     <div className="anim-fade relative flex w-full max-w-2xl flex-col gap-6">
+      <BoasVindasModal aberto={mostrarBoasVindas} onFechar={fecharBoasVindas} papel="gestor" />
       <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.06]" />
       <MapIllustration className="pointer-events-none absolute -bottom-6 -left-8 w-56 text-gold-500 opacity-[0.06]" />
       <header className="relative flex flex-col gap-1 self-start p-5">
@@ -128,6 +143,13 @@ export function GestorPage() {
           Progresso dos seus supervisionados ({usuarios.length}{' '}
           {usuarios.length === 1 ? 'pessoa' : 'pessoas'}).
         </p>
+        <button
+          type="button"
+          onClick={() => setMostrarBoasVindas(true)}
+          className="self-start text-xs text-neutral-500 transition-colors hover:text-neutral-300"
+        >
+          Como funciona o Bússola?
+        </button>
       </header>
 
       {usuarios.length === 0 && (
