@@ -505,6 +505,18 @@ export function JornadaView({
           aria-hidden="true"
         />
 
+        {/* Botão do "guiazinho" (reabre o modal de boas-vindas) — antes morava lá embaixo, perto do
+            "Refazer nivelamento", meio escondido no fim da página. Aqui no canto do hero é a
+            primeira coisa visível ao entrar na Jornada. */}
+        <button
+          type="button"
+          onClick={() => setMostrarBoasVindas(true)}
+          title="Como funciona o Bússola?"
+          className="absolute right-4 top-4 z-10 flex items-center gap-1 rounded-full border border-gold-500/40 bg-navy-900/80 px-2.5 py-1 text-xs font-medium text-gold-400 backdrop-blur-sm transition-colors hover:border-gold-500/70 hover:text-gold-300"
+        >
+          <Icon name="help" className="text-sm" /> Guia rápido
+        </button>
+
         <div className="relative flex items-center gap-5 p-6">
           <ProgressRing percent={percent} size={96}>
             <span className="text-xl font-bold text-neutral-100">{percent}%</span>
@@ -655,25 +667,13 @@ export function JornadaView({
         </div>
       </section>
 
-      <div className="flex items-center justify-center gap-4">
-        <button
-          type="button"
-          onClick={() => setMostrarBoasVindas(true)}
-          className="text-sm text-neutral-500 transition-colors hover:text-neutral-300"
-        >
-          Como funciona o Bússola?
-        </button>
-        <span className="text-neutral-700" aria-hidden="true">
-          ·
-        </span>
-        <button
-          type="button"
-          onClick={onRestart}
-          className="text-sm text-neutral-500 transition-colors hover:text-neutral-300"
-        >
-          Refazer nivelamento
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={onRestart}
+        className="self-center text-sm text-neutral-500 transition-colors hover:text-neutral-300"
+      >
+        Refazer nivelamento
+      </button>
     </div>
   )
 }
