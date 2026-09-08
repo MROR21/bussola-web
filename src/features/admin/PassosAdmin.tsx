@@ -170,7 +170,9 @@ export function PassosAdmin() {
               aberto={fasesAbertas[fase.id] ?? false}
               onToggle={() => setFasesAbertas((f) => ({ ...f, [fase.id]: !f[fase.id] }))}
             >
-              <ul className="flex flex-col gap-2">
+              {/* Acima de ~4 itens rola dentro de si mesmo em vez de esticar o dropdown inteiro —
+                  mesmo tratamento da lista de Usuários (index.css já cuida do visual da barra). */}
+              <ul className="flex max-h-[19rem] flex-col gap-2 overflow-y-auto pr-1">
                 {itens.map((p) => (
                   <li
                     key={p.id}

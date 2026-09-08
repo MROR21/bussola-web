@@ -187,8 +187,10 @@ export function GuiasAdmin() {
           if (totalTopico === 0) return null
           const modulosComItens = modulosDoTopico.filter(([, itens]) => itens.length > 0)
 
+          // Acima de ~4 itens rola dentro de si mesmo em vez de esticar o dropdown inteiro — mesmo
+          // tratamento da lista de Usuários (index.css já cuida do visual da barra).
           const listaItens = (itens: FluxoAdmin[]) => (
-            <ul className="flex flex-col gap-2">
+            <ul className="flex max-h-[19rem] flex-col gap-2 overflow-y-auto pr-1">
               {itens.map((f) => (
                 <li
                   key={f.id}

@@ -126,9 +126,9 @@ function ListaUsuarios() {
         className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500"
       />
 
-      {/* Acima de ~5 itens a lista rola DENTRO de si mesma (altura travada) em vez de esticar a
+      {/* Acima de ~4 itens a lista rola DENTRO de si mesma (altura travada) em vez de esticar a
           página inteira — a barra de rolagem personalizada (index.css) já cuida do visual. */}
-      <ul key={busca} className="anim-fade flex max-h-[28rem] flex-col gap-2 overflow-y-auto pr-1">
+      <ul key={busca} className="anim-fade flex max-h-[19rem] flex-col gap-2 overflow-y-auto pr-1">
         {itens.length > 0 && itensFiltrados.length === 0 && (
           <p className="anim-fade text-sm text-neutral-500">Nenhum usuário encontrado.</p>
         )}
@@ -389,9 +389,9 @@ function ListaEmailsAutorizados() {
         className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500"
       />
 
-      {/* Acima de ~5 itens a lista rola DENTRO de si mesma (altura travada) em vez de esticar a
+      {/* Acima de ~4 itens a lista rola DENTRO de si mesma (altura travada) em vez de esticar a
           página inteira — a barra de rolagem personalizada (index.css) já cuida do visual. */}
-      <ul key={busca} className="anim-fade flex max-h-[28rem] flex-col gap-2 overflow-y-auto pr-1">
+      <ul key={busca} className="anim-fade flex max-h-[19rem] flex-col gap-2 overflow-y-auto pr-1">
         {itens.length > 0 && itensFiltrados.length === 0 && (
           <p className="anim-fade text-sm text-neutral-500">Nenhum e-mail encontrado.</p>
         )}

@@ -154,7 +154,9 @@ export function AcessosAdmin() {
               aberto={gruposAbertos[cargo] ?? false}
               onToggle={() => setGruposAbertos((g) => ({ ...g, [cargo]: !g[cargo] }))}
             >
-              <ul className="flex flex-col gap-2">
+              {/* Acima de ~4 itens rola dentro de si mesmo em vez de esticar o dropdown inteiro —
+                  mesmo tratamento da lista de Usuários (index.css já cuida do visual da barra). */}
+              <ul className="flex max-h-[19rem] flex-col gap-2 overflow-y-auto pr-1">
                 {itens.map((a) => (
                   <li
                     key={a.id}
