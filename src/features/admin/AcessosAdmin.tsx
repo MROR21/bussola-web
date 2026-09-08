@@ -19,7 +19,7 @@ const CARGO_LABEL: Record<Cargo, string> = {
 // acesso com `cargoMinimo: 'Estagiario'` vale pra TODO MUNDO, então o grupo dele lê melhor como
 // "Todos" do que "A partir de Estagiário" (que soaria como se sobrasse alguém de fora).
 const GRUPO_LABEL: Record<Cargo, string> = {
-  Estagiario: 'Todos',
+  Estagiario: 'Para todos os cargos',
   Junior: 'A partir de Júnior',
   Pleno: 'A partir de Pleno',
 }

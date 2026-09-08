@@ -6,6 +6,7 @@ import { Icon } from '../../components/Icon'
 import { MapCorners } from '../../components/MapCorners'
 import { MapIllustration } from '../../components/MapIllustration'
 import { TrailDivider } from '../../components/TrailDivider'
+import { useRefetchOnFocus } from '../../hooks/useAtualizarEmSegundoPlano'
 import { useTitulo } from '../../hooks/useTitulo'
 import { cx } from '../../utils/cx'
 import { useAuthStore } from '../auth/authStore'
@@ -249,6 +250,13 @@ export function JornadaView({
     getFluxosConcluidos().then((ids) => setFluxosConcluidos(new Set(ids))).catch(() => {})
     getMeusAcessos(userId).then(setAcessos).catch(() => {})
   }, [userId])
+
+  // O gestor libera um acesso na tela do Supervisionado enquanto o colaborador já pode estar com a
+  // Jornada aberta — busca de novo, em silêncio, quando a aba volta a ficar em foco (mesmo padrão
+  // de JornadaPage.tsx pra trilha/fase editada pelo Admin).
+  useRefetchOnFocus(() => {
+    getMeusAcessos(userId).then(setAcessos).catch(() => {})
+  })
 
   const estaConcluido = (item: TrailStep) =>
     item.tipo === 'fluxo' ? fluxosConcluidos.has(item.id) : passosConcluidos.has(item.id)
