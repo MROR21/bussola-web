@@ -7,7 +7,9 @@ import { MapIllustration } from '../../components/MapIllustration'
 import { TrailDivider } from '../../components/TrailDivider'
 import { useTitulo } from '../../hooks/useTitulo'
 import { cx } from '../../utils/cx'
+import { useAuthStore } from '../auth/authStore'
 import { getFluxosConcluidos } from '../fluxos/fluxosService'
+import { BoasVindasModal } from './BoasVindasModal'
 import { ProgressRing } from './ProgressRing'
 import { getProgresso } from './progressService'
 import type { TrailStep } from './types'
@@ -217,6 +219,10 @@ export function JornadaView({
 }) {
   const [passosConcluidos, setPassosConcluidos] = useState<Set<string>>(new Set())
   const [fluxosConcluidos, setFluxosConcluidos] = useState<Set<string>>(new Set())
+  // Só dispara depois do nivelamento, na primeira vez que a pessoa entra na Home da Jornada de
+  // verdade (não mais logo no cadastro/durante o nivelamento) — pedido explícito do Miguel.
+  const boasVindasPendente = useAuthStore((s) => s.boasVindasPendente)
+  const fecharBoasVindas = useAuthStore((s) => s.fecharBoasVindas)
   // A fase aberta vive no PATH (/fase/:nome) — assim o "voltar" do navegador sai da fase
   // (em vez de sair da página), igual entrar/sair funcionasse por rota de verdade.
   const { nome: faseParam } = useParams<{ nome?: string }>()
@@ -465,6 +471,7 @@ export function JornadaView({
   // ---- Home: hero + próximo passo + cards das fases ----
   return (
     <div className="relative flex w-full max-w-2xl flex-col gap-8">
+      <BoasVindasModal aberto={boasVindasPendente} onFechar={fecharBoasVindas} />
       {/* Atmosfera da página inteira — igual à técnica do hero (absoluto + DOM antes dos
           irmãos "opacos", sem z-index negativo): um `position:fixed` com z negativo parecia
           funcionar, mas quebrou quando o `AppLayout` ganhou `position:relative` lá em cima (o
