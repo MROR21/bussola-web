@@ -136,6 +136,17 @@ export function GestorPage() {
       <MapIllustration className="pointer-events-none absolute -bottom-6 -left-8 w-56 text-gold-500 opacity-[0.06]" />
       <header className="relative flex flex-col gap-1 self-start p-5">
         <MapCorners tamanho={5} opacidade={25} />
+        {/* Mesmo canto do "guiazinho" da Jornada do supervisionado (canto superior direito do
+            cartão de destaque) — antes ficava solto embaixo do título, aqui fica consistente
+            entre as duas sessões. */}
+        <button
+          type="button"
+          onClick={() => setMostrarBoasVindas(true)}
+          title="Como funciona o Bússola?"
+          className="absolute right-4 top-4 z-10 flex items-center gap-1 rounded-full border border-gold-500/40 bg-navy-900/80 px-2.5 py-1 text-xs font-medium text-gold-400 backdrop-blur-sm transition-colors hover:border-gold-500/70 hover:text-gold-300"
+        >
+          <Icon name="help" className="text-sm" /> Guia rápido
+        </button>
         <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
           <Icon name="dashboard" className="text-2xl text-gold-400" /> Painel do gestor
         </h1>
@@ -143,14 +154,6 @@ export function GestorPage() {
           Progresso dos seus supervisionados ({usuarios.length}{' '}
           {usuarios.length === 1 ? 'pessoa' : 'pessoas'}).
         </p>
-        <button
-          type="button"
-          onClick={() => setMostrarBoasVindas(true)}
-          title="Como funciona o Bússola?"
-          className="mt-1 flex w-fit items-center gap-1 rounded-full border border-gold-500/40 bg-navy-900/80 px-2.5 py-1 text-xs font-medium text-gold-400 backdrop-blur-sm transition-colors hover:border-gold-500/70 hover:text-gold-300"
-        >
-          <Icon name="help" className="text-sm" /> Guia rápido
-        </button>
       </header>
 
       {usuarios.length === 0 && (
