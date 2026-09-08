@@ -30,6 +30,13 @@ export function Markdown({ children }: { children: string }) {
             {children}
           </blockquote>
         ),
+        img: ({ src, alt }) => (
+          <img
+            src={src}
+            alt={alt}
+            className="my-2 w-full rounded-xl border border-navy-700 shadow-lg shadow-black/20"
+          />
+        ),
       }}
     >
       {children}
