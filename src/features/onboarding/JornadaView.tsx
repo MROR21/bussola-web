@@ -10,8 +10,9 @@ import { useTitulo } from '../../hooks/useTitulo'
 import { cx } from '../../utils/cx'
 import { useAuthStore } from '../auth/authStore'
 import { getFluxosConcluidos } from '../fluxos/fluxosService'
+import type { AcessoProgresso } from '../gestor/types'
 import { ProgressRing } from './ProgressRing'
-import { getProgresso } from './progressService'
+import { getMeusAcessos, getProgresso } from './progressService'
 import type { TrailStep } from './types'
 
 // Ícone por fase (fallback genérico se aparecer uma fase nova).
@@ -219,6 +220,7 @@ export function JornadaView({
 }) {
   const [passosConcluidos, setPassosConcluidos] = useState<Set<string>>(new Set())
   const [fluxosConcluidos, setFluxosConcluidos] = useState<Set<string>>(new Set())
+  const [acessos, setAcessos] = useState<AcessoProgresso[]>([])
   // Dispara sozinho na 1ª vez que ESSE usuário entra na Home da Jornada (chaveado por id, não uma
   // flag solta — ver comentário em authStore.ts) + pode ser reaberto a qualquer momento pelo botão
   // "Como funciona o Bússola?" lá embaixo.
@@ -245,6 +247,7 @@ export function JornadaView({
   useEffect(() => {
     getProgresso(userId).then((ids) => setPassosConcluidos(new Set(ids))).catch(() => {})
     getFluxosConcluidos().then((ids) => setFluxosConcluidos(new Set(ids))).catch(() => {})
+    getMeusAcessos(userId).then(setAcessos).catch(() => {})
   }, [userId])
 
   const estaConcluido = (item: TrailStep) =>
@@ -582,6 +585,46 @@ export function JornadaView({
           )
         )}
       </div>
+
+      {/* Seus acessos — leitura só (quem marca é o gestor, na tela do Supervisionado). Sem isso o
+          modal de boas-vindas prometia "acompanhe seus acessos" sem nenhuma tela de verdade por
+          trás pro colaborador ver o próprio progresso de acesso. Só aparece se o Admin já tiver
+          algum Acesso cadastrado pro Cargo dessa pessoa. */}
+      {acessos.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+            Seus acessos
+          </h3>
+          <div className="relative flex flex-col gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-5">
+            <MapCorners tamanho={4} opacidade={20} />
+            <p className="text-sm text-neutral-400">
+              {acessos.filter((a) => a.concluido).length} de {acessos.length} liberados pelo seu
+              gestor.
+            </p>
+            <ul className="flex flex-wrap gap-2">
+              {acessos.map((a) => (
+                <li key={a.id} className="relative">
+                  <span
+                    className={cx(
+                      'flex items-center rounded-full border px-3 py-1 text-xs',
+                      a.concluido
+                        ? 'border-green-500/40 bg-green-500/10 text-green-300'
+                        : 'border-navy-600 bg-navy-900 text-neutral-400',
+                    )}
+                  >
+                    {a.nome}
+                  </span>
+                  {a.concluido && (
+                    <span className="pointer-events-none absolute -right-1.5 -top-1.5 flex size-4 items-center justify-center rounded-full bg-navy-800">
+                      <Icon name="verified" className="text-sm text-green-400" fill />
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
 
       {/* Trilha central — um caminho sinuoso ligando as fases, marco por marco (em vez de um
           grid de cards): o pedido foi um sentido de trilha literal, não uma lista disfarçada. */}

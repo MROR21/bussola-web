@@ -1,8 +1,16 @@
 import { apiGet, apiSend } from '../../services/api'
+import type { AcessoProgresso } from '../gestor/types'
 
 // Ids dos passos que o usuário já concluiu.
 export function getProgresso(userId: string): Promise<string[]> {
   return apiGet<string[]>(`/users/${userId}/progress`)
+}
+
+// Os PRÓPRIOS acessos do colaborador — leitura só, quem marca é o gestor (ver
+// SupervisionadoPage.tsx). Mesmo formato de GET /gestor/usuarios/{id}/acessos, só que
+// auto-escopado pelo token (o back confere `sub === id`).
+export function getMeusAcessos(userId: string): Promise<AcessoProgresso[]> {
+  return apiGet<AcessoProgresso[]>(`/users/${userId}/acessos`)
 }
 
 // Comprovação de um passo (pra pré-preencher a tela do passo).
