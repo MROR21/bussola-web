@@ -356,7 +356,12 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
             </div>
           )}
           <div className="flex flex-col gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed">
-            <Markdown>{step.conteudo}</Markdown>
+            {/* Conteúdo rola dentro de si mesmo (altura travada) — passos com várias imagens
+                (Ambientação) ficavam gigantes, empurrando concluir/desmarcar lá pro fundo da
+                página. A barra de rolagem personalizada (index.css) já cobre o visual. */}
+            <div className="max-h-[32rem] overflow-y-auto pr-1">
+              <Markdown>{step.conteudo}</Markdown>
+            </div>
 
             {/* Concluir/desmarcar mora no MESMO container da descrição — não é mais uma caixa à
                 parte só pra isso. */}
