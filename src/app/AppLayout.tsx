@@ -112,9 +112,18 @@ export function AppLayout() {
   // Colaborador não tem nada pra "escolher" em Configurações (só Perfil existe pra ele — Chaves de
   // API é só do gestor) — vira link direto pro Perfil, sem seta/dropdown, visão antiga de antes da
   // árvore existir. Gestor continua com a árvore de verdade (Perfil + Chaves de API).
-  const itensMenu = NAV.filter((item) => !item.papel || (item.papel === 'gestor' ? isGestor : !isGestor)).map(
-    (item) => (item.to === '/configuracoes' && !isGestor ? { ...item, to: '/perfil', filhosFixos: false } : item),
-  )
+  const itensMenuBase = NAV.filter(
+    (item) => !item.papel || (item.papel === 'gestor' ? isGestor : !isGestor),
+  ).map((item) => (item.to === '/configuracoes' && !isGestor ? { ...item, to: '/perfil', filhosFixos: false } : item))
+  // Ordem pedida é diferente por papel (gestor: Configurações antes de Admin; colaborador:
+  // Configurações por último) — não dá pra resolver só filtrando o array base (mesma posição pros
+  // dois), então o colaborador reordena essa 1 entrada pro fim depois do filtro.
+  const itensMenu = isGestor
+    ? itensMenuBase
+    : [
+        ...itensMenuBase.filter((item) => item.label !== 'Configurações'),
+        ...itensMenuBase.filter((item) => item.label === 'Configurações'),
+      ]
 
   // Galhos da árvore: nomes de fase/módulo, na ordem que o back já devolve — carregados uma vez,
   // sem depender da página atual ter buscado isso (o menu é sempre visível).
