@@ -60,7 +60,7 @@ const NAV: { to: string; label: string; icon: ReactNode; end: boolean; papel?: P
   { to: '/guias', label: 'Guias', icon: <Icon name="menu_book" className="text-[18px]" />, end: false, arvore: 'modulo' },
   { to: '/chat', label: 'Assistente', icon: <Icon name="chat" className="text-[18px]" />, end: false },
   { to: '/admin', label: 'Admin', icon: <Icon name="build" className="text-[18px]" />, end: false, papel: 'gestor' },
-  { to: '/perfil', label: 'Perfil', icon: <Icon name="settings" className="text-[18px]" />, end: false },
+  { to: '/perfil', label: 'Configurações', icon: <Icon name="settings" className="text-[18px]" />, end: false },
 ]
 
 // Casca do app (logado): menu lateral fixo + header + área de conteúdo que troca por rota.
