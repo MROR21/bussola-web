@@ -336,17 +336,16 @@ export function AppLayout() {
                     end={item.end}
                     title={colapsado ? item.label : undefined}
                     onClick={
-                      galhos.length > 0 && !colapsado
-                        ? () => setExpandido((e) => ({ ...e, [item.to]: !aberto }))
-                        : undefined
-                    }
-                    onDoubleClick={
                       colapsado
                         ? () => {
+                            // Clicar num ícone com o menu encolhido expande ele — e se o item tem
+                            // árvore, já abre ela junto (não precisa de um 2º clique depois).
                             setColapsado(false)
                             if (galhos.length > 0) setExpandido((e) => ({ ...e, [item.to]: true }))
                           }
-                        : undefined
+                        : galhos.length > 0
+                          ? () => setExpandido((e) => ({ ...e, [item.to]: !aberto }))
+                          : undefined
                     }
                     className={({ isActive }) =>
                       cx(
