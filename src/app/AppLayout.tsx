@@ -68,9 +68,9 @@ const NAV: {
   { to: '/gestor', label: 'Supervisionados', icon: <Icon name="group" className="text-[18px]" />, end: false, papel: 'gestor' },
   { to: '/', label: 'Jornada', icon: <TrilhaIcon />, end: true, papel: 'colaborador', arvore: 'fase' },
   { to: '/guias', label: 'Guias', icon: <Icon name="menu_book" className="text-[18px]" />, end: false, arvore: 'modulo' },
-  { to: '/chat', label: 'Assistente', icon: <Icon name="chat" className="text-[18px]" />, end: false },
   { to: '/admin', label: 'Admin', icon: <Icon name="build" className="text-[18px]" />, end: false, papel: 'gestor' },
   { to: '/configuracoes', label: 'Configurações', icon: <Icon name="settings" className="text-[18px]" />, end: false, filhosFixos: true },
+  { to: '/chat', label: 'Assistente', icon: <Icon name="chat" className="text-[18px]" />, end: false },
 ]
 
 // Filhos fixos de "Configurações" — "Chaves de API" só existe pro gestor (mesmo gate do back, ver
