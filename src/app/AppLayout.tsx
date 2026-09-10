@@ -53,15 +53,34 @@ function TrilhaIcon() {
 
 type Papel = 'gestor' | 'colaborador'
 // `arvore` diz que tipo de galho essa seção tem (fase ou módulo) — usado só pra escolher a lista
-// certa (`fases`/`modulos`) e a base do path (/fase ou /guias) na hora de montar o link.
-const NAV: { to: string; label: string; icon: ReactNode; end: boolean; papel?: Papel; arvore?: 'fase' | 'modulo' }[] = [
+// certa (`fases`/`modulos`) e a base do path (/fase ou /guias) na hora de montar o link. Item com
+// `filhosFixos: true` (só "Configurações" hoje) tem galhos ESTÁTICOS (`CONFIG_FILHOS` abaixo), não
+// vindos do back — mesmo comportamento de expandir/colapsar, fonte diferente.
+const NAV: {
+  to: string
+  label: string
+  icon: ReactNode
+  end: boolean
+  papel?: Papel
+  arvore?: 'fase' | 'modulo'
+  filhosFixos?: boolean
+}[] = [
   { to: '/gestor', label: 'Supervisionados', icon: <Icon name="group" className="text-[18px]" />, end: false, papel: 'gestor' },
   { to: '/', label: 'Jornada', icon: <TrilhaIcon />, end: true, papel: 'colaborador', arvore: 'fase' },
   { to: '/guias', label: 'Guias', icon: <Icon name="menu_book" className="text-[18px]" />, end: false, arvore: 'modulo' },
   { to: '/chat', label: 'Assistente', icon: <Icon name="chat" className="text-[18px]" />, end: false },
   { to: '/admin', label: 'Admin', icon: <Icon name="build" className="text-[18px]" />, end: false, papel: 'gestor' },
-  { to: '/perfil', label: 'Configurações', icon: <Icon name="settings" className="text-[18px]" />, end: false },
+  { to: '/configuracoes', label: 'Configurações', icon: <Icon name="settings" className="text-[18px]" />, end: false, filhosFixos: true },
 ]
+
+// Filhos fixos de "Configurações" — "Chaves de API" só existe pro gestor (mesmo gate do back, ver
+// Program.cs `/perfil/api-tokens` + a rota `/configuracoes/chaves` em SessaoAutenticada.tsx).
+const CONFIG_FILHOS: { to: string; label: string; soGestor?: boolean }[] = [
+  { to: '/perfil', label: 'Perfil' },
+  { to: '/configuracoes/chaves', label: 'Chaves de API', soGestor: true },
+]
+
+type Galho = { chave: string; label: string; linkTo: string }
 
 // Casca do app (logado): menu lateral fixo + header + área de conteúdo que troca por rota.
 export function AppLayout() {
@@ -273,14 +292,29 @@ export function AppLayout() {
             "fora da área visível" e fazia o navegador desenhar uma barra de rolagem à toa. */}
         <nav className="flex w-full min-h-0 flex-1 flex-col gap-1 overflow-y-auto overflow-x-hidden">
           {itensMenu.map((item) => {
-            const galhos = !arvoreCarregada ? [] : item.arvore === 'fase' ? fases : item.arvore === 'modulo' ? modulos : []
+            const galhos: Galho[] = item.filhosFixos
+              ? CONFIG_FILHOS.filter((f) => !f.soGestor || isGestor).map((f) => ({
+                  chave: `config:${f.to}`,
+                  label: f.label,
+                  linkTo: f.to,
+                }))
+              : !arvoreCarregada
+                ? []
+                : (item.arvore === 'fase' ? fases : item.arvore === 'modulo' ? modulos : []).map((nome) => ({
+                    chave: `${item.arvore}:${nome}`,
+                    label: nome,
+                    linkTo: `${item.arvore === 'fase' ? '/fase' : '/guias'}/${encodeURIComponent(nome)}`,
+                  }))
             const aberto = expandido[item.to] ?? false
             // Dentro de um Fluxo não existe rota /fase ou /guias pra casar de verdade — força a
             // aba de origem (Jornada ou Guias) como ativa, igual o usuário esperaria vendo a URL.
+            // "Perfil" também não fica sob /configuracoes de verdade — mesma ideia, força o galho
+            // pai a marcar ativo mesmo com a URL "fora" da árvore.
             const ativoForcado =
               (item.to === '/' && ((emFluxo && veioDaFaseNoFluxo) || emFase || emPasso)) ||
               (item.to === '/guias' && emFluxo && !veioDaFaseNoFluxo) ||
-              (item.to === '/gestor' && emSupervisionado)
+              (item.to === '/gestor' && emSupervisionado) ||
+              (item.to === '/configuracoes' && location.pathname === '/perfil')
 
             return (
               <div key={item.to}>
@@ -349,33 +383,28 @@ export function AppLayout() {
                     )}
                   >
                     <ul className="flex flex-col gap-0.5 overflow-hidden py-1">
-                      {galhos.map((nome) => {
-                        // Fase e Módulo têm bases de path diferentes (fase vive fora da Jornada,
-                        // módulo é sub-rota do próprio Guia) — não dá pra derivar só de `item.to`.
-                        const base = item.arvore === 'fase' ? '/fase' : '/guias'
-                        const linkTo = `${base}/${encodeURIComponent(nome)}`
+                      {galhos.map((galho) => {
                         const galhoForcado =
                           (item.to === '/guias' &&
                             emFluxo &&
                             !veioDaFaseNoFluxo &&
-                            nome === moduloDoFluxoAtual) ||
+                            galho.label === moduloDoFluxoAtual) ||
                           (item.to === '/' &&
                             emFluxo &&
                             veioDaFaseNoFluxo &&
-                            nome === FASE_FLUXO_NA_JORNADA) ||
-                          (item.to === '/' && emPasso && nome === faseDoPassoAtual)
-                        const ativo = location.pathname === linkTo || galhoForcado
-                        const chaveGalho = `${item.arvore}:${nome}`
+                            galho.label === FASE_FLUXO_NA_JORNADA) ||
+                          (item.to === '/' && emPasso && galho.label === faseDoPassoAtual)
+                        const ativo = location.pathname === galho.linkTo || galhoForcado
                         return (
                           <li
-                            key={nome}
+                            key={galho.chave}
                             ref={(el) => {
-                              if (el) refsGalhos.current.set(chaveGalho, el)
-                              else refsGalhos.current.delete(chaveGalho)
+                              if (el) refsGalhos.current.set(galho.chave, el)
+                              else refsGalhos.current.delete(galho.chave)
                             }}
                           >
                             <Link
-                              to={linkTo}
+                              to={galho.linkTo}
                               className={cx(
                                 'block truncate rounded-lg px-2 py-1 text-xs transition-colors',
                                 ativo
@@ -383,7 +412,7 @@ export function AppLayout() {
                                   : 'text-neutral-500 hover:text-neutral-200',
                               )}
                             >
-                              {nome}
+                              {galho.label}
                             </Link>
                           </li>
                         )

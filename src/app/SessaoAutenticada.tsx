@@ -8,6 +8,8 @@ import type { Perfil } from '../features/nivelamento/types'
 import { AppLayout } from './AppLayout'
 import { AdminPage } from '../pages/AdminPage'
 import { ChatPage } from '../pages/ChatPage'
+import { ChavesApiPage } from '../pages/ChavesApiPage'
+import { ConfiguracoesPage } from '../pages/ConfiguracoesPage'
 import { FluxoDetalhePage } from '../pages/FluxoDetalhePage'
 import { GestorPage } from '../pages/GestorPage'
 import { GuiasPage } from '../pages/GuiasPage'
@@ -98,6 +100,11 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
           <Route path="/fluxo/:titulo" element={<FluxoDetalhePage perfil={perfil} />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/perfil" element={<PerfilPage />} />
+          <Route path="/configuracoes" element={<ConfiguracoesPage />} />
+          <Route
+            path="/configuracoes/chaves"
+            element={usuario.isGestor ? <ChavesApiPage /> : <Navigate to="/configuracoes" replace />}
+          />
           <Route
             path="/gestor"
             element={usuario.isGestor ? <GestorPage /> : <Navigate to="/" replace />}

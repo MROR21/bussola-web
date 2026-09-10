@@ -10,15 +10,7 @@ import { useAuthStore } from '../features/auth/authStore'
 import { useTitulo } from '../hooks/useTitulo'
 import { Avatar } from '../features/perfil/Avatar'
 import { lerImagemReduzida } from '../features/perfil/imagem'
-import {
-  criarApiToken,
-  listarApiTokens,
-  revogarApiToken,
-  trocarEmail,
-  trocarFoto,
-  trocarSenha,
-} from '../features/perfil/perfilService'
-import type { ApiToken, ApiTokenCriado } from '../features/perfil/types'
+import { trocarEmail, trocarFoto, trocarSenha } from '../features/perfil/perfilService'
 import type { Cargo, Squad } from '../features/nivelamento/types'
 import { useTemaStore, type Tema } from '../features/tema/temaStore'
 
@@ -34,7 +26,7 @@ const CARGO_LABEL: Record<Cargo, string> = {
 }
 
 export function PerfilPage() {
-  useTitulo('Configurações')
+  useTitulo('Perfil')
   const usuario = useAuthStore((s) => s.usuario)
   const atualizarUsuario = useAuthStore((s) => s.atualizarUsuario)
   const tema = useTemaStore((s) => s.tema)
@@ -58,38 +50,11 @@ export function PerfilPage() {
   const [confirmandoRemover, setConfirmandoRemover] = useState(false)
   const modalRemover = useSaida(confirmandoRemover)
 
-  // Tokens de API (chamar o Bússola de fora, sem logar — mesmo acesso do usuário).
-  const [tokens, setTokens] = useState<ApiToken[]>([])
-  const [carregandoTokens, setCarregandoTokens] = useState(true)
-  const [nomeNovoToken, setNomeNovoToken] = useState('')
-  const [gerandoToken, setGerandoToken] = useState(false)
-  // Só existe entre gerar e a pessoa sair da tela/fechar — o back nunca devolve o valor de novo.
-  const [tokenGerado, setTokenGerado] = useState<ApiTokenCriado | null>(null)
-  const [copiado, setCopiado] = useState(false)
-  const [confirmandoRevogar, setConfirmandoRevogar] = useState<ApiToken | null>(null)
-  const [revogandoId, setRevogandoId] = useState<string | null>(null)
-  const modalRevogar = useSaidaValor(confirmandoRevogar)
-
   useEffect(() => {
     if (!feedback) return
     const t = setTimeout(() => setFeedback(null), 3000)
     return () => clearTimeout(t)
   }, [feedback])
-
-  useEffect(() => {
-    listarApiTokens()
-      .then(setTokens)
-      .catch(() => {
-        // silencioso — a lista só não aparece dessa vez, o resto da tela continua usável
-      })
-      .finally(() => setCarregandoTokens(false))
-  }, [])
-
-  useEffect(() => {
-    if (!copiado) return
-    const t = setTimeout(() => setCopiado(false), 2000)
-    return () => clearTimeout(t)
-  }, [copiado])
 
   if (!usuario) return null
 
@@ -155,47 +120,6 @@ export function PerfilPage() {
     }
   }
 
-  async function onGerarToken(e: React.FormEvent) {
-    e.preventDefault()
-    if (!nomeNovoToken.trim()) return
-    setGerandoToken(true)
-    try {
-      const criado = await criarApiToken(nomeNovoToken.trim())
-      setTokenGerado(criado)
-      setNomeNovoToken('')
-      setTokens((t) => [{ id: criado.id, nome: criado.nome, criadoEm: criado.criadoEm, ultimoUsoEm: null }, ...t])
-    } catch (err) {
-      setFeedback({ texto: err instanceof Error ? err.message : 'Erro ao gerar o token.', ok: false })
-    } finally {
-      setGerandoToken(false)
-    }
-  }
-
-  async function onCopiarToken() {
-    if (!tokenGerado) return
-    try {
-      await navigator.clipboard.writeText(tokenGerado.token)
-      setCopiado(true)
-    } catch {
-      // sem permissão de clipboard — a pessoa ainda pode selecionar o texto na mão
-    }
-  }
-
-  async function onConfirmarRevogar() {
-    if (!confirmandoRevogar) return
-    const alvo = confirmandoRevogar
-    setConfirmandoRevogar(null)
-    setRevogandoId(alvo.id)
-    try {
-      await revogarApiToken(alvo.id)
-      setTokens((t) => t.filter((tok) => tok.id !== alvo.id))
-    } catch (err) {
-      setFeedback({ texto: err instanceof Error ? err.message : 'Erro ao revogar o token.', ok: false })
-    } finally {
-      setRevogandoId(null)
-    }
-  }
-
   const emailMudou = email.trim() !== '' && email.trim() !== usuario.email
   const senhaValida =
     senhaAtual !== '' && novaSenha.length >= 6 && novaSenha === confirmar
@@ -213,9 +137,9 @@ export function PerfilPage() {
       <header className="relative flex flex-col gap-1 self-start p-5">
         <MapCorners tamanho={5} opacidade={25} />
         <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
-          <Icon name="settings" className="text-2xl text-gold-400" /> Configurações
+          <Icon name="settings" className="text-2xl text-gold-400" /> Perfil
         </h1>
-        <p className="text-sm text-neutral-400">Sua conta, foto, senha e tokens de API.</p>
+        <p className="text-sm text-neutral-400">Sua conta, foto e senha.</p>
       </header>
 
       {/* Cartão de identidade + foto */}
@@ -393,149 +317,6 @@ export function PerfilPage() {
           )}
         </button>
       </form>
-
-      {/* Tokens de API */}
-      <section className={cardCls}>
-        <div className="flex flex-col gap-1">
-          <h2 className="text-base font-semibold text-neutral-100">Tokens de API</h2>
-          <p className="text-sm text-neutral-400">
-            Chame o Bússola de fora (scripts, automações) com um token no lugar da sua senha —
-            mesmo acesso que você já tem logado.
-          </p>
-        </div>
-
-        {tokenGerado && (
-          <div className="anim-pop flex flex-col gap-2 rounded-xl border border-gold-500/40 bg-gold-500/10 p-4">
-            <p className="flex items-center gap-1.5 text-sm text-gold-300">
-              <Icon name="warning" className="text-base" /> Copie agora — esse valor não aparece
-              de novo.
-            </p>
-            <div className="flex items-center gap-2">
-              <code className="min-w-0 flex-1 select-all break-all rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-xs text-neutral-100">
-                {tokenGerado.token}
-              </code>
-              <button
-                type="button"
-                onClick={onCopiarToken}
-                className="flex shrink-0 items-center gap-1.5 rounded-lg border border-navy-600 px-3 py-2 text-sm text-neutral-200 transition-colors hover:bg-navy-700"
-              >
-                <Icon name={copiado ? 'check' : 'content_copy'} className="text-base" />
-                {copiado ? 'Copiado' : 'Copiar'}
-              </button>
-            </div>
-            <button
-              type="button"
-              onClick={() => setTokenGerado(null)}
-              className="self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
-            >
-              Já copiei, fechar
-            </button>
-          </div>
-        )}
-
-        <form
-          className="flex flex-wrap items-end gap-2"
-          onSubmit={onGerarToken}
-        >
-          <label className="flex min-w-40 flex-1 flex-col gap-1.5 text-sm">
-            <span className="text-neutral-300">Nome</span>
-            <input
-              value={nomeNovoToken}
-              onChange={(e) => setNomeNovoToken(e.target.value)}
-              placeholder="Ex.: Claude Code"
-              className={inputCls}
-            />
-          </label>
-          <button
-            type="submit"
-            disabled={!nomeNovoToken.trim() || gerandoToken}
-            className={cx(salvarCls, 'mb-0')}
-          >
-            {gerandoToken ? (
-              <>
-                <Spinner /> Gerando...
-              </>
-            ) : (
-              'Gerar token'
-            )}
-          </button>
-        </form>
-
-        {carregandoTokens ? (
-          <p className="text-sm text-neutral-500">Carregando...</p>
-        ) : tokens.length === 0 ? (
-          <p className="text-sm text-neutral-500">Nenhum token gerado ainda.</p>
-        ) : (
-          <ul className="flex max-h-[19rem] flex-col gap-2 overflow-y-auto pr-1">
-            {tokens.map((t) => (
-              <li
-                key={t.id}
-                className={cx(
-                  'flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3',
-                  revogandoId === t.id ? 'anim-pop-out' : 'anim-pop',
-                )}
-              >
-                <div className="flex min-w-0 flex-col">
-                  <span className="truncate text-neutral-100">{t.nome}</span>
-                  <span className="text-xs text-neutral-500">
-                    Criado em {new Date(t.criadoEm).toLocaleDateString('pt-BR')}
-                    {t.ultimoUsoEm
-                      ? ` · último uso em ${new Date(t.ultimoUsoEm).toLocaleDateString('pt-BR')}`
-                      : ' · nunca usado'}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setConfirmandoRevogar(t)}
-                  className="shrink-0 text-sm text-neutral-500 transition-colors hover:text-red-400"
-                >
-                  Revogar
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {modalRevogar.montado && modalRevogar.valor && (
-        <div
-          className={cx(
-            'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
-            modalRevogar.saindo ? 'anim-fade-out' : 'anim-fade',
-          )}
-          onClick={() => setConfirmandoRevogar(null)}
-        >
-          <div
-            className={cx(
-              'flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6',
-              modalRevogar.saindo ? 'anim-pop-out' : 'anim-pop',
-            )}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-lg font-semibold text-neutral-100">Revogar token?</h3>
-            <p className="text-sm text-neutral-400">
-              "{modalRevogar.valor.nome}" para de funcionar imediatamente — quem usava esse token
-              perde o acesso.
-            </p>
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setConfirmandoRevogar(null)}
-                className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={onConfirmarRevogar}
-                className="rounded-lg bg-red-500/90 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-500"
-              >
-                Revogar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {toastFeedback.montado && toastFeedback.valor && (
         <div
