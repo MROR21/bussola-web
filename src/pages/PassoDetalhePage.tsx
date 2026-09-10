@@ -8,7 +8,7 @@ import { MapIllustration } from '../components/MapIllustration'
 import { Markdown } from '../components/Markdown'
 import { MarkdownEditor } from '../components/MarkdownEditor'
 import { Carregando, Spinner } from '../components/Spinner'
-import { useRefetchOnFocus } from '../hooks/useAtualizarEmSegundoPlano'
+import { usePolling, useRefetchOnFocus } from '../hooks/useAtualizarEmSegundoPlano'
 import { useSaida, useSaidaValor } from '../hooks/useSaida'
 import { cx } from '../utils/cx'
 import { paraEmbed } from '../utils/video'
@@ -22,6 +22,7 @@ import {
   concluirPasso,
   desmarcarPasso,
   getComprovacao,
+  marcarCorrigido,
 } from '../features/onboarding/progressService'
 import type { OnboardingStep } from '../features/onboarding/types'
 import { hrefDoTrailItem, useTrailNavegacao } from '../features/onboarding/useTrailNavegacao'
@@ -29,6 +30,31 @@ import type { Perfil } from '../features/nivelamento/types'
 
 const inputCls =
   'rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500'
+
+// Rascunho da comprovação no localStorage — sobrevive a navegar pra outro passo/fase e voltar (ou
+// até fechar e abrir o navegador de novo), pra não perder o que a pessoa já tinha colado só por
+// sair da tela ou cancelar o envio. Só é lido/escrito enquanto o passo ainda não foi concluído de
+// verdade (ver efeitos abaixo); some sozinho assim que o envio é confirmado com sucesso.
+function chaveRascunho(usuarioId: string, stepId: string) {
+  return `bussola:rascunho-comprovacao:${usuarioId}:${stepId}`
+}
+
+function lerRascunho(usuarioId: string, stepId: string): string | null {
+  try {
+    return localStorage.getItem(chaveRascunho(usuarioId, stepId))
+  } catch {
+    return null
+  }
+}
+
+function salvarRascunho(usuarioId: string, stepId: string, texto: string) {
+  try {
+    if (texto) localStorage.setItem(chaveRascunho(usuarioId, stepId), texto)
+    else localStorage.removeItem(chaveRascunho(usuarioId, stepId))
+  } catch {
+    // sem storage disponível (ex.: aba privada) — só não persiste, sem quebrar a tela
+  }
+}
 
 // Mostra a evidência: se for um link (http), vira âncora clicável; senão, texto puro.
 function Comprovacao({ texto }: { texto: string }) {
@@ -48,27 +74,38 @@ function Comprovacao({ texto }: { texto: string }) {
 }
 
 // Página de um passo (rota /passo/:titulo): conteúdo em Markdown + concluir com comprovação opcional.
-export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
+export function PassoDetalhePage({
+  perfil,
+  gestorNome,
+}: {
+  perfil: Perfil | null
+  gestorNome?: string | null
+}) {
   const { titulo: tituloParam = '' } = useParams()
   const navigate = useNavigate()
   const usuario = useAuthStore((state) => state.usuario)
   const isGestor = usuario?.isGestor ?? false
-  const { anterior, proximo, faseDoItem, faseTerminada, ultimoItemDaTrilha } = useTrailNavegacao(
-    perfil,
-    tituloParam,
-  )
+  const { carregandoTrilha, anterior, proximo, faseDoItem, faseTerminada, ultimoItemDaTrilha } =
+    useTrailNavegacao(perfil, tituloParam)
 
   const [step, setStep] = useState<OnboardingStep | null>(null)
   const [concluido, setConcluido] = useState(false)
   const [evidencia, setEvidencia] = useState('')
-  const [editando, setEditando] = useState(false)
+  const [precisaCorrecao, setPrecisaCorrecao] = useState(false)
+  const [qtdCorrecoes, setQtdCorrecoes] = useState(0)
+  const [aguardandoConfirmacao, setAguardandoConfirmacao] = useState(false)
+  const [marcandoCorrigido, setMarcandoCorrigido] = useState(false)
   const [salvando, setSalvando] = useState(false)
+  const [confirmandoCancelar, setConfirmandoCancelar] = useState(false)
+  // Colapsa o container colorido (grid-rows 1fr→0fr) ANTES de cancelar de fato — sem isso o box
+  // simplesmente sumia seco assim que a chamada terminava, sem nenhuma transição visível.
+  const [colapsandoCancelamento, setColapsandoCancelamento] = useState(false)
+  const { montado: modalCancelarMontado, saindo: modalCancelarSaindo } = useSaida(confirmandoCancelar)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [tentativa, setTentativa] = useState(0)
 
-  // Edição inline do CONTEÚDO do passo (só gestor) — não confundir com `editando` acima, que é a
-  // comprovação do próprio colaborador.
+  // Edição inline do CONTEÚDO do passo (só gestor).
   const [editandoConteudo, setEditandoConteudo] = useState(false)
   const [carregandoEdicao, setCarregandoEdicao] = useState(false)
   const [baseAdmin, setBaseAdmin] = useState<PassoAdmin | null>(null)
@@ -99,7 +136,13 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
           if (cancelado) return
           setStep(passo)
           setConcluido(comp.concluido)
-          setEvidencia(comp.evidencia)
+          // Sem comprovação enviada ainda (nunca mandou, ou acabou de cancelar o envio) — recupera
+          // o rascunho salvo, se tiver algum, em vez de começar a caixa de texto vazia de novo.
+          const rascunho = !comp.concluido ? lerRascunho(usuario.id, passo.id) : null
+          setEvidencia(rascunho ?? comp.evidencia)
+          setPrecisaCorrecao(comp.precisaCorrecao)
+          setQtdCorrecoes(comp.qtdCorrecoes)
+          setAguardandoConfirmacao(comp.aguardandoConfirmacao)
         })
       })
       .catch((e) => {
@@ -112,6 +155,14 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
       cancelado = true
     }
   }, [tituloParam, usuario, tentativa, navigate])
+
+  // Salva o rascunho a cada letra digitada, enquanto ainda não enviou de verdade — é o que permite
+  // sair da tela (ou cancelar o envio) sem perder o que já tinha colado. Uma vez concluído, o que
+  // importa é a comprovação salva no servidor, não o rascunho local.
+  useEffect(() => {
+    if (!usuario || !step || concluido) return
+    salvarRascunho(usuario.id, step.id, evidencia)
+  }, [usuario, step, concluido, evidencia])
 
   // Um gestor pode editar o conteúdo desse Passo pela tela de Admin enquanto o colaborador está
   // lendo — busca de novo o CONTEÚDO (não a comprovação: nunca mexe em `concluido`/`evidencia`,
@@ -126,6 +177,21 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
       .catch(() => {})
   })
 
+  // O gestor pode pedir/aprovar correção (na tela do Supervisionado) enquanto o colaborador já
+  // está com esse passo aberto, literalmente esperando ver a resposta — poll a cada 15s, mesmo
+  // intervalo do lado do gestor (SupervisionadoPage.tsx), em vez de só ao voltar o foco (não mexe
+  // em concluido/evidencia, que podem estar sendo digitados agora mesmo).
+  usePolling(() => {
+    if (!usuario || !step) return
+    getComprovacao(usuario.id, step.id)
+      .then((comp) => {
+        setPrecisaCorrecao(comp.precisaCorrecao)
+        setQtdCorrecoes(comp.qtdCorrecoes)
+        setAguardandoConfirmacao(comp.aguardandoConfirmacao)
+      })
+      .catch(() => {})
+  }, 15_000)
+
   useTitulo(step?.title)
 
   async function concluir() {
@@ -133,8 +199,15 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
     setSalvando(true)
     try {
       await concluirPasso(usuario.id, step.id, evidencia)
+      // Otimista: sem isso, o container azul "PR em análise" só aparecia no próximo poll (até
+      // 15s depois) — o back já nasce o registro com AguardandoConfirmacao=true nesse caso, então
+      // dá pra refletir na hora em vez de esperar o round-trip do polling.
+      if (!concluido && ultimoItemDaTrilha) {
+        setAguardandoConfirmacao(true)
+        setFeedback({ texto: 'Comprovação enviada!', ok: true })
+      }
       setConcluido(true)
-      setEditando(false)
+      salvarRascunho(usuario.id, step.id, '')
     } catch {
       // sucesso já é visível na hora pelo próprio chip mudando — só a falha precisa de aviso
       // explícito, senão o usuário via só nada acontecer, sem saber por quê
@@ -144,14 +217,38 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
     }
   }
 
+  // Marca que já corrigiu (fez push na mesma branch/PR) — avisa o gestor que pode conferir de novo.
+  async function corrigir() {
+    if (!usuario || !step) return
+    setMarcandoCorrigido(true)
+    try {
+      await marcarCorrigido(usuario.id, step.id)
+      setPrecisaCorrecao(false)
+      setQtdCorrecoes((q) => q + 1)
+      setAguardandoConfirmacao(true)
+    } catch {
+      setFeedback({ texto: 'Não deu pra avisar seu gestor. Tente de novo.', ok: false })
+    } finally {
+      setMarcandoCorrigido(false)
+    }
+  }
+
   async function desmarcar() {
     if (!usuario || !step) return
     setSalvando(true)
+    // Otimista — troca pra "Comprovação (opcional)" (ou pro estado sem comprovação, nos passos
+    // normais) NA HORA, sem esperar a resposta do servidor. Antes disso esperava o `await` pra só
+    // então virar a tela, e o tempo de rede criava uma pausa "morta" entre o container encolher e
+    // a próxima tela aparecer — duas trocas visuais separadas em vez de uma só direta. O
+    // `anim-fade` que a tela de comprovação já tem cuida do efeito dessa troca.
+    setConcluido(false)
+    setColapsandoCancelamento(false)
     try {
       await desmarcarPasso(usuario.id, step.id)
-      setConcluido(false)
-      setEditando(false)
+      setFeedback({ texto: ultimoItemDaTrilha ? 'Envio cancelado.' : 'Desmarcado.', ok: true })
     } catch {
+      // Deu errado — desfaz o otimismo, volta pro estado concluído de verdade.
+      setConcluido(true)
       setFeedback({ texto: 'Não deu pra salvar. Tente de novo.', ok: false })
     } finally {
       setSalvando(false)
@@ -224,7 +321,7 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
     return () => clearTimeout(t)
   }, [feedback])
 
-  if (loading) return <Carregando texto="Carregando o passo..." />
+  if (loading || carregandoTrilha) return <Carregando texto="Carregando o passo..." />
   if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
   if (!step) return null
 
@@ -233,6 +330,11 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
   // outros passos, mesmo dentro do "Primeiro Card", são leitura ou ação local pontual, sem nada
   // que valha a pena anexar — ali o botão só marca concluído.
   const exigeComprovacao = ultimoItemDaTrilha
+  // `concluido` só diz que existe registro (comprovação enviada) — pra esse passo específico isso
+  // NÃO é a mesma coisa que "de verdade terminado" enquanto o gestor não aprova (mesmo critério do
+  // back, ver Program.cs). Usado pra travar o "Fase concluída · ver fase" até a aprovação de
+  // verdade, senão a Jornada dava a entender que a fase já tinha fechado antes da hora.
+  const concluidoDeVerdade = concluido && !precisaCorrecao && !aguardandoConfirmacao
 
   return (
     <article className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
@@ -383,41 +485,101 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
                   </div>
                 ) : (
                   <div className="anim-fade flex flex-col gap-3">
-                    {editando ? (
-                      <div className="anim-fade flex flex-col gap-3">
-                        <textarea
-                          value={evidencia}
-                          onChange={(e) => setEvidencia(e.target.value)}
-                          rows={2}
-                          placeholder="Cole o link do PR, um print, ou uma nota (opcional)"
-                          className={inputCls}
-                        />
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={concluir}
-                            disabled={salvando}
-                            className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:opacity-50"
-                          >
-                            {salvando ? (
-                              <>
-                                <Spinner /> Salvando...
-                              </>
-                            ) : (
-                              'Salvar comprovação'
+                    {/* Mesmo container nos dois estados — só muda de cor/conteúdo (âmbar
+                        "pendente" → verde "corrigido"), em vez de sumir e virar uma pilula solta
+                        em outro lugar (perde o contexto de repente). Sempre mostra aqui dentro
+                        (sem gating por precisaCorrecao/qtdCorrecoes/aguardandoConfirmacao) — esse
+                        passo específico SEMPRE passa por um desses 4 estados assim que a
+                        comprovação existe (nasce em "aguardando avaliação"), então gatear por
+                        qtdCorrecoes>0 escondia justo o "aprovado de primeira" (nenhum dos 3 campos
+                        true ao mesmo tempo). O grid-rows por fora é só pra "Cancelar envio" ter uma
+                        saída suave (encolhe antes de sumir) em vez de cortar seco — mesma técnica
+                        do Acordeao.tsx. */}
+                        <div
+                          className={cx(
+                            'grid transition-[grid-template-rows] duration-200 ease-out',
+                            colapsandoCancelamento ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]',
+                          )}
+                        >
+                          <div className="overflow-hidden">
+                          <div
+                            className={cx(
+                              'anim-pop flex flex-col gap-2 rounded-lg border p-3 transition-colors',
+                              precisaCorrecao
+                                ? 'border-amber-500/40 bg-amber-500/10'
+                                : aguardandoConfirmacao
+                                  ? 'border-sky-500/40 bg-sky-500/10'
+                                  : 'border-green-500/40 bg-green-500/10',
                             )}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setEditando(false)}
-                            className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
                           >
-                            Cancelar
-                          </button>
+                            <span
+                              className={cx(
+                                'flex items-center gap-1.5 text-sm font-medium',
+                                precisaCorrecao
+                                  ? 'text-amber-300'
+                                  : aguardandoConfirmacao
+                                    ? 'text-sky-300'
+                                    : 'text-green-300',
+                              )}
+                            >
+                              <Icon
+                                name={
+                                  precisaCorrecao
+                                    ? 'rate_review'
+                                    : aguardandoConfirmacao
+                                      ? 'hourglass_top'
+                                      : 'check_circle'
+                                }
+                                className="text-base"
+                                fill={!precisaCorrecao && !aguardandoConfirmacao}
+                              />
+                              {precisaCorrecao
+                                ? 'Seu gestor pediu uma correção'
+                                : aguardandoConfirmacao
+                                  ? qtdCorrecoes > 0
+                                    ? 'Você marcou como corrigido — aguardando aprovação do gestor'
+                                    : 'Comprovação enviada — aguardando avaliação do gestor'
+                                  : qtdCorrecoes > 0
+                                    ? gestorNome
+                                      ? `Correção aprovada pelo seu gestor ${gestorNome}`
+                                      : 'Correção aprovada'
+                                    : gestorNome
+                                      ? `Aprovado pelo seu gestor ${gestorNome}`
+                                      : 'Aprovado'}
+                            </span>
+                            {precisaCorrecao && (
+                              <>
+                                <p className="text-xs text-neutral-400">
+                                  Os comentários estão no próprio PR, no Bitbucket (link na
+                                  comprovação abaixo). Depois de ajustar e dar push na mesma branch,
+                                  marque abaixo que já corrigiu.
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={corrigir}
+                                  disabled={marcandoCorrigido}
+                                  className="flex items-center gap-1.5 self-start rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
+                                >
+                                  {marcandoCorrigido ? (
+                                    <>
+                                      <Spinner /> Enviando...
+                                    </>
+                                  ) : (
+                                    'Marcar como corrigido'
+                                  )}
+                                </button>
+                              </>
+                            )}
+                            {aguardandoConfirmacao && (
+                              <p className="text-xs text-neutral-400">
+                                Uma notificação já foi enviada para o seu gestor. Ele vai revisar o
+                                PR {qtdCorrecoes > 0 ? 'de novo ' : ''}e aprovar se estiver tudo
+                                certo — você recebe uma notificação assim que ele aprovar.
+                              </p>
+                            )}
+                          </div>
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="anim-fade flex flex-col gap-3">
                         <div className="flex flex-col gap-1">
                           <span className="text-xs text-neutral-500">Comprovação</span>
                           {evidencia ? (
@@ -426,27 +588,35 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
                             <span className="text-sm text-neutral-500">Sem comprovação anexada.</span>
                           )}
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setEditando(true)}
-                          className="self-start rounded-lg bg-navy-700 px-4 py-2 text-sm text-neutral-200 transition-colors hover:bg-navy-600"
-                        >
-                          {evidencia ? 'Editar comprovação' : 'Adicionar comprovação'}
-                        </button>
-                      </div>
-                    )}
 
                     <div className="flex items-center justify-between gap-3">
                       <button
                         type="button"
-                        onClick={desmarcar}
+                        onClick={() => setConfirmandoCancelar(true)}
                         disabled={salvando}
                         className="rounded-lg px-3 py-1.5 text-sm text-red-400 transition-all hover:bg-red-500/10 disabled:opacity-50"
                       >
-                        Desmarcar
+                        Cancelar envio
                       </button>
-                      <span className="flex items-center gap-1 rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-300">
-                        <Icon name="check" className="text-sm" /> Concluído
+                      {/* Mesmo chip de sempre, mas dinâmico — enquanto o gestor não avalia, isso
+                          NÃO conta como concluído de verdade (o back também não conta pro
+                          percentual da fase até aprovar), então "Concluído" fixo aqui era enganoso. */}
+                      <span
+                        className={cx(
+                          'flex items-center gap-1 rounded-full px-2 py-0.5 text-xs',
+                          precisaCorrecao
+                            ? 'bg-amber-500/20 text-amber-300'
+                            : aguardandoConfirmacao
+                              ? 'bg-sky-500/20 text-sky-300'
+                              : 'bg-green-500/20 text-green-300',
+                        )}
+                      >
+                        <Icon
+                          name={precisaCorrecao ? 'rate_review' : aguardandoConfirmacao ? 'hourglass_top' : 'check'}
+                          className="text-sm"
+                          size={aguardandoConfirmacao ? 15 : undefined}
+                        />
+                        {precisaCorrecao ? 'Correção pedida' : aguardandoConfirmacao ? 'PR em análise' : 'Concluído'}
                       </span>
                     </div>
                   </div>
@@ -475,7 +645,7 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
                         <Spinner /> Salvando...
                       </>
                     ) : (
-                      'Marcar como concluído'
+                      'Enviar comprovação'
                     )}
                   </button>
                 </div>
@@ -512,7 +682,7 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
         faseTerminada={faseTerminada}
         fase={faseDoItem}
         origemFase
-        proximoLiberado={concluido}
+        proximoLiberado={concluidoDeVerdade}
       />
 
       {toastSalvoMontado && (
@@ -536,6 +706,53 @@ export function PassoDetalhePage({ perfil }: { perfil: Perfil | null }) {
         >
           <Icon name={toastFeedback.valor.ok ? 'check_circle' : 'warning'} className="text-base" />
           {toastFeedback.valor.texto}
+        </div>
+      )}
+
+      {modalCancelarMontado && (
+        <div
+          className={cx(
+            'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
+            modalCancelarSaindo ? 'anim-fade-out' : 'anim-fade',
+          )}
+          onClick={() => setConfirmandoCancelar(false)}
+        >
+          <div
+            className={cx(
+              'flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6',
+              modalCancelarSaindo ? 'anim-pop-out' : 'anim-pop',
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold text-neutral-100">Cancelar o envio da comprovação?</h3>
+            <p className="text-sm text-neutral-400">
+              Some da tela do seu gestor e das notificações dele. Seu texto continua preenchido
+              pra reenviar depois.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmandoCancelar(false)}
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
+              >
+                Voltar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setConfirmandoCancelar(false)
+                  setColapsandoCancelamento(true)
+                  // Espera o colapso visual (mesma duração da transição do grid-rows) antes de
+                  // chamar a API de verdade — dá tempo do container encolher suavemente antes da
+                  // tela trocar pro formulário de "Enviar comprovação" de novo.
+                  setTimeout(desmarcar, 200)
+                }}
+                className="rounded-lg bg-red-500/90 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-500"
+              >
+                Cancelar envio
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </article>

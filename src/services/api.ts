@@ -14,15 +14,29 @@ function comAuth(headers: Record<string, string> = {}): Record<string, string> {
 // rede etc.) — o navegador rejeita a Promise nesses casos, sem status/corpo pra ler.
 const ERRO_SEM_CONEXAO = 'Não foi possível falar com o servidor. Verifique sua conexão ou tente novamente em instantes.'
 
+// Erro de API que carrega o corpo cru da resposta — além da mensagem (`erro`), alguns endpoints
+// mandam uma flag extra pro front decidir o que fazer (ex.: `precisaConfirmarEmail` no login/
+// cadastro). Chamadores que não precisam disso continuam só lendo `.message`, como sempre.
+export class ApiError extends Error {
+  corpo?: Record<string, unknown>
+
+  constructor(message: string, corpo?: Record<string, unknown>) {
+    super(message)
+    this.corpo = corpo
+  }
+}
+
 // Extrai a mensagem de erro do back. Padrão do back: corpo { erro: "..." }.
 // Se não vier JSON (ex.: 500 cru, ou o proxy do Vite respondendo no lugar do back que caiu), cai
 // numa mensagem genérica com só o status — nunca expõe o path interno da API pro usuário.
-async function extrairErro(response: Response, path: string): Promise<string> {
+async function extrairErro(response: Response, path: string): Promise<ApiError> {
   let mensagem: string | null = null
+  let corpo: Record<string, unknown> | undefined
   try {
     const body = await response.json()
     if (body && typeof body.erro === 'string') {
       mensagem = body.erro
+      corpo = body
     }
   } catch {
     // resposta sem corpo JSON — usa o fallback abaixo
@@ -34,10 +48,10 @@ async function extrairErro(response: Response, path: string): Promise<string> {
   if (response.status === 401 && !path.startsWith('/auth/')) {
     const motivo = mensagem ?? 'Sua sessão expirou. Entre novamente.'
     useAuthStore.getState().logout(motivo)
-    return motivo
+    return new ApiError(motivo, corpo)
   }
 
-  return mensagem ?? `Ocorreu um erro no servidor (${response.status}). Tente novamente em instantes.`
+  return new ApiError(mensagem ?? `Ocorreu um erro no servidor (${response.status}). Tente novamente em instantes.`, corpo)
 }
 
 // Envolve o fetch de verdade — se ele nem chegar a responder (servidor fora do ar), troca o erro
@@ -53,7 +67,7 @@ async function fetchOuFalhaAmigavel(path: string, init: RequestInit): Promise<Re
 export async function apiGet<T>(path: string): Promise<T> {
   const response = await fetchOuFalhaAmigavel(path, { headers: comAuth() })
   if (!response.ok) {
-    throw new Error(await extrairErro(response, path))
+    throw await extrairErro(response, path)
   }
   return response.json() as Promise<T>
 }
@@ -66,7 +80,7 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
     body: JSON.stringify(body),
   })
   if (!response.ok) {
-    throw new Error(await extrairErro(response, path))
+    throw await extrairErro(response, path)
   }
   return response.json() as Promise<T>
 }
@@ -84,6 +98,6 @@ export async function apiSend(
     body: body === undefined ? undefined : JSON.stringify(body),
   })
   if (!response.ok) {
-    throw new Error(await extrairErro(response, path))
+    throw await extrairErro(response, path)
   }
 }

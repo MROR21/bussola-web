@@ -1,9 +1,12 @@
 import { apiGet, apiSend } from '../../services/api'
-import type { AcessoProgresso } from '../gestor/types'
+import type { AcessoProgresso, CardLinkResposta } from '../gestor/types'
 
-// Ids dos passos que o usuário já concluiu.
-export function getProgresso(userId: string): Promise<string[]> {
-  return apiGet<string[]>(`/users/${userId}/progress`)
+// Ids dos passos que o usuário já concluiu (`completos`, tem registro — é o que faz a barra de
+// progresso sentir o envio/cancelamento da comprovação como avanço/retrocesso) e, dentro desses,
+// quais ainda estão pendentes de avaliação do gestor (`pendentes`, correção pedida OU aguardando
+// aprovação) — usado pra saber se a fase/Jornada fechou de VERDADE (só quando não sobra pendente).
+export function getProgresso(userId: string): Promise<{ completos: string[]; pendentes: string[] }> {
+  return apiGet(`/users/${userId}/progress`)
 }
 
 // Os PRÓPRIOS acessos do colaborador — leitura só, quem marca é o gestor (ver
@@ -17,8 +20,20 @@ export function getMeusAcessos(userId: string): Promise<AcessoProgresso[]> {
 export function getComprovacao(
   userId: string,
   stepId: string,
-): Promise<{ concluido: boolean; evidencia: string }> {
+): Promise<{
+  concluido: boolean
+  evidencia: string
+  precisaCorrecao: boolean
+  qtdCorrecoes: number
+  aguardandoConfirmacao: boolean
+}> {
   return apiGet(`/users/${userId}/progress/${stepId}`)
+}
+
+// Marca que já corrigiu o PR (push feito na mesma branch) — avisa o gestor que pode conferir de
+// novo. Desliga o aviso "precisa de correção" que o gestor tinha ligado.
+export function marcarCorrigido(userId: string, stepId: string): Promise<void> {
+  return apiSend('PUT', `/users/${userId}/progress/${stepId}/corrigido`)
 }
 
 // Marca um passo como concluído, com comprovação opcional (link do PR, print ou nota).
@@ -30,4 +45,10 @@ export function concluirPasso(userId: string, stepId: string, evidencia = ''): P
 // Desmarca um passo.
 export function desmarcarPasso(userId: string, stepId: string): Promise<void> {
   return apiSend('DELETE', `/users/${userId}/progress/${stepId}`)
+}
+
+// Link do card que o gestor enviou (null = ainda não enviou — é o que trava os passos da fase
+// "Primeiro Card" pro colaborador, ver JornadaView.tsx).
+export function getMeuCardLink(userId: string): Promise<CardLinkResposta> {
+  return apiGet<CardLinkResposta>(`/users/${userId}/card-link`)
 }

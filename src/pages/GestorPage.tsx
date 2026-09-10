@@ -166,7 +166,9 @@ export function GestorPage() {
         </p>
       )}
 
-      <ul className="flex flex-col gap-2">
+      {/* Acima de ~4 itens rola dentro de si mesma em vez de esticar a página inteira — mesmo
+          tratamento das listas de Admin (Usuários, Guias/Fluxos). */}
+      <ul className="flex max-h-[28rem] flex-col gap-2 overflow-y-auto pr-1">
         {usuarios.map((u) => {
           const percent =
             u.totalPassos > 0 ? Math.round((u.passosConcluidos / u.totalPassos) * 100) : 0
@@ -254,7 +256,7 @@ export function GestorPage() {
                 placeholder="Buscar por nome ou e-mail..."
                 className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500"
               />
-              <ul className="flex flex-col gap-2">
+              <ul className="flex max-h-[19rem] flex-col gap-2 overflow-y-auto pr-1">
               {disponiveis.length === 0 && (
                 <li className="text-sm text-neutral-500">Nenhum colaborador disponível.</li>
               )}

@@ -34,7 +34,7 @@ function contarPor<T>(lista: T[], chaveDe: (item: T) => string): Record<string, 
   return contagem
 }
 
-const ABAS = ['fases', 'modulos', 'passos', 'guias', 'acessos', 'usuarios'] as const
+const ABAS = ['fases', 'passos', 'guias', 'modulos', 'acessos', 'usuarios'] as const
 type Aba = (typeof ABAS)[number]
 
 const LABEL: Record<Aba, string> = {
@@ -99,19 +99,16 @@ export function AdminPage() {
           />
         </div>
       )}
+      {/* Rótulo e conteúdo trocados de propósito (pedido do Miguel): a aba "Módulos" mostra o
+          editor de Fluxos (GuiasAdmin) e a aba "Guias" mostra o CRUD simples de categorias — o
+          `aba` de cada bloco decide só POSIÇÃO/rótulo na barra, o componente renderizado é livre.
+          O título/ícone interno de cada componente também foi ajustado (`titulo="Guias"` aqui,
+          `<h2>Módulos</h2>` dentro de GuiasAdmin.tsx) pra bater com a aba que os envolve agora,
+          mesmo os dois continuando a mexer nos registros de Módulo (`singular="módulo"` etc.) por
+          baixo — só o texto visível mudou, não a entidade/CRUD de verdade. */}
       {aba === 'modulos' && (
         <div className="anim-page">
-          <SimpleEntityCrud
-            titulo="Módulos"
-            icone="inventory_2"
-            singular="módulo"
-            labelFilhos="fluxos"
-            listar={listarModulos}
-            criar={criarModulo}
-            editar={editarModulo}
-            apagar={apagarModulo}
-            contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
-          />
+          <GuiasAdmin />
         </div>
       )}
       {aba === 'passos' && (
@@ -121,7 +118,17 @@ export function AdminPage() {
       )}
       {aba === 'guias' && (
         <div className="anim-page">
-          <GuiasAdmin />
+          <SimpleEntityCrud
+            titulo="Guias"
+            icone="menu_book"
+            singular="módulo"
+            labelFilhos="fluxos"
+            listar={listarModulos}
+            criar={criarModulo}
+            editar={editarModulo}
+            apagar={apagarModulo}
+            contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
+          />
         </div>
       )}
       {aba === 'acessos' && (

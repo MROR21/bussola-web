@@ -1,6 +1,7 @@
 import { apiGet, apiSend } from '../../services/api'
 import type {
   AcessoProgresso,
+  CardLinkResposta,
   FluxoProgresso,
   ProgressoSupervisionado,
   UsuarioDisponivel,
@@ -47,4 +48,26 @@ export function marcarAcessoConcluido(
   concluido: boolean,
 ): Promise<void> {
   return apiSend('PUT', `/gestor/usuarios/${usuarioId}/acessos/${acessoId}`, { concluido })
+}
+
+// Link do card já enviado pro supervisionado (null = ainda não enviou).
+export function getCardLinkSupervisionado(usuarioId: string): Promise<CardLinkResposta> {
+  return apiGet<CardLinkResposta>(`/gestor/usuarios/${usuarioId}/card-link`)
+}
+
+// Envia (ou reenvia/sobrescreve) o link do card pro supervisionado.
+export function enviarCardLink(usuarioId: string, url: string): Promise<void> {
+  return apiSend('PUT', `/gestor/usuarios/${usuarioId}/card-link`, { url })
+}
+
+// Gestor pede correção no PR já enviado como comprovação (os comentários ficam no Bitbucket —
+// isso só liga o aviso pro colaborador). Só desliga quando ELE marcar que corrigiu.
+export function pedirCorrecaoPasso(usuarioId: string, stepId: string): Promise<void> {
+  return apiSend('PUT', `/gestor/usuarios/${usuarioId}/passos/${stepId}/pedir-correcao`)
+}
+
+// Gestor confere a correção marcada pelo colaborador e confirma que está tudo certo — fecha o
+// ciclo (aguardandoConfirmacao = false) e avisa o colaborador.
+export function confirmarCorrecaoPasso(usuarioId: string, stepId: string): Promise<void> {
+  return apiSend('PUT', `/gestor/usuarios/${usuarioId}/passos/${stepId}/confirmar`)
 }

@@ -31,6 +31,15 @@ export interface PassoProgresso {
   concluido: boolean
   // Comprovação anexada pelo supervisionado (link do PR, print ou nota). Vazio = sem comprovação.
   evidencia: string
+  // O gestor pediu correção nesse PR (comentários ficam no Bitbucket, isso é só o status) — só o
+  // gestor liga, só o colaborador desliga (depois de corrigir e atualizar a mesma branch/PR).
+  precisaCorrecao: boolean
+  // Quantos ciclos de correção já fecharam (incrementa toda vez que o colaborador marca
+  // "corrigido"). "Pedir correção" continua disponível mesmo com QtdCorrecoes > 0 — é só histórico.
+  qtdCorrecoes: number
+  // O colaborador marcou como corrigido, mas o gestor ainda não confirmou/revisou — true até o
+  // gestor conferir e confirmar (ou pedir correção de novo).
+  aguardandoConfirmacao: boolean
 }
 
 // Progresso detalhado de um supervisionado (GET /gestor/usuarios/{id}/progresso).
@@ -57,4 +66,9 @@ export interface AcessoProgresso {
   nome: string
   link: string
   concluido: boolean
+}
+
+// Resposta de GET .../card-link — url ausente/null = o gestor ainda não enviou o card.
+export interface CardLinkResposta {
+  url: string | null
 }

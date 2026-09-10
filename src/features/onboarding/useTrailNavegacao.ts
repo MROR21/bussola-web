@@ -15,16 +15,30 @@ export function hrefDoTrailItem(item: TrailStep): string {
 // própria, então fica sem seta (não é erro, só não se aplica).
 export function useTrailNavegacao(perfil: Perfil | null, tituloAtual: string) {
   const [trail, setTrail] = useState<TrailStep[]>([])
+  // Fica true até a 1ª resposta do `postTrail` (sucesso ou falha) — enquanto isso, `trail` ainda
+  // está no valor inicial vazio, e qualquer decisão computada em cima dele (`ultimoItemDaTrilha`,
+  // `faseDoItem` etc.) dá errado por engano. Quem usa esse hook (PassoDetalhePage,
+  // FluxoDetalhePage) precisa incluir isso no próprio loading, senão a tela mostra o fluxo/modo
+  // errado por um instante até a trilha carregar (ex.: escondia a caixa de comprovação do último
+  // passo, ou mirava o botão Voltar pro Guia em vez da Jornada).
+  const [carregandoTrilha, setCarregandoTrilha] = useState(true)
 
   useEffect(() => {
-    if (!perfil) return
+    if (!perfil) {
+      setCarregandoTrilha(false)
+      return
+    }
     let cancelado = false
+    setCarregandoTrilha(true)
     postTrail(perfil)
       .then((t) => {
         if (!cancelado) setTrail(t)
       })
       .catch(() => {
         // sem trilha (perfil ainda não pronto, ou erro de rede) — as setas só somem, sem tela de erro.
+      })
+      .finally(() => {
+        if (!cancelado) setCarregandoTrilha(false)
       })
     return () => {
       cancelado = true
@@ -44,6 +58,7 @@ export function useTrailNavegacao(perfil: Perfil | null, tituloAtual: string) {
       ? trail[indice + 1]
       : undefined
   return {
+    carregandoTrilha,
     anterior,
     proximo,
     // Fase do item atual, só quando ele faz parte da trilha da Jornada — um Fluxo aberto pelo Guia

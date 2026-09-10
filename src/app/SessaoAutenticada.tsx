@@ -89,7 +89,10 @@ export function SessaoAutenticada({ usuario }: { usuario: UsuarioLogado }) {
         <Route element={<AppLayout />}>
           <Route path="/" element={conteudoJornada} />
           <Route path="/fase/:nome" element={conteudoJornada} />
-          <Route path="/passo/:titulo" element={<PassoDetalhePage perfil={perfil} />} />
+          <Route
+            path="/passo/:titulo"
+            element={<PassoDetalhePage perfil={perfil} gestorNome={gestorNome} />}
+          />
           <Route path="/guias" element={<GuiasPage />} />
           <Route path="/guias/:modulo" element={<GuiasPage />} />
           <Route path="/fluxo/:titulo" element={<FluxoDetalhePage perfil={perfil} />} />

@@ -3,6 +3,7 @@ import { EstadoErro } from '../../components/EstadoErro'
 import { Icon } from '../../components/Icon'
 import { Carregando } from '../../components/Spinner'
 import { useAuthStore } from '../auth/authStore'
+import { useRefetchOnFocus } from '../../hooks/useAtualizarEmSegundoPlano'
 import { useSaidaValor } from '../../hooks/useSaida'
 import { cx } from '../../utils/cx'
 import {
@@ -61,6 +62,14 @@ function ListaUsuarios() {
   useEffect(() => {
     carregar()
   }, [])
+
+  // Outro gestor pode promover/revogar alguém pela mesma tela, em outra aba/computador, enquanto
+  // esta continua aberta — busca de novo, em silêncio, quando a aba volta a ficar em foco.
+  useRefetchOnFocus(() => {
+    listarUsuariosAdmin()
+      .then((lista) => setItens([...lista].sort((a, b) => Number(b.isGestor) - Number(a.isGestor))))
+      .catch(() => {})
+  })
 
   useEffect(() => {
     if (!feedback) return
@@ -315,6 +324,14 @@ function ListaEmailsAutorizados() {
   useEffect(() => {
     carregar()
   }, [])
+
+  // Mesmo motivo da lista de usuários acima: outro gestor pode autorizar/remover um e-mail nessa
+  // mesma tela, em outra aba/computador — busca de novo, em silêncio, ao voltar o foco.
+  useRefetchOnFocus(() => {
+    listarEmailsAutorizados()
+      .then(setItens)
+      .catch(() => {})
+  })
 
   useEffect(() => {
     if (!feedback) return

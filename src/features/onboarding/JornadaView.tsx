@@ -2,18 +2,19 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { BoasVindasModal } from '../../components/BoasVindasModal'
 import { CompassRose } from '../../components/CompassRose'
+import { Carregando } from '../../components/Spinner'
 import { Icon } from '../../components/Icon'
 import { MapCorners } from '../../components/MapCorners'
 import { MapIllustration } from '../../components/MapIllustration'
 import { TrailDivider } from '../../components/TrailDivider'
-import { useRefetchOnFocus } from '../../hooks/useAtualizarEmSegundoPlano'
+import { usePolling, useRefetchOnFocus } from '../../hooks/useAtualizarEmSegundoPlano'
 import { useTitulo } from '../../hooks/useTitulo'
 import { cx } from '../../utils/cx'
 import { useAuthStore } from '../auth/authStore'
 import { getFluxosConcluidos } from '../fluxos/fluxosService'
-import type { AcessoProgresso } from '../gestor/types'
+// import type { AcessoProgresso } from '../gestor/types'
 import { ProgressRing } from './ProgressRing'
-import { getMeusAcessos, getProgresso } from './progressService'
+import { getMeuCardLink, getProgresso } from './progressService'
 import type { TrailStep } from './types'
 
 // Ícone por fase (fallback genérico se aparecer uma fase nova).
@@ -220,8 +221,25 @@ export function JornadaView({
   onRestart: () => void
 }) {
   const [passosConcluidos, setPassosConcluidos] = useState<Set<string>>(new Set())
+  // Subconjunto de `passosConcluidos` que ainda tá pendente de avaliação do gestor (pediu
+  // correção OU aguardando aprovação) — usado só pra saber se a fase/Jornada fechou DE VERDADE
+  // (ver `estaAprovado` abaixo); a contagem numérica normal (`estaConcluido`) já sente o envio da
+  // comprovação como avanço mesmo antes da aprovação.
+  const [passosPendentes, setPassosPendentes] = useState<Set<string>>(new Set())
   const [fluxosConcluidos, setFluxosConcluidos] = useState<Set<string>>(new Set())
-  const [acessos, setAcessos] = useState<AcessoProgresso[]>([])
+  // ENGAVETADO junto com o container "Seus acessos" logo abaixo (ver comentário lá) — descomentar
+  // os dois juntos se o gestor confirmar que faz sentido ter essa visão pro colaborador.
+  // const [acessos, setAcessos] = useState<AcessoProgresso[]>([])
+  // Link do card que o gestor enviou pra fase "Primeiro Card" — null = ainda não enviou, e é
+  // isso que trava os passos dessa fase (ver o branch de faseNome === 'Primeiro Card' abaixo).
+  const [cardLink, setCardLink] = useState<string | null>(null)
+  // Fica false do mount até a 1ª rodada de progresso/fluxos/card resolver — sem essa trava, o
+  // componente já renderizava de cara com os Sets vazios (padrão do useState), e como
+  // `podeEntrar`/`faseLiberada` dependem desses dados, uma fase que já devia estar liberada
+  // aparecia bloqueada por um instante — a Jornada "piscava" pra visão de Home antes de acertar
+  // pra visão da fase certa. Reproduzível toda vez que este componente remonta do zero enquanto
+  // já se está numa fase (ex.: "Voltar" de dentro de um Passo, ou entrar direto por link).
+  const [dadosProntos, setDadosProntos] = useState(false)
   // Dispara sozinho na 1ª vez que ESSE usuário entra na Home da Jornada (chaveado por id, não uma
   // flag solta — ver comentário em authStore.ts) + pode ser reaberto a qualquer momento pelo botão
   // "Como funciona o Bússola?" lá embaixo.
@@ -246,20 +264,63 @@ export function JornadaView({
   useTitulo(faseSelecionada ?? 'Jornada')
 
   useEffect(() => {
-    getProgresso(userId).then((ids) => setPassosConcluidos(new Set(ids))).catch(() => {})
-    getFluxosConcluidos().then((ids) => setFluxosConcluidos(new Set(ids))).catch(() => {})
-    getMeusAcessos(userId).then(setAcessos).catch(() => {})
+    setDadosProntos(false)
+    const pProgresso = getProgresso(userId)
+      .then((p) => {
+        setPassosConcluidos(new Set(p.completos))
+        setPassosPendentes(new Set(p.pendentes))
+      })
+      .catch(() => {})
+    const pFluxos = getFluxosConcluidos().then((ids) => setFluxosConcluidos(new Set(ids))).catch(() => {})
+    // getMeusAcessos(userId).then(setAcessos).catch(() => {})
+    const pCardLink = getMeuCardLink(userId).then((r) => setCardLink(r.url)).catch(() => {})
+    // Cada promise acima já engole o próprio erro (.catch(() => {})), então o Promise.all abaixo
+    // sempre resolve assim que as 3 terminarem — nunca fica preso esperando por causa de uma falha.
+    Promise.all([pProgresso, pFluxos, pCardLink]).then(() => setDadosProntos(true))
   }, [userId])
 
   // O gestor libera um acesso na tela do Supervisionado enquanto o colaborador já pode estar com a
   // Jornada aberta — busca de novo, em silêncio, quando a aba volta a ficar em foco (mesmo padrão
   // de JornadaPage.tsx pra trilha/fase editada pelo Admin).
+  // ENGAVETADO junto com "Seus acessos" (ver acima) — sem uso enquanto o hook não tem call site.
+  // useRefetchOnFocus(() => {
+  //   getMeusAcessos(userId).then(setAcessos).catch(() => {})
+  // })
+
+  // O gestor envia o card na tela do Supervisionado enquanto o colaborador já pode estar com a
+  // fase Primeiro Card aberta esperando — mesmo padrão de refetch-on-focus de cima.
   useRefetchOnFocus(() => {
-    getMeusAcessos(userId).then(setAcessos).catch(() => {})
+    getMeuCardLink(userId).then((r) => setCardLink(r.url)).catch(() => {})
   })
+
+  // O próprio colaborador envia a comprovação do Primeiro Card no PassoDetalhePage (rota
+  // diferente), e o GESTOR aprova/pede correção de lá também — essa é a tela em que o
+  // colaborador mais fica com a aba aberta esperando essa resposta (ver JornadaPage.tsx), então
+  // só refetch-on-focus deixava um intervalo sem atualizar sozinho enquanto ele ficava olhando
+  // sem trocar de aba. Polling de 15s, mesmo padrão de PassoDetalhePage/SupervisionadoPage.
+  usePolling(() => {
+    getProgresso(userId)
+      .then((p) => {
+        setPassosConcluidos(new Set(p.completos))
+        setPassosPendentes(new Set(p.pendentes))
+      })
+      .catch(() => {})
+  }, 15_000)
 
   const estaConcluido = (item: TrailStep) =>
     item.tipo === 'fluxo' ? fluxosConcluidos.has(item.id) : passosConcluidos.has(item.id)
+
+  // Igual a `estaConcluido`, mas exige que não esteja pendente de avaliação do gestor — só usado
+  // pros booleanos que fecham fase/Jornada de VERDADE (faseCompleta, completa, faseLiberada). A
+  // contagem numérica (feitos/pct) usa `pesoItem` abaixo, não esse boolean direto.
+  const estaAprovado = (item: TrailStep) =>
+    estaConcluido(item) && (item.tipo === 'fluxo' || !passosPendentes.has(item.id))
+
+  // Peso de um item pro PERCENTUAL (não pro "X de Y", que continua inteiro): 1 se aprovado de
+  // verdade, 0.5 se só enviado e ainda pendente de avaliação (sente o envio como avanço, sem
+  // travar num teto arbitrário tipo 99%), 0 se nem isso. Com isso, o percentual só bate 100%
+  // quando `completa`/`faseCompleta` (estrito) também batem — nunca antes, sem precisar de cap.
+  const pesoItem = (item: TrailStep) => (estaAprovado(item) ? 1 : estaConcluido(item) ? 0.5 : 0)
 
   // Agrupa por fase preservando a ordem (o back já manda ordenado: fases guiadas, depois os
   // fluxos do squad, por fim o Primeiro Card).
@@ -303,17 +364,28 @@ export function JornadaView({
   }, [pontosTrilha])
 
   const total = trail.length
-  const feitos = trail.filter(estaConcluido).length
-  const percent = total > 0 ? Math.round((feitos / total) * 100) : 0
-  const completa = total > 0 && feitos === total
+  // Estrito — o texto "X de Y" mostra só o que foi aprovado de verdade (a barra/anel logo abaixo
+  // usa peso fracionário e continua sentindo o envio, ver `percent`).
+  const feitos = trail.filter(estaAprovado).length
+  // Estrito (aprovado, não só enviado) — "toda a Jornada" só fecha de verdade depois da avaliação
+  // do gestor no último passo.
+  const completa = total > 0 && trail.every(estaAprovado)
+  const percent =
+    total > 0 ? Math.round((trail.reduce((soma, item) => soma + pesoItem(item), 0) / total) * 100) : 0
 
   const proximo = trail.find((item) => !estaConcluido(item))
   const faseAtualIndex = proximo ? fases.findIndex(([fase]) => fase === proximo.phase) : fases.length - 1
 
-  // Fase no índice i só libera se TODAS as anteriores (0..i-1) estiverem 100% concluídas — a
+  // Fase no índice i só libera se TODAS as anteriores (0..i-1) estiverem aprovadas de verdade — a
   // primeira fase sempre libera (slice vazio, every() é true).
   const faseLiberada = (i: number) =>
-    fases.slice(0, i).every(([, itens]) => itens.every(estaConcluido))
+    fases.slice(0, i).every(([, itens]) => itens.every(estaAprovado))
+
+  // Só decide Home vs. Fase depois que os dados de progresso chegam — com os Sets ainda vazios
+  // (mount fresco), `faseLiberada` acima daria falso pra qualquer fase depois da 1ª, mostrando a
+  // Home por engano antes de corrigir sozinho no re-render seguinte (o "pisca" que o Miguel viu
+  // ao clicar Voltar de um Passo).
+  if (!dadosProntos) return <Carregando texto="Carregando sua jornada..." />
 
   // ---- Vista de UMA fase (entrou no card) ----
   // Só entra se a fase da URL existe de fato (param inválido/velho → cai na home) e já estiver
@@ -323,15 +395,32 @@ export function JornadaView({
   const podeEntrar = faseEntry && faseLiberada(faseSelecionadaIndex)
   if (podeEntrar) {
     const [faseNome, itens] = faseEntry
-    const feitosFase = itens.filter(estaConcluido).length
-    const faseCompleta = feitosFase === itens.length
+    // Estrito — o texto "X de Y itens concluídos" mostra só o aprovado de verdade (a barra
+    // `pctFase` abaixo usa peso fracionário e sente o envio).
+    const feitosFase = itens.filter(estaAprovado).length
+    // Estrito — "Fase concluída!" (banner/confete) só quando não sobra ninguém pendente de
+    // avaliação do gestor.
+    const faseCompleta = itens.every(estaAprovado)
+    // "Primeiro Card" é diferente das outras fases: a sequência já libera ENTRAR nela assim que a
+    // fase anterior termina, mas os PASSOS de dentro só liberam depois que o gestor manda o link
+    // do card (ver GestorPage/SupervisionadoPage) — até lá, mostra um aviso explicando em vez da
+    // trilha normal de itens.
+    const ehPrimeiroCard = faseNome === 'Primeiro Card'
+    const aguardandoCard = ehPrimeiroCard && !cardLink
     // Passo atual (o 1º ainda não concluído) em destaque + uma trilha sinuosa com TODOS os itens
     // da fase (feitos, atual, bloqueados) — mesma linguagem visual da trilha de Fases da Home, só
     // que um nível abaixo (Passo em vez de Fase). A conclusão só acontece de verdade dentro do
     // próprio passo/fluxo.
     const itemAtualIndex = itens.findIndex((item) => !estaConcluido(item))
     const itemAtual = itemAtualIndex >= 0 ? itens[itemAtualIndex] : undefined
-    const pctFase = itens.length > 0 ? Math.round((feitosFase / itens.length) * 100) : 0
+    // Mesmo peso fracionário do percentual da Jornada acima — sem isso, uma fase pequena (tipo
+    // Primeiro Card com só uns 7 itens) já batia 100% redondo assim que a comprovação era
+    // enviada, contradizendo o banner "Chegou o seu primeiro card!" que continua na tela até a
+    // aprovação de verdade.
+    const pctFase =
+      itens.length > 0
+        ? Math.round((itens.reduce((soma, item) => soma + pesoItem(item), 0) / itens.length) * 100)
+        : 0
     // Fase seguinte na sequência (se existir) — a fase atual acabou de ficar 100% completa, então
     // ela já libera a próxima (mesmo gate `faseLiberada` de cima), sem precisar checar de novo.
     const proximaFaseEntry =
@@ -394,6 +483,46 @@ export function JornadaView({
           </div>
         </div>
 
+        {aguardandoCard && (
+          <div className="anim-pop relative flex flex-col gap-2 overflow-hidden rounded-2xl border border-navy-700 bg-navy-800 p-5">
+            <MapCorners tamanho={4} opacidade={20} />
+            <span className="flex items-center gap-2 text-base font-semibold text-neutral-100">
+              <Icon name="hourglass_top" className="text-xl text-gold-400" /> Aguardando seu gestor
+            </span>
+            <p className="text-sm text-neutral-400">
+              Chegou a hora do seu primeiro card! Seu gestor vai escolher e te enviar o link em
+              breve — os passos dessa fase liberam automaticamente assim que ele mandar.
+            </p>
+          </div>
+        )}
+
+        {/* Some quando a fase termina — já cumpriu o papel de dar o link+instrução enquanto a
+            pessoa trabalhava nele; o painel "concluiu a jornada" logo abaixo vira a mensagem
+            final única, sem repetir outro card dourado igual em seguida. */}
+        {ehPrimeiroCard && cardLink && !faseCompleta && (
+          <div className="anim-pop relative flex flex-col gap-2 overflow-hidden rounded-2xl border border-gold-500/40 bg-gold-500/10 p-5">
+            <MapCorners tamanho={4} opacidade={20} />
+            <span className="flex items-center gap-2 text-base font-semibold text-neutral-100">
+              <Icon name="emoji_events" className="text-xl text-gold-400" fill /> Chegou o seu
+              primeiro card!
+            </span>
+            <p className="text-sm text-neutral-400">
+              É a sua primeira atividade de verdade aqui na Agilean — uma tarefa real, escolhida
+              pelo seu gestor. Implemente o que o card pede seguindo o passo a passo abaixo — ele
+              te guia da branch até o Pull Request. No último passo, cole o link do seu PR como
+              comprovação.
+            </p>
+            <a
+              href={cardLink}
+              target="_blank"
+              rel="noreferrer"
+              className="flex w-fit items-center gap-1.5 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
+            >
+              <Icon name="open_in_new" className="text-base" /> Abrir o link do seu primeiro card
+            </a>
+          </div>
+        )}
+
         {faseCompleta && (
           <div className="anim-pop relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-gold-500/40 bg-gold-500/10 p-5 sm:flex-row sm:items-center">
             <MapCorners tamanho={4} opacidade={20} />
@@ -443,7 +572,19 @@ export function JornadaView({
           </div>
         )}
 
-        {faseCompleta ? (
+        {/* "Diário de bordo" — lista vertical de entradas de log ligadas por uma linha fina (não a
+            trilha sinuosa da Jornada: um nível abaixo pede um registro mais discreto, tipo
+            caderno de bordo, não outro mapa). O destaque do "passo atual" não é mais um card fixo
+            separado — a entrada atual DENTRO da lista se expande (título, descrição, botão) e
+            some pro formato compacto assim que é concluída, o próximo item que virar atual
+            expande no lugar dele (o destaque "sobe" acompanhando o progresso).
+            `itemAtual` pode não existir mesmo sem a fase estar 100% aprovada — é exatamente o caso
+            do último passo (comprovação) já enviado mas ainda em análise: `estaConcluido` (lenient)
+            já conta ele como feito, então não sobra "próximo item" pra apontar. Sem `itemAtual`,
+            ninguém fica marcado como atual/bloqueado — só mostra tudo "feito" (o pendente também,
+            já que ele sente o avanço igual) e o card de "aguardando avaliação" acima já avisa o
+            que falta de verdade. */}
+        {!aguardandoCard && (
           <ul className="relative flex flex-col">
             {itens.map((item, i) => (
               <ItemDiarioDeBordo
@@ -451,38 +592,13 @@ export function JornadaView({
                 item={item}
                 indice={i}
                 isLast={i === itens.length - 1}
-                feito
-                atual={false}
-                bloqueado={false}
+                feito={estaConcluido(item)}
+                atual={itemAtual ? item.id === itemAtual.id : false}
+                bloqueado={itemAtual ? i > itemAtualIndex : false}
                 href={hrefDoItem(item)}
               />
             ))}
           </ul>
-        ) : (
-          itemAtual && (
-            <>
-              {/* "Diário de bordo" — lista vertical de entradas de log ligadas por uma linha fina
-                  (não a trilha sinuosa da Jornada: um nível abaixo pede um registro mais discreto,
-                  tipo caderno de bordo, não outro mapa). O destaque do "passo atual" não é mais um
-                  card fixo separado — a entrada atual DENTRO da lista se expande (título, descrição,
-                  botão) e some pro formato compacto assim que é concluída, o próximo item que virar
-                  atual expande no lugar dele (o destaque "sobe" acompanhando o progresso). */}
-              <ul className="relative flex flex-col">
-                {itens.map((item, i) => (
-                  <ItemDiarioDeBordo
-                    key={item.id}
-                    item={item}
-                    indice={i}
-                    isLast={i === itens.length - 1}
-                    feito={estaConcluido(item)}
-                    atual={item.id === itemAtual.id}
-                    bloqueado={i > itemAtualIndex}
-                    href={hrefDoItem(item)}
-                  />
-                ))}
-              </ul>
-            </>
-          )
         )}
       </div>
     )
@@ -562,42 +678,81 @@ export function JornadaView({
             </p>
             <Link
               to="/guias"
+              // Sinaliza pro AppLayout abrir o galho "Guias" do menu lateral já expandido — é uma
+              // ação explícita de "me leva pra lá", diferente de navegação incidental (por isso não
+              // reabre a regra geral do menu, que fica fechado até o usuário abrir manualmente).
+              state={{ expandirMenuGuias: true }}
               className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
             >
               Ir pro Guia pelo sistema
             </Link>
           </div>
-        ) : (
-          proximo && (
-            <div className="anim-fade relative flex flex-col gap-3 border-t border-navy-700 bg-gold-500/10 p-5">
-              <div className="flex items-start gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-gold-400/50 bg-navy-800 text-gold-400">
-                  <Icon name={iconeDaFase(proximo.phase)} className="text-lg" />
+        ) : proximo ? (
+          <div className="anim-fade relative flex flex-col gap-3 border-t border-navy-700 bg-gold-500/10 p-5">
+            <div className="flex items-start gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-gold-400/50 bg-navy-800 text-gold-400">
+                <Icon name={iconeDaFase(proximo.phase)} className="text-lg" />
+              </span>
+              <div className="flex flex-col gap-1">
+                <span className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-gold-400">
+                  <Icon name="play_arrow" className="text-sm" /> Próximo · {proximo.phase}
                 </span>
-                <div className="flex flex-col gap-1">
-                  <span className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-gold-400">
-                    <Icon name="play_arrow" className="text-sm" /> Próximo · {proximo.phase}
-                  </span>
-                  <h3 className="text-lg font-semibold text-neutral-100">{proximo.title}</h3>
-                  <p className="text-sm text-neutral-400">{proximo.description}</p>
-                </div>
+                <h3 className="text-lg font-semibold text-neutral-100">{proximo.title}</h3>
+                <p className="text-sm text-neutral-400">{proximo.description}</p>
               </div>
-              <button
-                type="button"
-                onClick={() => entrarFase(proximo.phase)}
-                className="self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
-              >
-                Ir para a fase
-              </button>
             </div>
-          )
+            <button
+              type="button"
+              onClick={() => entrarFase(proximo.phase)}
+              className="self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
+            >
+              Ir para a fase
+            </button>
+          </div>
+        ) : (
+          // Não sobra "próximo" (todo mundo já tem registro, `estaConcluido` lenient) mas também
+          // não é `completa` de verdade (ainda tem gente pendente de aprovação) — não existe
+          // PRÓXIMA fase nenhuma nesse caso (é literalmente a última), então o rótulo é "último
+          // passo pendente", não "próximo". `itemPendenteFinal` é o item que falta aprovar.
+          (() => {
+            const itemPendenteFinal = trail.find((item) => !estaAprovado(item))
+            return (
+              itemPendenteFinal && (
+                <div className="anim-fade relative flex flex-col gap-3 border-t border-navy-700 bg-sky-500/10 p-5">
+                  <div className="flex items-start gap-3">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-sky-400/50 bg-navy-800 text-sky-400">
+                      <Icon name="hourglass_top" className="text-lg" />
+                    </span>
+                    <div className="flex flex-col gap-1">
+                      <span className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-sky-400">
+                        <Icon name="play_arrow" className="text-sm" /> Aguardando aprovação ·{' '}
+                        {itemPendenteFinal.phase}
+                      </span>
+                      <h3 className="text-lg font-semibold text-neutral-100">{itemPendenteFinal.title}</h3>
+                      <p className="text-sm text-neutral-400">
+                        Você já enviou tudo — só falta seu gestor aprovar pra fechar a Jornada.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => entrarFase(itemPendenteFinal.phase)}
+                    className="self-start rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-sky-400"
+                  >
+                    Ir para a fase
+                  </button>
+                </div>
+              )
+            )
+          })()
         )}
       </div>
 
-      {/* Seus acessos — leitura só (quem marca é o gestor, na tela do Supervisionado). Sem isso o
-          modal de boas-vindas prometia "acompanhe seus acessos" sem nenhuma tela de verdade por
-          trás pro colaborador ver o próprio progresso de acesso. Só aparece se o Admin já tiver
-          algum Acesso cadastrado pro Cargo dessa pessoa. */}
+      {/* ENGAVETADO a pedido do Miguel (2026-09-09): tirado de vista até ele confirmar com o gestor
+          se faz sentido o colaborador ver o próprio progresso de acessos aqui. Se a resposta for
+          sim, descomentar o bloco abaixo; se não, apagar de vez. (Motivo original de existir: sem
+          isso o modal de boas-vindas prometia "acompanhe seus acessos" sem nenhuma tela de verdade
+          por trás pro colaborador ver o próprio progresso.)
       {acessos.length > 0 && (
         <section className="flex flex-col gap-3">
           <h3 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
@@ -633,6 +788,7 @@ export function JornadaView({
           </div>
         </section>
       )}
+      */}
 
       {/* Trilha central — um caminho sinuoso ligando as fases, marco por marco (em vez de um
           grid de cards): o pedido foi um sentido de trilha literal, não uma lista disfarçada. */}
@@ -659,9 +815,13 @@ export function JornadaView({
           </svg>
 
           {fases.map(([fase, itens], i) => {
-            const feitosFase = itens.filter(estaConcluido).length
-            const pct = itens.length > 0 ? Math.round((feitosFase / itens.length) * 100) : 0
-            const faseCompleta = feitosFase === itens.length
+            // Estrito — mesmo critério de coerência do texto acima ("X de Y" só conta aprovado).
+            const feitosFase = itens.filter(estaAprovado).length
+            const faseCompleta = itens.every(estaAprovado)
+            const pct =
+              itens.length > 0
+                ? Math.round((itens.reduce((soma, item) => soma + pesoItem(item), 0) / itens.length) * 100)
+                : 0
             const atual = proximo?.phase === fase
             const bloqueada = !faseLiberada(i)
             const ponto = pontosTrilha[i]

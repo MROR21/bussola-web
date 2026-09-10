@@ -40,9 +40,17 @@ export function NotificationBell() {
   const jaAvisadasRef = useRef<Set<string>>(new Set())
   const navegar = useNavigate()
 
+  // O campo `link` serve dois casos: uma ROTA interna do próprio app (ex.: "/fase/Primeiro%20Card",
+  // navega por dentro) ou um link EXTERNO (ex.: a comprovação/PR anexada ao concluir o Primeiro
+  // Card) — esse precisa abrir numa aba nova, tentar navegar por dentro pra uma URL http não faria
+  // sentido nenhum (o React Router não sabe rotear pra fora do próprio app).
   function irPara(link: string) {
     setAberto(false)
-    navegar(link)
+    if (/^https?:\/\//i.test(link)) {
+      window.open(link, '_blank', 'noopener,noreferrer')
+    } else {
+      navegar(link)
+    }
   }
 
   useEffect(() => {
@@ -127,11 +135,19 @@ export function NotificationBell() {
     return () => document.removeEventListener('mousedown', aoClicarFora)
   }, [aberto])
 
+  // Busca uma vez logo no mount (só pra gestor) — sem isso, a barra de filtro só aparecia DEPOIS
+  // de abrir o sino pela 1ª vez (o fetch abaixo só disparava com `aberto=true`), dando um "pisca"
+  // de a barra surgir de repente na primeira abertura da sessão.
+  useEffect(() => {
+    if (!isGestor) return
+    getUsuariosProgresso().then(setSupervisionados).catch(() => {})
+  }, [isGestor])
+
   // Pra um gestor, a lista de opções de filtro é a dos PRÓPRIOS supervisionados — assim o filtro já
   // aparece mesmo que só um deles tenha notificado até agora (o outro simplesmente mostra "nenhuma
-  // notificação dessa pessoa" se escolhido). Busca de novo TODA VEZ que o sino abre (não só uma vez
-  // no mount) — senão um supervisionado removido no Painel do gestor continuava aparecendo aqui
-  // até a página recarregar, já que essa lista vivia só num estado próprio, sem saber da remoção.
+  // notificação dessa pessoa" se escolhido). Busca de novo TODA VEZ que o sino abre (além do fetch
+  // do mount acima) — senão um supervisionado removido no Painel do gestor continuava aparecendo
+  // aqui até a página recarregar, já que essa lista vivia só num estado próprio, sem saber da remoção.
   useEffect(() => {
     if (!isGestor || !aberto) return
     getUsuariosProgresso().then(setSupervisionados).catch(() => {})

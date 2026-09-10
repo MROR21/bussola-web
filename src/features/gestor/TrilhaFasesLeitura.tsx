@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { AmpulhetaAnimada } from '../../components/AmpulhetaAnimada'
 import { Icon } from '../../components/Icon'
 import { cx } from '../../utils/cx'
 import type { PassoProgresso } from './types'
@@ -96,11 +97,18 @@ export function TrilhaFasesLeitura({ passos }: { passos: PassoProgresso[] }) {
     return d
   }, [pontosTrilha])
 
+  // "Concluído de verdade" (não só comprovação enviada) — só usado pros booleanos de fechamento
+  // (faseCompleta/faseFinalLiberada).
+  const aprovado = (p: PassoProgresso) => p.concluido && !p.precisaCorrecao && !p.aguardandoConfirmacao
+  // Peso pro PERCENTUAL: 1 se aprovado, 0.5 se só enviado e pendente (sente o avanço sem bater
+  // 100% cedo demais), 0 se nem isso — mesmo critério de JornadaView.tsx.
+  const peso = (p: PassoProgresso) => (aprovado(p) ? 1 : p.concluido ? 0.5 : 0)
+
   const proximo = passos.find((p) => !p.concluido)
   const indiceFaseFinal = fases.findIndex(([fase]) => fase === FASE_FINAL)
   const faseFinalLiberada =
     indiceFaseFinal < 0 ||
-    fases.slice(0, indiceFaseFinal).every(([, itens]) => itens.every((p) => p.concluido))
+    fases.slice(0, indiceFaseFinal).every(([, itens]) => itens.every(aprovado))
 
   const itensExpandidos = ultimaFaseVista
     ? fases.find(([f]) => f === ultimaFaseVista)?.[1]
@@ -129,9 +137,14 @@ export function TrilhaFasesLeitura({ passos }: { passos: PassoProgresso[] }) {
         </svg>
 
         {fases.map(([fase, itens], i) => {
-          const feitosFase = itens.filter((p) => p.concluido).length
-          const pct = itens.length > 0 ? Math.round((feitosFase / itens.length) * 100) : 0
-          const faseCompleta = feitosFase === itens.length
+          // Estrito — o texto "X de Y" mostra só o que foi aprovado de verdade (coerência com o
+          // resto das telas do gestor); a barra (`pct` abaixo) continua sentindo o envio.
+          const feitosFase = itens.filter(aprovado).length
+          const pct =
+            itens.length > 0
+              ? Math.round((itens.reduce((soma, p) => soma + peso(p), 0) / itens.length) * 100)
+              : 0
+          const faseCompleta = itens.every(aprovado)
           const atual = proximo?.phase === fase
           const bloqueada = fase === FASE_FINAL && !faseFinalLiberada
           const ponto = pontosTrilha[i]
@@ -204,17 +217,38 @@ export function TrilhaFasesLeitura({ passos }: { passos: PassoProgresso[] }) {
                 {ultimaFaseVista}
               </h4>
               <ul className="flex flex-col gap-1.5">
-                {itensExpandidos.map((p) => (
+                {itensExpandidos.map((p) => {
+                  // Enviado mas ainda não aprovado — mesmo passo que exige comprovação, só ele
+                  // pode ficar nesse estado. Ampulheta (em análise) cinza e menor que os outros
+                  // ícones dessa lista — no lugar do check "concluído de verdade", senão dava a
+                  // entender que já tinha fechado.
+                  const pendente = p.concluido && (p.precisaCorrecao || p.aguardandoConfirmacao)
+                  const emAnalise = pendente && !p.precisaCorrecao
+                  return (
                   <li key={p.id} className="flex flex-col gap-1 text-sm">
                     <div className="flex items-center gap-2">
-                      <Icon
-                        name={p.concluido ? 'check_circle' : 'radio_button_unchecked'}
-                        className={cx(
-                          'text-base',
-                          p.concluido ? 'text-gold-400' : 'text-neutral-600',
-                        )}
-                        fill={p.concluido}
-                      />
+                      {emAnalise ? (
+                        <AmpulhetaAnimada className="text-sm text-neutral-400" />
+                      ) : (
+                        <Icon
+                          name={
+                            p.precisaCorrecao
+                              ? 'rate_review'
+                              : p.concluido
+                                ? 'check_circle'
+                                : 'radio_button_unchecked'
+                          }
+                          className={cx(
+                            'text-base',
+                            p.precisaCorrecao
+                              ? 'text-amber-400'
+                              : p.concluido
+                                ? 'text-gold-400'
+                                : 'text-neutral-600',
+                          )}
+                          fill={p.concluido}
+                        />
+                      )}
                       <span className={p.concluido ? 'text-neutral-300' : 'text-neutral-500'}>
                         {p.title}
                       </span>
@@ -239,7 +273,8 @@ export function TrilhaFasesLeitura({ passos }: { passos: PassoProgresso[] }) {
                       </div>
                     )}
                   </li>
-                ))}
+                  )
+                })}
               </ul>
             </section>
           )}

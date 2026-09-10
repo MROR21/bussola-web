@@ -276,3 +276,11 @@
 *::-webkit-scrollbar-thumb:hover {
   background-color: var(--color-gold-500);
 }
+
+/* O ícone nativo de "revelar senha" do Edge (`::-ms-reveal`, input[type=password]) vem sempre
+   escuro por padrão — não aceita `color` normal (é um botão do próprio navegador, não um glifo de
+   fonte). `filter: invert(1)` vira o preto em branco, pra enxergar contra o fundo escuro do campo
+   (LoginForm.tsx). Sem efeito em navegadores sem esse elemento (Chrome/Firefox/Safari). */
+.bussola-senha-input::-ms-reveal {
+  filter: invert(1);
+}

@@ -35,7 +35,25 @@ export const useAuthStore = create<AuthState>()(
       // Atualiza campos do usuário na sessão sem relogar (ex.: squad ao refazer o nivelamento).
       atualizarUsuario: (patch) =>
         set((s) => (s.usuario ? { usuario: { ...s.usuario, ...patch } } : {})),
-      logout: (motivo) => set({ usuario: null, token: null, motivoSaida: motivo ?? null }),
+      logout: (motivo) =>
+        set((s) => {
+          // Rascunho de comprovação (PassoDetalhePage) fica salvo por usuário — sem isso, some
+          // do localStorage só se o passo for enviado, então quem desloga sem enviar deixa lixo
+          // pra sempre. Limpa aqui, escopado ao usuário que está saindo (não mexe no rascunho de
+          // outra conta nesse mesmo navegador).
+          if (s.usuario) {
+            try {
+              const prefixo = `bussola:rascunho-comprovacao:${s.usuario.id}:`
+              for (let i = localStorage.length - 1; i >= 0; i--) {
+                const chave = localStorage.key(i)
+                if (chave?.startsWith(prefixo)) localStorage.removeItem(chave)
+              }
+            } catch {
+              // sem storage disponível (ex.: aba privada) — só não limpa, sem quebrar o logout
+            }
+          }
+          return { usuario: null, token: null, motivoSaida: motivo ?? null }
+        }),
       limparMotivoSaida: () => set({ motivoSaida: null }),
       marcarBoasVindasVista: (usuarioId, tipo) =>
         set((s) => ({

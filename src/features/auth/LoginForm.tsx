@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Icon } from '../../components/Icon'
 import { Spinner } from '../../components/Spinner'
+import { useSaidaValor } from '../../hooks/useSaida'
 import { useTitulo } from '../../hooks/useTitulo'
-import { login, loginComMicrosoft, register } from './authService'
+import { ApiError } from '../../services/api'
+import { cx } from '../../utils/cx'
+import { confirmarEmail, login, loginComMicrosoft, register, reenviarCodigo } from './authService'
 import { useAuthStore } from './authStore'
 import { entrarComMicrosoft, msalHabilitado } from './msal'
 
@@ -31,34 +34,97 @@ export function LoginForm() {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
+  const [senhaComFoco, setSenhaComFoco] = useState(false)
   const [loading, setLoading] = useState(false)
   const [carregandoMicrosoft, setCarregandoMicrosoft] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Não-nulo = trocou a tela de login/cadastro pela de "digite o código" (ver bloco de confirmação
+  // mais abaixo). Guarda o e-mail já validado (veio do cadastro, ou do próprio campo no login) pra
+  // não precisar pedir de novo.
+  const [emailPendente, setEmailPendente] = useState<string | null>(null)
+  const [codigo, setCodigo] = useState('')
+  const [confirmando, setConfirmando] = useState(false)
+  const [reenviando, setReenviando] = useState(false)
+  const [codigoReenviado, setCodigoReenviado] = useState(false)
 
   // Mensagem de um logout FORÇADO (sessão expirada, acesso revogado) — captura o valor uma vez na
   // montagem (o `persist` do authStore já reidratou síncrono do localStorage antes disso) e limpa
   // no mesmo instante, senão ficaria persistido e reapareceria numa visita futura sem relação
   // nenhuma com o motivo original.
-  const [mensagemSaida] = useState(() => useAuthStore.getState().motivoSaida)
+  const [mensagemSaida, setMensagemSaida] = useState(() => useAuthStore.getState().motivoSaida)
   useEffect(() => {
     useAuthStore.getState().limparMotivoSaida()
   }, [])
+  // Some sozinho depois de um tempo — um aviso de sessão expirada ficando preso na tela pra
+  // sempre (até a pessoa entrar de novo) incomoda mais do que ajuda depois dos primeiros segundos.
+  useEffect(() => {
+    if (!mensagemSaida) return
+    const t = setTimeout(() => setMensagemSaida(null), 8000)
+    return () => clearTimeout(t)
+  }, [mensagemSaida])
+  const toastSaida = useSaidaValor(mensagemSaida)
+
+  useEffect(() => {
+    if (!codigoReenviado) return
+    const t = setTimeout(() => setCodigoReenviado(false), 4000)
+    return () => clearTimeout(t)
+  }, [codigoReenviado])
 
   const ehCadastro = location.pathname === '/cadastro'
   useTitulo(ehCadastro ? 'Criar conta' : 'Entrar')
+  const senhaTemMinimo = senha.length >= 6
 
   async function handleSubmit() {
     setLoading(true)
     setError(null)
     try {
-      const resposta = ehCadastro
-        ? await register(nome.trim(), email.trim(), senha)
-        : await login(email.trim(), senha)
-      entrar(resposta.usuario, resposta.token)
+      if (ehCadastro) {
+        const resposta = await register(nome.trim(), email.trim(), senha)
+        setEmailPendente(resposta.email)
+      } else {
+        const resposta = await login(email.trim(), senha)
+        entrar(resposta.usuario, resposta.token)
+      }
     } catch (e) {
+      // Senha certa mas e-mail sem confirmar (só acontece no login — cadastro sempre cai aqui em
+      // cima) — manda direto pra tela de código em vez de só mostrar o erro.
+      if (e instanceof ApiError && e.corpo?.precisaConfirmarEmail) {
+        setEmailPendente(email.trim())
+        return
+      }
       setError(e instanceof Error ? e.message : 'Erro ao entrar')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleConfirmarCodigo() {
+    if (!emailPendente) return
+    setConfirmando(true)
+    setError(null)
+    try {
+      const resposta = await confirmarEmail(emailPendente, codigo)
+      entrar(resposta.usuario, resposta.token)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erro ao confirmar')
+    } finally {
+      setConfirmando(false)
+    }
+  }
+
+  async function handleReenviarCodigo() {
+    if (!emailPendente) return
+    setReenviando(true)
+    setError(null)
+    setCodigoReenviado(false)
+    try {
+      await reenviarCodigo(emailPendente)
+      setCodigoReenviado(true)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erro ao reenviar')
+    } finally {
+      setReenviando(false)
     }
   }
 
@@ -79,15 +145,93 @@ export function LoginForm() {
   function trocarModo() {
     navigate(ehCadastro ? '/login' : '/cadastro')
     setError(null)
+    setEmailPendente(null)
+  }
+
+  if (emailPendente) {
+    return (
+      <div key="confirmar-email" className="anim-page flex flex-col gap-6">
+        <div className="anim-fade flex flex-col gap-1">
+          <h2 className="flex items-center gap-1.5 text-xl font-semibold">
+            Confirme seu e-mail <Icon name="mark_email_read" className="text-xl text-gold-400" />
+          </h2>
+          <p className="text-sm text-neutral-400">
+            Mandamos um código de 6 dígitos pra{' '}
+            <span className="text-neutral-200">{emailPendente}</span>.
+          </p>
+        </div>
+
+        {error && <p className="anim-fade text-sm text-red-400">{error}</p>}
+        {codigoReenviado && <p className="anim-fade text-sm text-green-400">Código reenviado.</p>}
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            handleConfirmarCodigo()
+          }}
+          className="flex flex-col gap-4"
+        >
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-neutral-300">Código</span>
+            <input
+              required
+              autoFocus
+              inputMode="numeric"
+              maxLength={6}
+              value={codigo}
+              onChange={(e) => setCodigo(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              placeholder="000000"
+              className="w-full rounded-lg border border-navy-600 bg-navy-900 px-3.5 py-2.5 text-center text-lg tracking-[0.5em] text-neutral-100 outline-none transition-colors focus:border-gold-500"
+            />
+          </label>
+
+          <button
+            type="submit"
+            disabled={confirmando || codigo.length !== 6}
+            className="flex items-center justify-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {confirmando ? (
+              <>
+                <Spinner /> Confirmando...
+              </>
+            ) : (
+              'Confirmar'
+            )}
+          </button>
+        </form>
+
+        <button
+          type="button"
+          onClick={handleReenviarCodigo}
+          disabled={reenviando}
+          className="text-sm text-gold-400 transition-colors hover:text-gold-300 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {reenviando ? 'Enviando...' : 'Reenviar código'}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setEmailPendente(null)
+            setError(null)
+            setCodigo('')
+          }}
+          className="text-sm text-neutral-500 transition-colors hover:text-neutral-300"
+        >
+          Voltar
+        </button>
+      </div>
+    )
   }
 
   return (
     <form
+      key={ehCadastro ? 'cadastro' : 'login'}
       onSubmit={(e) => {
         e.preventDefault()
         handleSubmit()
       }}
-      className="flex flex-col gap-6"
+      className="anim-page flex flex-col gap-6"
     >
       <div key={ehCadastro ? 'cadastro' : 'login'} className="anim-fade flex flex-col gap-1">
         <h2 className="flex items-center gap-1.5 text-xl font-semibold">
@@ -104,9 +248,14 @@ export function LoginForm() {
         </p>
       </div>
 
-      {mensagemSaida && (
-        <p className="anim-fade flex items-center gap-1.5 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300">
-          <Icon name="warning" className="shrink-0 text-base" /> {mensagemSaida}
+      {toastSaida.montado && toastSaida.valor && (
+        <p
+          className={cx(
+            'flex items-center gap-1.5 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300',
+            toastSaida.saindo ? 'anim-fade-out' : 'anim-fade',
+          )}
+        >
+          <Icon name="warning" className="shrink-0 text-base" /> {toastSaida.valor}
         </p>
       )}
 
@@ -143,9 +292,22 @@ export function LoginForm() {
           minLength={ehCadastro ? 6 : undefined}
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
-          placeholder={ehCadastro ? 'Ao menos 6 caracteres' : '••••••••'}
-          className="rounded-lg border border-navy-600 bg-navy-900 px-3.5 py-2.5 text-neutral-100 outline-none transition-colors focus:border-gold-500"
+          onFocus={() => setSenhaComFoco(true)}
+          onBlur={() => setSenhaComFoco(false)}
+          placeholder={ehCadastro ? 'Crie uma senha' : '••••••••'}
+          className="bussola-senha-input w-full rounded-lg border border-navy-600 bg-navy-900 px-3.5 py-2.5 text-neutral-100 outline-none transition-colors focus:border-gold-500"
         />
+        {ehCadastro && senhaComFoco && (
+          <span
+            className={cx(
+              'anim-fade flex items-center gap-1.5 text-xs transition-colors',
+              senhaTemMinimo ? 'text-green-400' : 'text-red-400',
+            )}
+          >
+            <Icon name={senhaTemMinimo ? 'check_circle' : 'cancel'} size={16} fill />
+            Ao menos 6 caracteres
+          </span>
+        )}
       </label>
 
       {error && <p className="anim-fade text-sm text-red-400">{error}</p>}

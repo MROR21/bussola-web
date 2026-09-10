@@ -100,6 +100,10 @@ export function AppLayout() {
   const [modulos, setModulos] = useState<string[]>([])
   const [todosFluxos, setTodosFluxos] = useState<Fluxo[]>([])
   const [todosPassos, setTodosPassos] = useState<OnboardingStep[]>([])
+  // Fica false até a 1ª resposta de `carregarArvore()` — enquanto isso, `fases`/`modulos` ainda
+  // estão vazios (valor inicial), e usar isso direto pra decidir "mostra a seta de expandir?"
+  // fazia ela aparecer/sumir de repente assim que o fetch resolvia, logo depois do login.
+  const [arvoreCarregada, setArvoreCarregada] = useState(false)
 
   // FLIP pra animar o reordenar dos galhos (mesma técnica do `mover()` em SimpleEntityCrud.tsx):
   // guarda a posição de cada `<li>` ANTES de trocar o array, e um layout effect abaixo anima cada
@@ -124,6 +128,8 @@ export function AppLayout() {
       setModulos(distintosEmOrdem(fluxos, (f) => f.modulo))
     } catch {
       // silencioso — o menu só não atualiza a árvore dessa vez, tenta de novo na próxima
+    } finally {
+      setArvoreCarregada(true)
     }
   }
 
@@ -209,6 +215,16 @@ export function AppLayout() {
   }
   const regiaoAnterior = useRef<string | null>(null)
 
+  // O botão "Ir pro Guia pelo sistema" (banner de Jornada completa) manda esse sinal via
+  // `state` da navegação — é uma ação explícita de "me leva pra lá", diferente de navegação
+  // incidental (por isso não muda a regra geral abaixo, que só fecha e nunca abre sozinha).
+  useEffect(() => {
+    if ((location.state as { expandirMenuGuias?: boolean } | null)?.expandirMenuGuias) {
+      setExpandido((e) => ({ ...e, '/guias': true }))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state])
+
   // Ao TROCAR de seção (deep link, ou veio de outra aba), fecha sozinha a seção que ficou pra
   // trás — não abre mais a nova sozinha (isso causava um tremor visual no primeiro clique: abrir
   // e a lista de galhos empurrando o resto do menu na mesma hora). Quem quiser ver os galhos da
@@ -257,7 +273,7 @@ export function AppLayout() {
             "fora da área visível" e fazia o navegador desenhar uma barra de rolagem à toa. */}
         <nav className="flex w-full min-h-0 flex-1 flex-col gap-1 overflow-y-auto overflow-x-hidden">
           {itensMenu.map((item) => {
-            const galhos = item.arvore === 'fase' ? fases : item.arvore === 'modulo' ? modulos : []
+            const galhos = !arvoreCarregada ? [] : item.arvore === 'fase' ? fases : item.arvore === 'modulo' ? modulos : []
             const aberto = expandido[item.to] ?? false
             // Dentro de um Fluxo não existe rota /fase ou /guias pra casar de verdade — força a
             // aba de origem (Jornada ou Guias) como ativa, igual o usuário esperaria vendo a URL.
