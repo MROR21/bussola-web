@@ -105,8 +105,8 @@ export function ChavesApiPage() {
           <Icon name="key" className="text-2xl text-gold-400" /> Chaves de API
         </h1>
         <p className="text-sm text-neutral-400">
-          Chame o Bússola de fora (scripts, automações) com um token no lugar da senha — mesmo
-          acesso que você já tem logado.
+          Gere tokens de acesso pessoal para autenticar na API do Bússola — em scripts,
+          automações ou integrações externas — com o mesmo nível de acesso da sua conta.
         </p>
       </header>
 
