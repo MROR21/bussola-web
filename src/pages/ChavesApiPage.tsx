@@ -226,23 +226,23 @@ export function ChavesApiPage() {
 
       {/* Portal pro <body>: garante que o modal cubra a tela INTEIRA de verdade — qualquer
           ancestral com transform/filter/etc. (ex.: a animação de entrada da página) criaria um
-          "container" novo pro `fixed` e quebraria o posicionamento. O card EXTERNO é o modal de
-          verdade (fundo navy sólido, igual aos outros modais do app — é o que separa visualmente
-          do backdrop). O box amarelo (`bg-gold-500/10`) mora DENTRO dele, só em volta do aviso +
+          "container" novo pro `fixed` e quebraria o posicionamento. Card externo no MESMO padrão
+          dos outros modais do app (fundo navy sólido, sem blur/sombra extra — ver modal
+          "Revogar token?" logo abaixo). O box amarelo mora DENTRO dele, só em volta do aviso +
           token + copiar; "Já copiei, fechar" fica fora do amarelo, no card externo. */}
       {modalTokenGerado.montado &&
         modalTokenGerado.valor &&
         createPortal(
           <div
             className={cx(
-              'fixed inset-0 z-30 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm',
+              'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
               modalTokenGerado.saindo ? 'anim-fade-out' : 'anim-fade',
             )}
             onClick={fecharTokenGerado}
           >
             <div
               className={cx(
-                'flex w-full max-w-2xl flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6 shadow-2xl shadow-black/60',
+                'flex w-full max-w-2xl flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6',
                 modalTokenGerado.saindo ? 'anim-pop-out' : 'anim-pop',
               )}
               onClick={(e) => e.stopPropagation()}
