@@ -336,8 +336,18 @@ export function PassoDetalhePage({
   // verdade, senão a Jornada dava a entender que a fase já tinha fechado antes da hora.
   const concluidoDeVerdade = concluido && !precisaCorrecao && !aguardandoConfirmacao
 
+  // Layout tipo "aula" pra todo passo com vídeo: vídeo maior à esquerda, conteúdo + concluir numa
+  // coluna à direita, em vez do empilhado padrão (mesmo tratamento do FluxoDetalhePage.tsx, testado
+  // e aprovado por Miguel em 2026-09-11). Sem vídeo, mantém a largura estreita de sempre.
+  const layoutAula = Boolean(step.videoUrl)
+
   return (
-    <article className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
+    <article
+      className={cx(
+        'anim-fade relative flex w-full flex-col gap-5',
+        layoutAula ? 'max-w-6xl' : 'max-w-2xl',
+      )}
+    >
       <CompassRose className="pointer-events-none fixed right-8 top-20 size-64 text-gold-500 opacity-[0.15]" />
       <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] bottom-8 w-56 text-gold-500 opacity-[0.25]" />
       {/* Sempre volta pra visão geral da fase (nunca pro passo anterior) — mesmo entrando pelas
@@ -445,9 +455,14 @@ export function PassoDetalhePage({
           </div>
         </div>
       ) : (
-        <div className="anim-fade flex flex-col gap-5">
+        <div className={cx('anim-fade flex flex-col gap-5', layoutAula && 'lg:flex-row lg:items-start')}>
           {step.videoUrl && (
-            <div className="aspect-video w-full overflow-hidden rounded-2xl border border-navy-700">
+            <div
+              className={cx(
+                'aspect-video w-full overflow-hidden rounded-2xl border border-navy-700',
+                layoutAula && 'lg:flex-[3]',
+              )}
+            >
               <iframe
                 src={paraEmbed(step.videoUrl)}
                 title={step.title}
@@ -457,7 +472,12 @@ export function PassoDetalhePage({
               />
             </div>
           )}
-          <div className="flex flex-col gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed">
+          <div
+            className={cx(
+              'flex flex-col gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed',
+              layoutAula && 'lg:flex-[2] lg:self-stretch',
+            )}
+          >
             {/* Conteúdo rola dentro de si mesmo (altura travada) — passos com várias imagens
                 (Ambientação) ficavam gigantes, empurrando concluir/desmarcar lá pro fundo da
                 página. A barra de rolagem personalizada (index.css) já cobre o visual. */}

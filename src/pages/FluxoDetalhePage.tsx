@@ -205,8 +205,19 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
       : undefined
   const hrefDoFluxo = (f: Fluxo) => `/fluxo/${encodeURIComponent(f.titulo)}`
 
+  // Layout tipo "aula" pra todo fluxo com vídeo: vídeo maior à esquerda, checklist + concluir numa
+  // coluna à direita, em vez do empilhado padrão — testado antes só num fluxo específico (aprovado
+  // por Miguel em 2026-09-11), agora vale pra qualquer um que tenha vídeo. Sem vídeo, mantém a
+  // largura estreita de sempre (texto largo demais fica ruim de ler).
+  const layoutAula = Boolean(fluxo.videoUrl)
+
   return (
-    <article className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
+    <article
+      className={cx(
+        'anim-fade relative flex w-full flex-col gap-5',
+        layoutAula ? 'max-w-6xl' : 'max-w-2xl',
+      )}
+    >
       <CompassRose className="pointer-events-none fixed right-8 top-20 size-64 text-gold-500 opacity-[0.15]" />
       <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] bottom-8 w-56 text-gold-500 opacity-[0.25]" />
       {/* Destino FIXO nos dois casos (nunca histórico) — quem entrou pela Jornada (`veioDaFase`,
@@ -327,9 +338,19 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
           </div>
         </div>
       ) : (
-        <div className="anim-fade flex flex-col gap-5">
+        <div
+          className={cx(
+            'anim-fade flex flex-col gap-5',
+            layoutAula && 'lg:flex-row lg:items-start',
+          )}
+        >
           {fluxo.videoUrl && (
-            <div className="aspect-video w-full overflow-hidden rounded-2xl border border-navy-700">
+            <div
+              className={cx(
+                'aspect-video w-full overflow-hidden rounded-2xl border border-navy-700',
+                layoutAula && 'lg:flex-[3]',
+              )}
+            >
               <iframe
                 src={paraEmbed(fluxo.videoUrl)}
                 title={fluxo.titulo}
@@ -340,7 +361,12 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
             </div>
           )}
 
-          <div className="flex flex-col gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed">
+          <div
+            className={cx(
+              'flex flex-col gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed',
+              layoutAula && 'lg:flex-[2] lg:self-stretch',
+            )}
+          >
             <Markdown>{fluxo.conteudo}</Markdown>
 
             {/* Concluir/desmarcar mora no MESMO container da descrição — não é mais uma caixa à
