@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
+import { CampoData } from '../components/CampoData'
 import { CompassRose } from '../components/CompassRose'
 import { Icon } from '../components/Icon'
 import { MapCorners } from '../components/MapCorners'
@@ -173,13 +174,7 @@ export function ChavesApiPage() {
           </label>
           <label className="flex flex-col gap-1.5 text-sm">
             <span className="text-neutral-300">Expira em</span>
-            <input
-              type="date"
-              value={expiraEmInput}
-              min={hojeIso}
-              onChange={(e) => setExpiraEmInput(e.target.value)}
-              className={inputCls}
-            />
+            <CampoData value={expiraEmInput} onChange={setExpiraEmInput} min={hojeIso} className="w-40" />
           </label>
           <button
             type="submit"
