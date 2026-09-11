@@ -61,6 +61,7 @@ export function ChavesApiPage() {
       setTokenGerado(criado)
       setNomeNovoToken('')
       setTokens((t) => [{ id: criado.id, nome: criado.nome, criadoEm: criado.criadoEm, ultimoUsoEm: null }, ...t])
+      setFeedback({ texto: `Token "${criado.nome}" gerado.`, ok: true })
     } catch (err) {
       setFeedback({ texto: err instanceof Error ? err.message : 'Erro ao gerar o token.', ok: false })
     } finally {
@@ -86,6 +87,7 @@ export function ChavesApiPage() {
     try {
       await revogarApiToken(alvo.id)
       setTokens((t) => t.filter((tok) => tok.id !== alvo.id))
+      setFeedback({ texto: `Token "${alvo.nome}" revogado.`, ok: true })
     } catch (err) {
       setFeedback({ texto: err instanceof Error ? err.message : 'Erro ao revogar o token.', ok: false })
     } finally {
