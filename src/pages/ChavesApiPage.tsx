@@ -93,8 +93,6 @@ export function ChavesApiPage() {
 
   const inputCls =
     'rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500 disabled:opacity-50'
-  const salvarCls =
-    'flex items-center gap-1.5 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40'
   const cardCls = 'flex flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6'
 
   return (
@@ -155,7 +153,7 @@ export function ChavesApiPage() {
           <button
             type="submit"
             disabled={!nomeNovoToken.trim() || gerando}
-            className={cx(salvarCls, 'mb-0')}
+            className="flex shrink-0 items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {gerando ? (
               <>
