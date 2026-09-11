@@ -435,7 +435,7 @@ export function JornadaView({
     return (
       <div className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
         <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.15]" />
-        <MapIllustration className="pointer-events-none absolute -bottom-10 -left-8 w-56 text-gold-500 opacity-[0.06]" />
+        <MapIllustration className="pointer-events-none absolute -bottom-10 -left-8 w-56 text-gold-500 opacity-100" />
         <button
           type="button"
           onClick={sairFase}
@@ -618,7 +618,7 @@ export function JornadaView({
         className="pointer-events-none absolute -right-16 -top-10 size-[520px] text-gold-500 opacity-[0.15]"
       />
       <MapIllustration
-        className="pointer-events-none absolute -bottom-10 -left-20 w-[420px] text-gold-500 opacity-[0.07]"
+        className="pointer-events-none absolute -bottom-10 -left-20 w-[420px] text-gold-500 opacity-100"
       />
       {/* Hero — anel de progresso + próximo passo num único cartão (antes eram duas caixas soltas
           empilhadas; agora lê como um bloco só, com o glow sutil atrás do anel). */}
