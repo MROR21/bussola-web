@@ -243,7 +243,10 @@ export function NotificationBell() {
       {painelMontado && (
         <div
           className={cx(
-            'absolute right-0 z-10 mt-2 w-72 overflow-hidden rounded-xl border border-navy-700 bg-navy-800 shadow-lg',
+            // z-40: acima de qualquer conteúdo normal de página (ex.: o botão "Guia rápido" da
+            // Jornada, que também é z-10 — empatado, ganhava por vir depois no DOM). O dropdown
+            // do sino é elemento de navegação global, deve sempre ficar por cima do conteúdo.
+            'absolute right-0 z-40 mt-2 w-72 overflow-hidden rounded-xl border border-navy-700 bg-navy-800 shadow-lg',
             painelSaindo ? 'anim-pop-out' : 'anim-pop',
           )}
         >
