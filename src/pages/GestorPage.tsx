@@ -9,7 +9,7 @@ import { MapIllustration } from '../components/MapIllustration'
 import { Carregando } from '../components/Spinner'
 import { useAuthStore } from '../features/auth/authStore'
 import { usePolling } from '../hooks/useAtualizarEmSegundoPlano'
-import { useSaidaValor } from '../hooks/useSaida'
+import { useSaida, useSaidaValor } from '../hooks/useSaida'
 import { useTitulo } from '../hooks/useTitulo'
 import { cx } from '../utils/cx'
 import {
@@ -40,8 +40,10 @@ export function GestorPage() {
   const [buscaDisponivel, setBuscaDisponivel] = useState('')
   const [confirmandoRemover, setConfirmandoRemover] = useState<UsuarioProgresso | null>(null)
   const [removendoId, setRemovendoId] = useState<string | null>(null)
+  const [mostrandoLimite, setMostrandoLimite] = useState(false)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
   const modalRemover = useSaidaValor(confirmandoRemover)
+  const modalLimite = useSaida(mostrandoLimite)
   const toastFeedback = useSaidaValor(feedback)
   const navegar = useNavigate()
 
@@ -235,10 +237,8 @@ export function GestorPage() {
       <div className="flex flex-col gap-3 border-t border-navy-700 pt-4">
         <button
           type="button"
-          onClick={() => setAdicionando((v) => !v)}
-          disabled={noLimite}
-          title={noLimite ? `Máximo de ${LIMITE_SUPERVISIONADOS} supervisionados por gestor.` : undefined}
-          className="flex items-center gap-1.5 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
+          onClick={() => (noLimite ? setMostrandoLimite(true) : setAdicionando((v) => !v))}
+          className="flex items-center gap-1.5 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
         >
           <Icon name="add" className="text-base" /> Adicionar supervisionado
           <Icon
@@ -289,9 +289,8 @@ export function GestorPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => adicionar(u.id, u.nome)}
-                    disabled={noLimite}
-                    className="shrink-0 text-sm text-gold-400 transition-colors hover:text-gold-300 disabled:cursor-not-allowed disabled:opacity-40"
+                    onClick={() => (noLimite ? setMostrandoLimite(true) : adicionar(u.id, u.nome))}
+                    className="shrink-0 text-sm text-gold-400 transition-colors hover:text-gold-300"
                   >
                     Adicionar
                   </button>
@@ -337,6 +336,42 @@ export function GestorPage() {
                 className="rounded-lg bg-red-500/90 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-500"
               >
                 Remover
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {modalLimite.montado && (
+        <div
+          className={cx(
+            'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
+            modalLimite.saindo ? 'anim-fade-out' : 'anim-fade',
+          )}
+          onClick={() => setMostrandoLimite(false)}
+        >
+          <div
+            className={cx(
+              'flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6',
+              modalLimite.saindo ? 'anim-pop-out' : 'anim-pop',
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="flex items-center gap-1.5 text-lg font-semibold text-neutral-100">
+              <Icon name="group_off" className="text-xl text-gold-400" /> Limite de supervisionados
+            </h3>
+            <p className="text-sm text-neutral-400">
+              Você já tem {LIMITE_SUPERVISIONADOS} supervisionados — o máximo por gestor, pra dar
+              atenção de verdade a cada onboarding. Remova alguém da sua lista antes de adicionar
+              outra pessoa.
+            </p>
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setMostrandoLimite(false)}
+                className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
+              >
+                Entendi
               </button>
             </div>
           </div>
