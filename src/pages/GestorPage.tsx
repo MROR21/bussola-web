@@ -20,6 +20,11 @@ import {
 } from '../features/gestor/gestorService'
 import type { UsuarioDisponivel, UsuarioProgresso } from '../features/gestor/types'
 
+// Mesmo valor do back (`limiteSupervisionados` em Program.cs) — um onboarding de verdade não
+// escala bem além de poucas pessoas ao mesmo tempo. Duplicado aqui só pra UI reagir na hora, sem
+// esperar o erro do back; o back é quem garante de verdade (nunca confiar só no front).
+const LIMITE_SUPERVISIONADOS = 3
+
 // Painel do gestor: progresso dos supervisionados + adicionar/remover supervisionados.
 export function GestorPage() {
   useTitulo('Supervisionados')
@@ -47,6 +52,8 @@ export function GestorPage() {
     setMostrarBoasVindas(false)
     if (usuarioLogado) marcarBoasVindasVista(usuarioLogado.id, 'supervisor')
   }
+
+  const noLimite = usuarios.length >= LIMITE_SUPERVISIONADOS
 
   const disponiveisFiltrados = disponiveis.filter((u) => {
     const q = buscaDisponivel.trim().toLowerCase()
@@ -229,7 +236,9 @@ export function GestorPage() {
         <button
           type="button"
           onClick={() => setAdicionando((v) => !v)}
-          className="flex items-center gap-1.5 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
+          disabled={noLimite}
+          title={noLimite ? `Máximo de ${LIMITE_SUPERVISIONADOS} supervisionados por gestor.` : undefined}
+          className="flex items-center gap-1.5 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Icon name="add" className="text-base" /> Adicionar supervisionado
           <Icon
@@ -237,6 +246,12 @@ export function GestorPage() {
             className={cx('text-base transition-transform duration-200', adicionando && 'rotate-180')}
           />
         </button>
+        {noLimite && (
+          <p className="anim-fade text-xs text-neutral-500">
+            Você já tem {LIMITE_SUPERVISIONADOS} supervisionados — o máximo por gestor. Remova
+            alguém antes de adicionar outro.
+          </p>
+        )}
 
         {/* Grid-rows em vez de montar/desmontar na hora (mesma técnica do menu lateral e dos
             accordions) — abrir já animava (`anim-fade`), mas fechar só sumia na hora, sem
@@ -275,7 +290,8 @@ export function GestorPage() {
                   <button
                     type="button"
                     onClick={() => adicionar(u.id, u.nome)}
-                    className="shrink-0 text-sm text-gold-400 transition-colors hover:text-gold-300"
+                    disabled={noLimite}
+                    className="shrink-0 text-sm text-gold-400 transition-colors hover:text-gold-300 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Adicionar
                   </button>
