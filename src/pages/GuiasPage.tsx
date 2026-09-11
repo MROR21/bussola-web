@@ -234,7 +234,7 @@ export function GuiasPage() {
     return (
       <div className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
         <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.15]" />
-        <MapIllustration className="pointer-events-none absolute -bottom-10 -left-8 w-56 text-gold-500 opacity-100" />
+        <MapIllustration className="pointer-events-none absolute -bottom-10 -left-8 w-56 text-gold-500 opacity-[0.15]" />
         <button
           type="button"
           onClick={sairModulo}
@@ -280,7 +280,7 @@ export function GuiasPage() {
   return (
     <div className="anim-fade relative flex w-full max-w-2xl flex-col gap-6">
       <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.15]" />
-      <MapIllustration className="pointer-events-none absolute -bottom-6 -left-8 w-56 text-gold-500 opacity-100" />
+      <MapIllustration className="pointer-events-none absolute -bottom-6 -left-8 w-56 text-gold-500 opacity-[0.15]" />
       <header className="relative flex flex-col gap-1 self-start p-5">
         <MapCorners tamanho={5} opacidade={25} />
         <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
