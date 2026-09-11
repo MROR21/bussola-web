@@ -190,15 +190,23 @@ export function ChavesApiPage() {
         >
           <div
             className={cx(
-              'flex w-full max-w-sm flex-col gap-2 rounded-2xl border border-gold-500/40 bg-navy-800 p-6',
+              'flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6',
               modalTokenGerado.saindo ? 'anim-pop-out' : 'anim-pop',
             )}
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="flex items-center gap-1.5 text-sm text-gold-300">
-              <Icon name="warning" className="text-base" /> Copie agora — esse valor não aparece
-              de novo.
-            </p>
+            <div className="flex flex-col gap-1">
+              <h3 className="text-lg font-semibold text-neutral-100">Token gerado</h3>
+              <p className="text-sm text-neutral-400">
+                Esse é o único momento em que o valor completo fica visível.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-1.5 rounded-lg border border-gold-500/30 bg-gold-500/10 px-3 py-2 text-xs text-gold-300">
+              <Icon name="warning" className="text-sm" /> Copie agora e guarde num lugar seguro —
+              não é possível ver esse valor de novo.
+            </div>
+
             <div className="flex items-center gap-2">
               <code className="min-w-0 flex-1 select-all break-all rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-xs text-neutral-100">
                 {modalTokenGerado.valor.token}
@@ -212,13 +220,16 @@ export function ChavesApiPage() {
                 {copiado ? 'Copiado' : 'Copiar'}
               </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setTokenGerado(null)}
-              className="self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
-            >
-              Já copiei, fechar
-            </button>
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setTokenGerado(null)}
+                className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
+              >
+                Já copiei, fechar
+              </button>
+            </div>
           </div>
         </div>
       )}
