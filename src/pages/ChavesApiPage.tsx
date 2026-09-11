@@ -28,6 +28,7 @@ export function ChavesApiPage() {
   const [revogandoId, setRevogandoId] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
   const modalRevogar = useSaidaValor(confirmandoRevogar)
+  const modalTokenGerado = useSaidaValor(tokenGerado)
   const toastFeedback = useSaidaValor(feedback)
 
   useEffect(() => {
@@ -118,35 +119,6 @@ export function ChavesApiPage() {
       </header>
 
       <section className={cardCls}>
-        {tokenGerado && (
-          <div className="anim-pop flex flex-col gap-2 rounded-xl border border-gold-500/40 bg-gold-500/10 p-4">
-            <p className="flex items-center gap-1.5 text-sm text-gold-300">
-              <Icon name="warning" className="text-base" /> Copie agora — esse valor não aparece
-              de novo.
-            </p>
-            <div className="flex items-center gap-2">
-              <code className="min-w-0 flex-1 select-all break-all rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-xs text-neutral-100">
-                {tokenGerado.token}
-              </code>
-              <button
-                type="button"
-                onClick={onCopiarToken}
-                className="flex shrink-0 items-center gap-1.5 rounded-lg border border-navy-600 px-3 py-2 text-sm text-neutral-200 transition-colors hover:bg-navy-700"
-              >
-                <Icon name={copiado ? 'check' : 'content_copy'} className="text-base" />
-                {copiado ? 'Copiado' : 'Copiar'}
-              </button>
-            </div>
-            <button
-              type="button"
-              onClick={() => setTokenGerado(null)}
-              className="self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
-            >
-              Já copiei, fechar
-            </button>
-          </div>
-        )}
-
         <form className="flex flex-wrap items-end gap-2" onSubmit={onGerarToken}>
           <label className="flex min-w-40 flex-1 flex-col gap-1.5 text-sm">
             <span className="text-neutral-300">Nome</span>
@@ -207,6 +179,49 @@ export function ChavesApiPage() {
           </ul>
         )}
       </section>
+
+      {modalTokenGerado.montado && modalTokenGerado.valor && (
+        <div
+          className={cx(
+            'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
+            modalTokenGerado.saindo ? 'anim-fade-out' : 'anim-fade',
+          )}
+          onClick={() => setTokenGerado(null)}
+        >
+          <div
+            className={cx(
+              'flex w-full max-w-sm flex-col gap-2 rounded-2xl border border-gold-500/40 bg-navy-800 p-6',
+              modalTokenGerado.saindo ? 'anim-pop-out' : 'anim-pop',
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="flex items-center gap-1.5 text-sm text-gold-300">
+              <Icon name="warning" className="text-base" /> Copie agora — esse valor não aparece
+              de novo.
+            </p>
+            <div className="flex items-center gap-2">
+              <code className="min-w-0 flex-1 select-all break-all rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-xs text-neutral-100">
+                {modalTokenGerado.valor.token}
+              </code>
+              <button
+                type="button"
+                onClick={onCopiarToken}
+                className="flex shrink-0 items-center gap-1.5 rounded-lg border border-navy-600 px-3 py-2 text-sm text-neutral-200 transition-colors hover:bg-navy-700"
+              >
+                <Icon name={copiado ? 'check' : 'content_copy'} className="text-base" />
+                {copiado ? 'Copiado' : 'Copiar'}
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => setTokenGerado(null)}
+              className="self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
+            >
+              Já copiei, fechar
+            </button>
+          </div>
+        </div>
+      )}
 
       {modalRevogar.montado && modalRevogar.valor && (
         <div
