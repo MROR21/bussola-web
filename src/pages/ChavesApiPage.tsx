@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { CompassRose } from '../components/CompassRose'
 import { Icon } from '../components/Icon'
@@ -58,10 +59,11 @@ export function ChavesApiPage() {
     setGerando(true)
     try {
       const criado = await criarApiToken(nomeNovoToken.trim())
+      // Só abre o modal aqui — NÃO entra na lista nem avisa por toast ainda. Isso só acontece
+      // quando a pessoa termina de verdade (copia e fecha), ver `fecharTokenGerado` — gerar não é
+      // a mesma coisa que "pronto", e mostrar os dois de uma vez só polui a tela à toa.
       setTokenGerado(criado)
       setNomeNovoToken('')
-      setTokens((t) => [{ id: criado.id, nome: criado.nome, criadoEm: criado.criadoEm, ultimoUsoEm: null }, ...t])
-      setFeedback({ texto: `Token "${criado.nome}" gerado.`, ok: true })
     } catch (err) {
       setFeedback({ texto: err instanceof Error ? err.message : 'Erro ao gerar o token.', ok: false })
     } finally {
@@ -74,9 +76,20 @@ export function ChavesApiPage() {
     try {
       await navigator.clipboard.writeText(tokenGerado.token)
       setCopiado(true)
+      setFeedback({ texto: 'Token copiado.', ok: true })
     } catch {
       // sem permissão de clipboard — a pessoa ainda pode selecionar o texto na mão
     }
+  }
+
+  // Fecha o modal de revelação — é só AQUI que o token passa a existir pro resto da tela (entra na
+  // lista) e a pessoa é avisada que terminou. Mesma função pro botão "Já copiei, fechar" e pro
+  // clique no fundo, pra não ter dois caminhos com efeito diferente.
+  function fecharTokenGerado() {
+    if (!tokenGerado) return
+    setTokens((t) => [{ id: tokenGerado.id, nome: tokenGerado.nome, criadoEm: tokenGerado.criadoEm, ultimoUsoEm: null }, ...t])
+    setFeedback({ texto: `Token "${tokenGerado.nome}" gerado com sucesso.`, ok: true })
+    setTokenGerado(null)
   }
 
   async function onConfirmarRevogar() {
@@ -84,15 +97,19 @@ export function ChavesApiPage() {
     const alvo = confirmandoRevogar
     setConfirmandoRevogar(null)
     setRevogandoId(alvo.id)
-    try {
-      await revogarApiToken(alvo.id)
-      setTokens((t) => t.filter((tok) => tok.id !== alvo.id))
-      setFeedback({ texto: `Token "${alvo.nome}" revogado.`, ok: true })
-    } catch (err) {
-      setFeedback({ texto: err instanceof Error ? err.message : 'Erro ao revogar o token.', ok: false })
-    } finally {
-      setRevogandoId(null)
-    }
+    // Espera a animação de saída (`anim-pop-out`, 150ms) tocar antes de tirar de verdade da
+    // lista — senão, se a API responder rápido, o item pode sumir antes do efeito terminar.
+    setTimeout(async () => {
+      try {
+        await revogarApiToken(alvo.id)
+        setTokens((t) => t.filter((tok) => tok.id !== alvo.id))
+        setFeedback({ texto: `Token "${alvo.nome}" revogado.`, ok: true })
+      } catch (err) {
+        setFeedback({ texto: err instanceof Error ? err.message : 'Erro ao revogar o token.', ok: false })
+      } finally {
+        setRevogandoId(null)
+      }
+    }, 150)
   }
 
   const inputCls =
@@ -136,13 +153,15 @@ export function ChavesApiPage() {
             disabled={!nomeNovoToken.trim() || gerando}
             className="flex shrink-0 items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {gerando ? (
-              <>
-                <Spinner /> Gerando...
-              </>
-            ) : (
-              'Gerar token'
-            )}
+            <span key={gerando ? 'gerando' : 'idle'} className="anim-pop flex items-center gap-1.5">
+              {gerando ? (
+                <>
+                  <Spinner /> Gerando...
+                </>
+              ) : (
+                'Gerar token'
+              )}
+            </span>
           </button>
         </form>
 
@@ -182,106 +201,121 @@ export function ChavesApiPage() {
         )}
       </section>
 
-      {modalTokenGerado.montado && modalTokenGerado.valor && (
-        <div
-          className={cx(
-            'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
-            modalTokenGerado.saindo ? 'anim-fade-out' : 'anim-fade',
-          )}
-          onClick={() => setTokenGerado(null)}
-        >
+      {/* Portal pro <body>: garante que o modal cubra a tela INTEIRA de verdade — qualquer
+          ancestral com transform/filter/etc. (ex.: a animação de entrada da página) criaria um
+          "container" novo pro `fixed` e quebraria o posicionamento (bug reportado pelo Miguel:
+          a caixa aparecia encaixada no meio do conteúdo, sem cobrir a tela). */}
+      {modalTokenGerado.montado &&
+        modalTokenGerado.valor &&
+        createPortal(
           <div
             className={cx(
-              'flex w-full max-w-2xl flex-col gap-3 rounded-2xl border border-gold-500/40 bg-gold-500/10 p-6',
-              modalTokenGerado.saindo ? 'anim-pop-out' : 'anim-pop',
+              'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
+              modalTokenGerado.saindo ? 'anim-fade-out' : 'anim-fade',
             )}
-            onClick={(e) => e.stopPropagation()}
+            onClick={fecharTokenGerado}
           >
-            <h3 className="flex items-center gap-1.5 text-lg font-semibold text-neutral-100">
-              <Icon name="warning" className="text-xl text-gold-400" /> Token gerado
-            </h3>
-            <p className="text-sm text-gold-300">
-              Copie agora e guarde num lugar seguro — esse é o único momento em que o valor
-              completo fica visível.
-            </p>
-
-            <div className="flex items-center gap-2">
-              <code className="min-w-0 flex-1 select-all overflow-x-auto whitespace-nowrap rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-xs text-neutral-100">
-                {modalTokenGerado.valor.token}
-              </code>
-              <button
-                type="button"
-                onClick={onCopiarToken}
-                className="flex shrink-0 items-center gap-1.5 rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-200 transition-colors hover:bg-navy-700"
-              >
-                <Icon name={copiado ? 'check' : 'content_copy'} className="text-base" />
-                {copiado ? 'Copiado' : 'Copiar'}
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setTokenGerado(null)}
-              className="self-end rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
+            <div
+              className={cx(
+                'flex w-full max-w-2xl flex-col gap-3 rounded-2xl border border-gold-500/40 bg-gold-500/10 p-6',
+                modalTokenGerado.saindo ? 'anim-pop-out' : 'anim-pop',
+              )}
+              onClick={(e) => e.stopPropagation()}
             >
-              Já copiei, fechar
-            </button>
-          </div>
-        </div>
-      )}
+              <h3 className="flex items-center gap-1.5 text-lg font-semibold text-neutral-100">
+                <Icon name="warning" className="text-xl text-gold-400" /> Token gerado
+              </h3>
+              <p className="text-sm text-gold-300">
+                Copie agora e guarde num lugar seguro — esse é o único momento em que o valor
+                completo fica visível.
+              </p>
 
-      {modalRevogar.montado && modalRevogar.valor && (
-        <div
-          className={cx(
-            'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
-            modalRevogar.saindo ? 'anim-fade-out' : 'anim-fade',
-          )}
-          onClick={() => setConfirmandoRevogar(null)}
-        >
-          <div
-            className={cx(
-              'flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6',
-              modalRevogar.saindo ? 'anim-pop-out' : 'anim-pop',
-            )}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-lg font-semibold text-neutral-100">Revogar token?</h3>
-            <p className="text-sm text-neutral-400">
-              "{modalRevogar.valor.nome}" para de funcionar imediatamente — quem usava esse token
-              perde o acesso.
-            </p>
-            <div className="flex justify-end gap-2">
+              <div className="flex items-center gap-2">
+                <code className="min-w-0 flex-1 select-all overflow-x-auto whitespace-nowrap rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-xs text-neutral-100">
+                  {modalTokenGerado.valor.token}
+                </code>
+                <button
+                  type="button"
+                  onClick={onCopiarToken}
+                  className="flex shrink-0 items-center gap-1.5 rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-200 transition-colors hover:bg-navy-700"
+                >
+                  <span key={copiado ? 'copiado' : 'copiar'} className="anim-pop flex items-center gap-1.5">
+                    <Icon name={copiado ? 'check' : 'content_copy'} className="text-base" />
+                    {copiado ? 'Copiado' : 'Copiar'}
+                  </span>
+                </button>
+              </div>
+
               <button
                 type="button"
-                onClick={() => setConfirmandoRevogar(null)}
-                className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
+                onClick={fecharTokenGerado}
+                className="self-end rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
               >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={onConfirmarRevogar}
-                className="rounded-lg bg-red-500/90 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-500"
-              >
-                Revogar
+                Já copiei, fechar
               </button>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
 
-      {toastFeedback.montado && toastFeedback.valor && (
-        <div
-          className={cx(
-            'fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg',
-            toastFeedback.saindo ? 'anim-pop-out' : 'anim-pop',
-            toastFeedback.valor.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300',
-          )}
-        >
-          <Icon name={toastFeedback.valor.ok ? 'check_circle' : 'warning'} className="text-base" />
-          {toastFeedback.valor.texto}
-        </div>
-      )}
+      {modalRevogar.montado &&
+        modalRevogar.valor &&
+        createPortal(
+          <div
+            className={cx(
+              'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
+              modalRevogar.saindo ? 'anim-fade-out' : 'anim-fade',
+            )}
+            onClick={() => setConfirmandoRevogar(null)}
+          >
+            <div
+              className={cx(
+                'flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6',
+                modalRevogar.saindo ? 'anim-pop-out' : 'anim-pop',
+              )}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-semibold text-neutral-100">Revogar token?</h3>
+              <p className="text-sm text-neutral-400">
+                "{modalRevogar.valor.nome}" para de funcionar imediatamente — quem usava esse token
+                perde o acesso.
+              </p>
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmandoRevogar(null)}
+                  className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={onConfirmarRevogar}
+                  className="rounded-lg bg-red-500/90 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-500"
+                >
+                  Revogar
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
+
+      {toastFeedback.montado &&
+        toastFeedback.valor &&
+        createPortal(
+          <div
+            className={cx(
+              'fixed bottom-4 right-4 z-30 flex items-center gap-1.5 rounded-xl border bg-navy-800 px-4 py-3 text-sm shadow-lg',
+              toastFeedback.saindo ? 'anim-pop-out' : 'anim-pop',
+              toastFeedback.valor.ok ? 'border-green-500/40 text-green-300' : 'border-red-500/40 text-red-300',
+            )}
+          >
+            <Icon name={toastFeedback.valor.ok ? 'check_circle' : 'warning'} className="text-base" />
+            {toastFeedback.valor.texto}
+          </div>,
+          document.body,
+        )}
     </div>
   )
 }
