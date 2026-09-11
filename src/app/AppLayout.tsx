@@ -247,6 +247,8 @@ export function AppLayout() {
     if (pathname === '/' || pathname.startsWith('/fase') || pathname.startsWith('/passo')) return '/'
     if (pathname.startsWith('/fluxo')) return viaFase ? '/' : '/guias'
     if (pathname.startsWith('/guias')) return '/guias'
+    // "Configurações" e seus filhos fixos (Perfil, Chaves de API — ver CONFIG_FILHOS acima).
+    if (pathname.startsWith('/configuracoes') || pathname === '/perfil') return '/configuracoes'
     return null
   }
   const regiaoAnterior = useRef<string | null>(null)
