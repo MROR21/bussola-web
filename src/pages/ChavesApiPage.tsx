@@ -13,14 +13,6 @@ import { cx } from '../utils/cx'
 import { criarApiToken, listarApiTokens, revogarApiToken } from '../features/perfil/perfilService'
 import type { ApiToken, ApiTokenCriado } from '../features/perfil/types'
 
-// 90 dias à frente, formatado pro `<input type="date">` (yyyy-MM-dd) — ponto de partida razoável,
-// a pessoa é livre pra escolher outra data no form.
-function expiracaoPadrao(): string {
-  const d = new Date()
-  d.setDate(d.getDate() + 90)
-  return d.toISOString().slice(0, 10)
-}
-
 const hojeIso = new Date().toISOString().slice(0, 10)
 
 // Gestão de tokens pessoais (Personal Access Token) — chamar o Bússola de fora (curl/scripts) com
@@ -32,7 +24,9 @@ export function ChavesApiPage() {
   const [tokens, setTokens] = useState<ApiToken[]>([])
   const [carregando, setCarregando] = useState(true)
   const [nomeNovoToken, setNomeNovoToken] = useState('')
-  const [expiraEmInput, setExpiraEmInput] = useState(expiracaoPadrao)
+  // Começa vazio de propósito — obriga a pessoa a escolher uma data, em vez de deixar passar
+  // batido com um prazo padrão que talvez não fizesse sentido pro uso dela.
+  const [expiraEmInput, setExpiraEmInput] = useState('')
   const [gerando, setGerando] = useState(false)
   // Só existe entre gerar e a pessoa sair da tela/fechar — o back nunca devolve o valor de novo.
   const [tokenGerado, setTokenGerado] = useState<ApiTokenCriado | null>(null)
@@ -143,7 +137,7 @@ export function ChavesApiPage() {
   return (
     <div className="relative flex w-full max-w-2xl flex-col gap-6">
       <CompassRose className="pointer-events-none absolute -bottom-16 -right-12 size-72 text-gold-500 opacity-[0.15]" />
-      <MapIllustration className="pointer-events-none absolute -top-6 -left-10 w-56 text-gold-500 opacity-[0.06]" />
+      <MapIllustration className="pointer-events-none absolute -top-6 -left-10 w-56 text-gold-500 opacity-100" />
       <Link
         to="/configuracoes"
         className="relative flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
@@ -232,23 +226,28 @@ export function ChavesApiPage() {
 
       {/* Portal pro <body>: garante que o modal cubra a tela INTEIRA de verdade — qualquer
           ancestral com transform/filter/etc. (ex.: a animação de entrada da página) criaria um
-          "container" novo pro `fixed` e quebraria o posicionamento (bug reportado pelo Miguel:
-          a caixa aparecia encaixada no meio do conteúdo, sem cobrir a tela). */}
+          "container" novo pro `fixed` e quebraria o posicionamento. O fundo do card é um
+          color-mix (navy sólido + um toque de dourado) em vez de `bg-gold-500/10` puro — essa
+          opacidade baixa deixava ver o backdrop TRANSPARECENDO através do card, então o "modal"
+          se misturava com o fundo escurecido atrás dele e parecia só um contorno solto em cima da
+          própria página, sem separação nenhuma (o motivo real do "não parece um modal" reportado
+          — não era falta de backdrop, era o card não ter fundo opaco pra se destacar dele). */}
       {modalTokenGerado.montado &&
         modalTokenGerado.valor &&
         createPortal(
           <div
             className={cx(
-              'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
+              'fixed inset-0 z-30 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm',
               modalTokenGerado.saindo ? 'anim-fade-out' : 'anim-fade',
             )}
             onClick={fecharTokenGerado}
           >
             <div
               className={cx(
-                'flex w-full max-w-2xl flex-col gap-3 rounded-2xl border border-gold-500/40 bg-gold-500/10 p-6',
+                'flex w-full max-w-2xl flex-col gap-3 rounded-2xl border border-gold-500/40 p-6 shadow-2xl shadow-black/60',
                 modalTokenGerado.saindo ? 'anim-pop-out' : 'anim-pop',
               )}
+              style={{ background: 'color-mix(in oklab, var(--color-navy-800), var(--color-gold-500) 14%)' }}
               onClick={(e) => e.stopPropagation()}
             >
               <h3 className="flex items-center gap-1.5 text-lg font-semibold text-neutral-100">
