@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { CompassRose } from '../components/CompassRose'
 import { Icon } from '../components/Icon'
@@ -275,7 +275,16 @@ export function AppLayout() {
   }, [location.pathname, veioDaFaseNoFluxo])
 
   return (
-    <div className="relative flex h-screen overflow-hidden bg-navy-900 text-neutral-100">
+    // `--sidebar-w`: exposta como variável CSS pra qualquer `position:fixed` em qualquer
+    // página (ver as marcas d'água CompassRose/MapIllustration) conseguir desviar do menu
+    // lateral sem precisar saber se ele está colapsado — só referenciar
+    // `left-[calc(var(--sidebar-w)+Xrem)]` e a variável já cascateia por herança normal de CSS,
+    // mesmo pra descendentes com position:fixed (herança de custom property não depende de
+    // containing block/layout).
+    <div
+      className="relative flex h-screen overflow-hidden bg-navy-900 text-neutral-100"
+      style={{ '--sidebar-w': colapsado ? '72px' : '240px' } as CSSProperties}
+    >
       <aside
         className={cx(
           'relative flex shrink-0 flex-col gap-4 overflow-hidden border-r border-navy-700 bg-navy-800 p-4 transition-[width] duration-200',

@@ -434,8 +434,8 @@ export function JornadaView({
 
     return (
       <div className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
-        <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.15]" />
-        <MapIllustration className="pointer-events-none absolute -bottom-10 -left-8 w-56 text-gold-500 opacity-[0.25]" />
+        <CompassRose className="pointer-events-none fixed right-8 top-20 size-64 text-gold-500 opacity-[0.15]" />
+        <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] bottom-8 w-56 text-gold-500 opacity-[0.25]" />
         <button
           type="button"
           onClick={sairFase}

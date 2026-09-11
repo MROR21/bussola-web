@@ -65,17 +65,6 @@
 
 /* Animações sutis do Bússola. Classes próprias (o projeto não usa os tokens ads-* da Agilean).
    Tudo é desligado pra quem prefere menos movimento. */
-@keyframes bussola-fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @keyframes bussola-fade-in {
   from {
     opacity: 0;
@@ -174,12 +163,14 @@
   }
 }
 
-/* Entrada de página/conteúdo (sobe suave). Sem fill-mode: o keyframe final já é
-   idêntico ao estado normal (transform:none), então não precisa "segurar" — segurar
-   deixaria um transform ativo, e isso quebra position:fixed dos filhos (viram
-   relativos a este elemento em vez de à tela, ex. os modais). */
+/* Entrada de página/conteúdo. Era um "sobe suave" (fade + translateY) até 2026-09-11: um
+   `transform` ativo durante os 0.28s da animação, mesmo sem fill-mode, torna esse elemento
+   containing block de qualquer `position:fixed` dentro dele por aquele instante — quebrava
+   as marcas d'água de fundo (CompassRose/MapIllustration) que passaram a ser `fixed` nessa
+   data pra não se mexer conforme o conteúdo da página cresce/rola. Fade puro (sem transform)
+   resolve de vez, ao custo de perder o "sobe" — só o fade continua. */
 .anim-page {
-  animation: bussola-fade-in-up 0.28s ease-out;
+  animation: bussola-fade-in 0.28s ease-out;
 }
 
 /* Fade puro (backdrops, banners). */

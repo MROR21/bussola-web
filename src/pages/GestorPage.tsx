@@ -141,8 +141,8 @@ export function GestorPage() {
   return (
     <div className="anim-fade relative flex w-full max-w-2xl flex-col gap-6">
       <BoasVindasModal aberto={mostrarBoasVindas} onFechar={fecharBoasVindas} papel="gestor" />
-      <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.15]" />
-      <MapIllustration className="pointer-events-none absolute -bottom-6 -left-8 w-56 text-gold-500 opacity-[0.25]" />
+      <CompassRose className="pointer-events-none fixed right-8 top-20 size-64 text-gold-500 opacity-[0.15]" />
+      <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] bottom-8 w-56 text-gold-500 opacity-[0.25]" />
       <header className="relative flex flex-col gap-1 self-start p-5">
         <MapCorners tamanho={5} opacidade={25} />
         {/* Título e badge lado a lado num flex row (não mais absolute) — com o header em
