@@ -163,10 +163,7 @@ export function GestorPage() {
             <Icon name="help" className="text-sm" /> Guia rápido
           </button>
         </div>
-        <p className="text-sm text-neutral-400">
-          Progresso dos seus supervisionados ({usuarios.length}{' '}
-          {usuarios.length === 1 ? 'pessoa' : 'pessoas'}).
-        </p>
+        <p className="text-sm text-neutral-400">Progresso dos seus supervisionados.</p>
       </header>
 
       {usuarios.length === 0 && (
