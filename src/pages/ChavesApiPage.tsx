@@ -146,7 +146,7 @@ export function ChavesApiPage() {
             <input
               value={nomeNovoToken}
               onChange={(e) => setNomeNovoToken(e.target.value)}
-              placeholder="Ex.: Claude Code"
+              placeholder="Ex.: Integração com o Claude Code"
               className={inputCls}
             />
           </label>
