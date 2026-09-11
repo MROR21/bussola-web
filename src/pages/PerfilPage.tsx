@@ -139,7 +139,7 @@ export function PerfilPage() {
         <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
           <Icon name="settings" className="text-2xl text-gold-400" /> Perfil
         </h1>
-        <p className="text-sm text-neutral-400">Sua conta, foto e senha.</p>
+        <p className="text-sm text-neutral-400">Sua conta, foto, senha e tema.</p>
       </header>
 
       {/* Cartão de identidade + foto */}
