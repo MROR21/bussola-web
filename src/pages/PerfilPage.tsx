@@ -139,7 +139,9 @@ export function PerfilPage() {
         <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">
           <Icon name="settings" className="text-2xl text-gold-400" /> Perfil
         </h1>
-        <p className="text-sm text-neutral-400">Sua conta, foto, senha e tema.</p>
+        <p className="text-sm text-neutral-400">
+          Gerencie os dados da sua conta, sua foto de perfil, sua senha e a aparência do sistema.
+        </p>
       </header>
 
       {/* Cartão de identidade + foto */}
@@ -235,7 +237,10 @@ export function PerfilPage() {
 
       {/* Aparência */}
       <section className={cardCls}>
-        <h2 className="text-base font-semibold text-neutral-100">Aparência</h2>
+        <div className="flex flex-col gap-1">
+          <h2 className="text-base font-semibold text-neutral-100">Aparência</h2>
+          <p className="text-xs text-neutral-500">Escolha entre o tema escuro ou claro.</p>
+        </div>
         <div className="flex gap-2">
           {(['dark', 'light'] as Tema[]).map((opcao) => (
             <button
@@ -258,7 +263,10 @@ export function PerfilPage() {
 
       {/* Trocar e-mail */}
       <form className={cardCls} onSubmit={onSalvarEmail}>
-        <h2 className="text-base font-semibold text-neutral-100">E-mail</h2>
+        <div className="flex flex-col gap-1">
+          <h2 className="text-base font-semibold text-neutral-100">E-mail</h2>
+          <p className="text-xs text-neutral-500">Altere o e-mail usado pra entrar no Bússola.</p>
+        </div>
         <input
           type="email"
           value={email}
@@ -279,7 +287,10 @@ export function PerfilPage() {
 
       {/* Trocar senha */}
       <form className={cardCls} onSubmit={onSalvarSenha}>
-        <h2 className="text-base font-semibold text-neutral-100">Senha</h2>
+        <div className="flex flex-col gap-1">
+          <h2 className="text-base font-semibold text-neutral-100">Senha</h2>
+          <p className="text-xs text-neutral-500">Defina uma nova senha pra sua conta.</p>
+        </div>
         <input
           type="password"
           value={senhaAtual}
