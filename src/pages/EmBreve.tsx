@@ -18,7 +18,7 @@ export function EmBreve({
 
   return (
     <div className="anim-fade relative flex w-full max-w-md flex-col items-center">
-      <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.06]" />
+      <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.15]" />
       <MapIllustration className="pointer-events-none absolute -bottom-10 -left-8 w-56 text-gold-500 opacity-[0.06]" />
       <div className="relative flex flex-col items-center gap-3 p-10 text-center">
         <MapCorners tamanho={5} opacidade={25} />

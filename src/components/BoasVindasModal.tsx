@@ -79,7 +79,7 @@ export function BoasVindasModal({
         )}
       >
         <MapCorners tamanho={6} opacidade={30} />
-        <CompassRose className="pointer-events-none absolute -bottom-12 -right-12 size-56 text-gold-500 opacity-[0.06]" />
+        <CompassRose className="pointer-events-none absolute -bottom-12 -right-12 size-56 text-gold-500 opacity-[0.15]" />
 
         <div className="relative flex flex-col items-center gap-2 text-center">
           <div className="flex size-14 items-center justify-center rounded-2xl bg-gold-500/10">

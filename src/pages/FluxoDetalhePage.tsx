@@ -207,7 +207,7 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
 
   return (
     <article className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
-      <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.06]" />
+      <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.15]" />
       <MapIllustration className="pointer-events-none absolute -bottom-10 -left-8 w-56 text-gold-500 opacity-[0.06]" />
       {/* Destino FIXO nos dois casos (nunca histórico) — quem entrou pela Jornada (`veioDaFase`,
           marcado pelo link de origem) sempre volta pra visão geral da fase, igual o Passo; quem

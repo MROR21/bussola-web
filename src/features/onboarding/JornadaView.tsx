@@ -434,7 +434,7 @@ export function JornadaView({
 
     return (
       <div className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
-        <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.06]" />
+        <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.15]" />
         <MapIllustration className="pointer-events-none absolute -bottom-10 -left-8 w-56 text-gold-500 opacity-[0.06]" />
         <button
           type="button"
@@ -615,7 +615,7 @@ export function JornadaView({
           app). absolute+DOM-order não tem essa armadilha. Dois motivos, cantos opostos, pra dar
           mais vida (rosa dos ventos em cima, mapa embaixo) sem competir com a do hero. */}
       <CompassRose
-        className="pointer-events-none absolute -right-16 -top-10 size-[520px] text-gold-500 opacity-[0.06]"
+        className="pointer-events-none absolute -right-16 -top-10 size-[520px] text-gold-500 opacity-[0.15]"
       />
       <MapIllustration
         className="pointer-events-none absolute -bottom-10 -left-20 w-[420px] text-gold-500 opacity-[0.07]"
@@ -625,7 +625,7 @@ export function JornadaView({
       <div className="relative overflow-hidden rounded-3xl border border-navy-700 bg-navy-800 shadow-xl shadow-black/20">
         <MapCorners />
         <CompassRose
-          className="pointer-events-none absolute -bottom-10 -right-10 size-40 text-gold-500 opacity-[0.06]"
+          className="pointer-events-none absolute -bottom-10 -right-10 size-40 text-gold-500 opacity-[0.15]"
         />
         <div
           className="pointer-events-none absolute -left-12 -top-16 size-56 rounded-full bg-gold-500/10 blur-3xl"
