@@ -156,7 +156,7 @@ export function LoginForm() {
             Confirme seu e-mail <Icon name="mark_email_read" className="text-xl text-gold-400" />
           </h2>
           <p className="text-sm text-neutral-400">
-            Mandamos um código de 6 dígitos pra{' '}
+            Mandamos um código de 6 dígitos para{' '}
             <span className="text-neutral-200">{emailPendente}</span>.
           </p>
         </div>
@@ -244,7 +244,7 @@ export function LoginForm() {
           )}
         </h2>
         <p className="text-sm text-neutral-400">
-          {ehCadastro ? 'Crie sua conta pra começar.' : 'Entre pra continuar sua jornada.'}
+          {ehCadastro ? 'Crie sua conta para começar.' : 'Entre para continuar sua jornada.'}
         </p>
       </div>
 

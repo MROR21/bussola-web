@@ -211,7 +211,7 @@ export function PassoDetalhePage({
     } catch {
       // sucesso já é visível na hora pelo próprio chip mudando — só a falha precisa de aviso
       // explícito, senão o usuário via só nada acontecer, sem saber por quê
-      setFeedback({ texto: 'Não deu pra salvar. Tente de novo.', ok: false })
+      setFeedback({ texto: 'Não deu para salvar. Tente de novo.', ok: false })
     } finally {
       setSalvando(false)
     }
@@ -227,7 +227,7 @@ export function PassoDetalhePage({
       setQtdCorrecoes((q) => q + 1)
       setAguardandoConfirmacao(true)
     } catch {
-      setFeedback({ texto: 'Não deu pra avisar seu gestor. Tente de novo.', ok: false })
+      setFeedback({ texto: 'Não deu para avisar seu gestor. Tente de novo.', ok: false })
     } finally {
       setMarcandoCorrigido(false)
     }
@@ -249,7 +249,7 @@ export function PassoDetalhePage({
     } catch {
       // Deu errado — desfaz o otimismo, volta pro estado concluído de verdade.
       setConcluido(true)
-      setFeedback({ texto: 'Não deu pra salvar. Tente de novo.', ok: false })
+      setFeedback({ texto: 'Não deu para salvar. Tente de novo.', ok: false })
     } finally {
       setSalvando(false)
     }
@@ -727,7 +727,7 @@ export function PassoDetalhePage({
             <h3 className="text-lg font-semibold text-neutral-100">Cancelar o envio da comprovação?</h3>
             <p className="text-sm text-neutral-400">
               Some da tela do seu gestor e das notificações dele. Seu texto continua preenchido
-              pra reenviar depois.
+              para reenviar depois.
             </p>
             <div className="flex justify-end gap-2">
               <button

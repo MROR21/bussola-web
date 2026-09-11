@@ -361,7 +361,7 @@ export function GestorPage() {
               <Icon name="group_off" className="text-xl text-gold-400" /> Limite de supervisionados
             </h3>
             <p className="text-sm text-neutral-400">
-              Você já tem {LIMITE_SUPERVISIONADOS} supervisionados — o máximo por gestor, pra dar
+              Você já tem {LIMITE_SUPERVISIONADOS} supervisionados — o máximo por gestor, para dar
               atenção de verdade a cada onboarding. Remova alguém da sua lista antes de adicionar
               outra pessoa.
             </p>

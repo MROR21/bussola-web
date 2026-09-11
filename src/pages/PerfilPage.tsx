@@ -142,7 +142,7 @@ export function PerfilPage() {
           to="/configuracoes"
           className="relative flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
         >
-          <Icon name="arrow_back" className="text-base" /> Voltar pra Configurações
+          <Icon name="arrow_back" className="text-base" /> Voltar para Configurações
         </Link>
       )}
       <header className="relative flex flex-col gap-1 self-start p-5">
@@ -276,7 +276,7 @@ export function PerfilPage() {
       <form className={cardCls} onSubmit={onSalvarEmail}>
         <div className="flex flex-col gap-1">
           <h2 className="text-base font-semibold text-neutral-100">E-mail</h2>
-          <p className="text-xs text-neutral-500">Altere o e-mail usado pra entrar no Bússola.</p>
+          <p className="text-xs text-neutral-500">Altere o e-mail usado para entrar no Bússola.</p>
         </div>
         <input
           type="email"
@@ -300,7 +300,7 @@ export function PerfilPage() {
       <form className={cardCls} onSubmit={onSalvarSenha}>
         <div className="flex flex-col gap-1">
           <h2 className="text-base font-semibold text-neutral-100">Senha</h2>
-          <p className="text-xs text-neutral-500">Defina uma nova senha pra sua conta.</p>
+          <p className="text-xs text-neutral-500">Defina uma nova senha para sua conta.</p>
         </div>
         <input
           type="password"

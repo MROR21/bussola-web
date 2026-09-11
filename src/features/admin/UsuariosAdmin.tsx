@@ -180,7 +180,7 @@ function ListaUsuarios() {
                   souEuMesmo
                     ? 'Você não pode alterar sua própria permissão de supervisor.'
                     : naoPodeTornarSupervisor
-                      ? 'Não dá pra tornar supervisor alguém com o acesso revogado.'
+                      ? 'Não dá para tornar supervisor alguém com o acesso revogado.'
                       : undefined
                 }
                 className="text-sm text-gold-400 transition-all hover:text-gold-300 disabled:cursor-not-allowed disabled:opacity-40"

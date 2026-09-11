@@ -215,7 +215,7 @@ export function SimpleEntityCrud({
                     onClick={() => mover(item, -1)}
                     disabled={indice === 0 || movendo !== null}
                     className="leading-none text-neutral-500 transition-all hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
-                    aria-label="Mover pra cima"
+                    aria-label="Mover para cima"
                   >
                     <Icon name="arrow_drop_up" className="text-lg" />
                   </button>
@@ -224,7 +224,7 @@ export function SimpleEntityCrud({
                     onClick={() => mover(item, 1)}
                     disabled={indice === itens.length - 1 || movendo !== null}
                     className="-mt-2 leading-none text-neutral-500 transition-all hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
-                    aria-label="Mover pra baixo"
+                    aria-label="Mover para baixo"
                   >
                     <Icon name="arrow_drop_down" className="text-lg" />
                   </button>

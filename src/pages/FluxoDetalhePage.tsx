@@ -119,7 +119,7 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
       else await concluirFluxo(fluxo.id)
     } catch {
       setConcluido(antes)
-      setFeedback({ texto: 'Não deu pra salvar. Tente de novo.', ok: false })
+      setFeedback({ texto: 'Não deu para salvar. Tente de novo.', ok: false })
     }
   }
 

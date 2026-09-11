@@ -240,7 +240,7 @@ export function GuiasPage() {
           onClick={sairModulo}
           className="relative flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
         >
-          <Icon name="arrow_back" className="text-base" /> Voltar pros módulos
+          <Icon name="arrow_back" className="text-base" /> Voltar para os módulos
         </button>
         <div className="relative flex items-center gap-3 self-start p-5">
           <MapCorners tamanho={5} opacidade={25} />

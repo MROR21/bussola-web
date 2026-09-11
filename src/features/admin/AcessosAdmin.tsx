@@ -138,7 +138,7 @@ export function AcessosAdmin() {
       </div>
 
       <p className="text-sm text-neutral-500">
-        "Cargo" aqui é o mínimo pra precisar desse acesso — cumulativo (quem tem esse cargo ou um
+        "Cargo" aqui é o mínimo para precisar desse acesso — cumulativo (quem tem esse cargo ou um
         acima também precisa dele).
       </p>
 
@@ -226,7 +226,7 @@ export function AcessosAdmin() {
                 </label>
 
                 <label className="flex flex-col gap-1 text-sm text-neutral-400">
-                  Link (opcional — leva direto pra página que libera esse acesso)
+                  Link (opcional — leva direto para a página que libera esse acesso)
                   <input
                     value={form.link}
                     onChange={(e) => setForm({ ...form, link: e.target.value })}

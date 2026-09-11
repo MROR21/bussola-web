@@ -34,7 +34,7 @@ const iconeDaFase = (fase: string) => FASE_ICONE[fase] ?? 'flag'
 const FASE_RESUMO: Record<string, string> = {
   Ambientação: 'Conheça a Agilean, o squad e como as coisas funcionam por aqui.',
   Padrões: 'Os padrões de código e o fluxo de git que o time segue no dia a dia.',
-  'Ambiente técnico': 'Deixe o ambiente de desenvolvimento pronto pra codar.',
+  'Ambiente técnico': 'Deixe o ambiente de desenvolvimento pronto para codar.',
   'Conheça o sistema': 'Entenda o produto do seu squad por dentro, na prática.',
   'Primeiro Card': 'Do primeiro card ao merge — o ciclo completo de uma entrega.',
 }
@@ -441,7 +441,7 @@ export function JornadaView({
           onClick={sairFase}
           className="relative flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
         >
-          <Icon name="arrow_back" className="text-base" /> Voltar pra jornada
+          <Icon name="arrow_back" className="text-base" /> Voltar para a jornada
         </button>
         <div
           className={cx(
@@ -684,7 +684,7 @@ export function JornadaView({
               state={{ expandirMenuGuias: true }}
               className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
             >
-              Ir pro Guia pelo sistema
+              Ir para o Guia pelo sistema
             </Link>
           </div>
         ) : proximo ? (
@@ -730,7 +730,7 @@ export function JornadaView({
                       </span>
                       <h3 className="text-lg font-semibold text-neutral-100">{itemPendenteFinal.title}</h3>
                       <p className="text-sm text-neutral-400">
-                        Você já enviou tudo — só falta seu gestor aprovar pra fechar a Jornada.
+                        Você já enviou tudo — só falta seu gestor aprovar para fechar a Jornada.
                       </p>
                     </div>
                   </div>

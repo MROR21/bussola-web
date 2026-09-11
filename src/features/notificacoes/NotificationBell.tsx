@@ -207,7 +207,7 @@ export function NotificationBell() {
     } catch {
       // a lista já mudou na hora (otimista) — sem revert, só avisa que não colou de verdade; o
       // próximo carregar() periódico acaba trazendo ela de volta se continuar existindo no back
-      setFeedback({ texto: 'Não deu pra apagar a notificação. Tente de novo.', ok: false })
+      setFeedback({ texto: 'Não deu para apagar a notificação. Tente de novo.', ok: false })
     }
   }
 
@@ -217,7 +217,7 @@ export function NotificationBell() {
     try {
       await apagarTodasNotificacoes()
     } catch {
-      setFeedback({ texto: 'Não deu pra limpar as notificações. Tente de novo.', ok: false })
+      setFeedback({ texto: 'Não deu para limpar as notificações. Tente de novo.', ok: false })
     }
   }
 

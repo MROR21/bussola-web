@@ -104,7 +104,7 @@ export function ChavesApiPage() {
         to="/configuracoes"
         className="relative flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
       >
-        <Icon name="arrow_back" className="text-base" /> Voltar pra Configurações
+        <Icon name="arrow_back" className="text-base" /> Voltar para Configurações
       </Link>
       <header className="relative flex flex-col gap-1 self-start p-5">
         <MapCorners tamanho={5} opacidade={25} />

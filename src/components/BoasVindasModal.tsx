@@ -16,7 +16,7 @@ const TOPICOS_COLABORADOR: Topico[] = [
   {
     icone: 'menu_book',
     titulo: 'Guia pelo sistema',
-    texto: 'Fluxos e vídeos de qualquer área, pra consultar sozinho(a) sempre que precisar, sem depender de ninguém.',
+    texto: 'Fluxos e vídeos de qualquer área, para consultar sozinho(a) sempre que precisar, sem depender de ninguém.',
   },
   {
     icone: 'key',

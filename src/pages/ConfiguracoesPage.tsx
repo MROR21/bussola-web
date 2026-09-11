@@ -18,7 +18,7 @@ export function ConfiguracoesPage() {
       to: '/perfil',
       icone: 'account_circle',
       titulo: 'Perfil',
-      descricao: 'Sua conta, foto e senha.',
+      descricao: 'Dados da sua conta, foto, senha e o tema do sistema.',
     },
     ...(isGestor
       ? [
@@ -26,7 +26,7 @@ export function ConfiguracoesPage() {
             to: '/configuracoes/chaves',
             icone: 'key',
             titulo: 'Chaves de API',
-            descricao: 'Tokens pra chamar o Bússola de fora, sem logar.',
+            descricao: 'Tokens pessoais para chamar o Bússola de fora, sem precisar logar.',
           },
         ]
       : []),

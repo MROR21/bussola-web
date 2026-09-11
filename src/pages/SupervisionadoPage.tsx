@@ -233,7 +233,7 @@ export function SupervisionadoPage() {
       <CompassRose className="pointer-events-none absolute -right-10 -top-4 size-64 text-gold-500 opacity-[0.15]" />
       <MapIllustration className="pointer-events-none absolute -bottom-10 -left-8 w-56 text-gold-500 opacity-[0.06]" />
       <Link to="/gestor" className="flex items-center gap-1 text-sm text-neutral-400 transition-colors hover:text-neutral-200">
-        <Icon name="arrow_back" className="text-base" /> Voltar pros supervisionados
+        <Icon name="arrow_back" className="text-base" /> Voltar para os supervisionados
       </Link>
 
       <div className="relative flex items-center gap-3 self-start p-5">
@@ -255,7 +255,7 @@ export function SupervisionadoPage() {
         onToggle={() => setAcessosAbertos((a) => !a)}
       >
         {acessos.length === 0 ? (
-          <p className="text-xs text-neutral-500">Nenhum acesso cadastrado pra esse cargo ainda.</p>
+          <p className="text-xs text-neutral-500">Nenhum acesso cadastrado para esse cargo ainda.</p>
         ) : (
           <>
             <ul className="flex flex-wrap gap-2">
@@ -278,7 +278,7 @@ export function SupervisionadoPage() {
                         onClick={() => {
                           if (!acesso.concluido) alternarAcesso(acesso)
                         }}
-                        title={acesso.concluido ? 'Já liberado — clique pra abrir o link de novo' : 'Abre o link e marca como liberado'}
+                        title={acesso.concluido ? 'Já liberado — clique para abrir o link de novo' : 'Abre o link e marca como liberado'}
                         className={cx(classeBase, classeEstado)}
                       >
                         {acesso.nome}
@@ -303,7 +303,7 @@ export function SupervisionadoPage() {
               })}
             </ul>
             <p className="mt-3 text-xs text-neutral-500">
-              {acessosFeitos} de {acessos.length} liberados — clique num acesso pendente pra abrir o
+              {acessosFeitos} de {acessos.length} liberados — clique num acesso pendente para abrir o
               link e marcar como feito.
             </p>
           </>
@@ -340,7 +340,7 @@ export function SupervisionadoPage() {
           )}
           {!cardLink && !editandoCard && (
             <p className="text-xs text-neutral-500">
-              Ainda não enviado — os passos dessa fase ficam travados pro colaborador até você mandar.
+              Ainda não enviado — os passos dessa fase ficam travados para o colaborador até você mandar.
             </p>
           )}
           {editandoCard ? (
