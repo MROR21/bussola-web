@@ -23,8 +23,10 @@ export function listarApiTokens(): Promise<ApiToken[]> {
 }
 
 // O `token` em texto puro só vem nessa resposta — o back nunca guarda nem devolve de novo.
-export function criarApiToken(nome: string): Promise<ApiTokenCriado> {
-  return apiPost<ApiTokenCriado>('/perfil/api-tokens', { nome })
+// `expiraEm` é a data (ISO) escolhida no date picker do form — null só pra token antigo, o front
+// sempre manda uma data daqui pra frente.
+export function criarApiToken(nome: string, expiraEm: string | null): Promise<ApiTokenCriado> {
+  return apiPost<ApiTokenCriado>('/perfil/api-tokens', { nome, expiraEm })
 }
 
 export function revogarApiToken(id: string): Promise<void> {

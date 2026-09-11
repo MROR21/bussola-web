@@ -12,6 +12,16 @@ import { cx } from '../utils/cx'
 import { criarApiToken, listarApiTokens, revogarApiToken } from '../features/perfil/perfilService'
 import type { ApiToken, ApiTokenCriado } from '../features/perfil/types'
 
+// 90 dias à frente, formatado pro `<input type="date">` (yyyy-MM-dd) — ponto de partida razoável,
+// a pessoa é livre pra escolher outra data no form.
+function expiracaoPadrao(): string {
+  const d = new Date()
+  d.setDate(d.getDate() + 90)
+  return d.toISOString().slice(0, 10)
+}
+
+const hojeIso = new Date().toISOString().slice(0, 10)
+
 // Gestão de tokens pessoais (Personal Access Token) — chamar o Bússola de fora (curl/scripts) com
 // o mesmo acesso do usuário, sem precisar logar. Só gestor chega aqui (gate no back E aqui, ver
 // AppLayout.tsx/SessaoAutenticada.tsx) — decisão do Miguel 2026-09-10.
@@ -21,10 +31,15 @@ export function ChavesApiPage() {
   const [tokens, setTokens] = useState<ApiToken[]>([])
   const [carregando, setCarregando] = useState(true)
   const [nomeNovoToken, setNomeNovoToken] = useState('')
+  const [expiraEmInput, setExpiraEmInput] = useState(expiracaoPadrao)
   const [gerando, setGerando] = useState(false)
   // Só existe entre gerar e a pessoa sair da tela/fechar — o back nunca devolve o valor de novo.
   const [tokenGerado, setTokenGerado] = useState<ApiTokenCriado | null>(null)
   const [copiado, setCopiado] = useState(false)
+  // Trava o fechamento do modal de revelação até a pessoa copiar pelo menos uma vez — diferente de
+  // `copiado`, que reseta sozinho depois de 2s (ver useEffect abaixo), esse fica true até o modal
+  // fechar de verdade.
+  const [jaCopiou, setJaCopiou] = useState(false)
   const [confirmandoRevogar, setConfirmandoRevogar] = useState<ApiToken | null>(null)
   const [revogandoId, setRevogandoId] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
@@ -55,13 +70,16 @@ export function ChavesApiPage() {
 
   async function onGerarToken(e: React.FormEvent) {
     e.preventDefault()
-    if (!nomeNovoToken.trim()) return
+    if (!nomeNovoToken.trim() || !expiraEmInput) return
     setGerando(true)
     try {
-      const criado = await criarApiToken(nomeNovoToken.trim())
+      // Fim do dia escolhido, não meia-noite — senão escolher "hoje" já nasceria expirado.
+      const expiraEm = `${expiraEmInput}T23:59:59.999Z`
+      const criado = await criarApiToken(nomeNovoToken.trim(), expiraEm)
       // Só abre o modal aqui — NÃO entra na lista nem avisa por toast ainda. Isso só acontece
       // quando a pessoa termina de verdade (copia e fecha), ver `fecharTokenGerado` — gerar não é
       // a mesma coisa que "pronto", e mostrar os dois de uma vez só polui a tela à toa.
+      setJaCopiou(false)
       setTokenGerado(criado)
       setNomeNovoToken('')
     } catch (err) {
@@ -76,6 +94,7 @@ export function ChavesApiPage() {
     try {
       await navigator.clipboard.writeText(tokenGerado.token)
       setCopiado(true)
+      setJaCopiou(true)
       setFeedback({ texto: 'Token copiado.', ok: true })
     } catch {
       // sem permissão de clipboard — a pessoa ainda pode selecionar o texto na mão
@@ -84,10 +103,14 @@ export function ChavesApiPage() {
 
   // Fecha o modal de revelação — é só AQUI que o token passa a existir pro resto da tela (entra na
   // lista) e a pessoa é avisada que terminou. Mesma função pro botão "Já copiei, fechar" e pro
-  // clique no fundo, pra não ter dois caminhos com efeito diferente.
+  // clique no fundo, pra não ter dois caminhos com efeito diferente. Só fecha se ela já copiou
+  // pelo menos uma vez — senão é fácil perder o token sem nunca ter salvo em lugar nenhum.
   function fecharTokenGerado() {
-    if (!tokenGerado) return
-    setTokens((t) => [{ id: tokenGerado.id, nome: tokenGerado.nome, criadoEm: tokenGerado.criadoEm, ultimoUsoEm: null }, ...t])
+    if (!tokenGerado || !jaCopiou) return
+    setTokens((t) => [
+      { id: tokenGerado.id, nome: tokenGerado.nome, criadoEm: tokenGerado.criadoEm, ultimoUsoEm: null, expiraEm: tokenGerado.expiraEm },
+      ...t,
+    ])
     setFeedback({ texto: `Token "${tokenGerado.nome}" gerado com sucesso.`, ok: true })
     setTokenGerado(null)
   }
@@ -148,9 +171,19 @@ export function ChavesApiPage() {
               className={inputCls}
             />
           </label>
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-neutral-300">Expira em</span>
+            <input
+              type="date"
+              value={expiraEmInput}
+              min={hojeIso}
+              onChange={(e) => setExpiraEmInput(e.target.value)}
+              className={inputCls}
+            />
+          </label>
           <button
             type="submit"
-            disabled={!nomeNovoToken.trim() || gerando}
+            disabled={!nomeNovoToken.trim() || !expiraEmInput || gerando}
             className="flex shrink-0 items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <span key={gerando ? 'gerando' : 'idle'} className="anim-pop flex items-center gap-1.5">
@@ -186,6 +219,7 @@ export function ChavesApiPage() {
                     {t.ultimoUsoEm
                       ? ` · último uso em ${new Date(t.ultimoUsoEm).toLocaleDateString('pt-BR')}`
                       : ' · nunca usado'}
+                    {t.expiraEm ? ` · expira em ${new Date(t.expiraEm).toLocaleDateString('pt-BR')}` : ' · sem expiração'}
                   </span>
                 </div>
                 <button
@@ -246,13 +280,17 @@ export function ChavesApiPage() {
                 </button>
               </div>
 
-              <button
-                type="button"
-                onClick={fecharTokenGerado}
-                className="self-end rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
-              >
-                Já copiei, fechar
-              </button>
+              <div className="flex items-center justify-end gap-2">
+                {!jaCopiou && <span className="text-xs text-gold-300/70">Copie o token para poder fechar.</span>}
+                <button
+                  type="button"
+                  onClick={fecharTokenGerado}
+                  disabled={!jaCopiou}
+                  className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Já copiei, fechar
+                </button>
+              </div>
             </div>
           </div>,
           document.body,

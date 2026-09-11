@@ -4,6 +4,7 @@ export interface ApiToken {
   nome: string
   criadoEm: string
   ultimoUsoEm: string | null
+  expiraEm: string | null
 }
 
 // Resposta da criação — o único momento em que o valor em texto puro existe do lado de cá.
@@ -11,5 +12,6 @@ export interface ApiTokenCriado {
   id: string
   nome: string
   criadoEm: string
+  expiraEm: string | null
   token: string
 }
