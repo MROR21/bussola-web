@@ -378,7 +378,7 @@ export function SupervisionadoPage() {
               }}
               className="self-start rounded-lg bg-navy-700 px-4 py-2 text-sm text-neutral-200 transition-colors hover:bg-navy-600"
             >
-              {cardLink ? 'Editar' : 'Enviar link do card'}
+              {cardLink ? 'Editar' : 'Anexar link do card'}
             </button>
           )}
 
