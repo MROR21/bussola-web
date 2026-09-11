@@ -202,7 +202,7 @@ export function GestorPage() {
                       e.stopPropagation()
                       setConfirmandoRemover(u)
                     }}
-                    className="text-sm text-neutral-500 transition-colors hover:text-red-400"
+                    className="text-sm text-red-400 transition-colors hover:text-red-300"
                   >
                     Remover
                   </button>
