@@ -137,7 +137,7 @@ export function ChavesApiPage() {
   return (
     <div className="relative flex w-full max-w-2xl flex-col gap-6">
       <CompassRose className="pointer-events-none absolute -bottom-16 -right-12 size-72 text-gold-500 opacity-[0.15]" />
-      <MapIllustration className="pointer-events-none absolute -top-6 -left-10 w-56 text-gold-500 opacity-[0.15]" />
+      <MapIllustration className="pointer-events-none absolute -top-6 -left-10 w-56 text-gold-500 opacity-100" />
       <Link
         to="/configuracoes"
         className="relative flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"
@@ -226,12 +226,10 @@ export function ChavesApiPage() {
 
       {/* Portal pro <body>: garante que o modal cubra a tela INTEIRA de verdade — qualquer
           ancestral com transform/filter/etc. (ex.: a animação de entrada da página) criaria um
-          "container" novo pro `fixed` e quebraria o posicionamento. O fundo do card é um
-          color-mix (navy sólido + um toque de dourado) em vez de `bg-gold-500/10` puro — essa
-          opacidade baixa deixava ver o backdrop TRANSPARECENDO através do card, então o "modal"
-          se misturava com o fundo escurecido atrás dele e parecia só um contorno solto em cima da
-          própria página, sem separação nenhuma (o motivo real do "não parece um modal" reportado
-          — não era falta de backdrop, era o card não ter fundo opaco pra se destacar dele). */}
+          "container" novo pro `fixed` e quebraria o posicionamento. O card EXTERNO é o modal de
+          verdade (fundo navy sólido, igual aos outros modais do app — é o que separa visualmente
+          do backdrop). O box amarelo (`bg-gold-500/10`) mora DENTRO dele, só em volta do aviso +
+          token + copiar; "Já copiei, fechar" fica fora do amarelo, no card externo. */}
       {modalTokenGerado.montado &&
         modalTokenGerado.valor &&
         createPortal(
@@ -244,38 +242,39 @@ export function ChavesApiPage() {
           >
             <div
               className={cx(
-                'flex w-full max-w-2xl flex-col gap-3 rounded-2xl border border-gold-500/40 p-6 shadow-2xl shadow-black/60',
+                'flex w-full max-w-2xl flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6 shadow-2xl shadow-black/60',
                 modalTokenGerado.saindo ? 'anim-pop-out' : 'anim-pop',
               )}
-              style={{ background: 'color-mix(in oklab, var(--color-navy-800), var(--color-gold-500) 14%)' }}
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="flex items-center gap-1.5 text-lg font-semibold text-neutral-100">
-                <Icon name="warning" className="text-xl text-gold-400" /> Token gerado
-              </h3>
-              <p className="text-sm text-gold-300">
-                Copie agora e guarde num lugar seguro — esse é o único momento em que o valor
-                completo fica visível.
-              </p>
+              <div className="flex flex-col gap-3 rounded-xl border border-gold-500/40 bg-gold-500/10 p-5">
+                <h3 className="flex items-center gap-1.5 text-lg font-semibold text-neutral-100">
+                  <Icon name="warning" className="text-xl text-gold-400" /> Token gerado
+                </h3>
+                <p className="text-sm text-gold-300">
+                  Copie agora e guarde num lugar seguro — esse é o único momento em que o valor
+                  completo fica visível.
+                </p>
 
-              <div className="flex items-center gap-2">
-                <code className="min-w-0 flex-1 select-all overflow-x-auto whitespace-nowrap rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-xs text-neutral-100">
-                  {modalTokenGerado.valor.token}
-                </code>
-                <button
-                  type="button"
-                  onClick={onCopiarToken}
-                  className="flex shrink-0 items-center gap-1.5 rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-200 transition-colors hover:bg-navy-700"
-                >
-                  <span key={copiado ? 'copiado' : 'copiar'} className="anim-pop flex items-center gap-1.5">
-                    <Icon name={copiado ? 'check' : 'content_copy'} className="text-base" />
-                    {copiado ? 'Copiado' : 'Copiar'}
-                  </span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <code className="min-w-0 flex-1 select-all overflow-x-auto whitespace-nowrap rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-xs text-neutral-100">
+                    {modalTokenGerado.valor.token}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={onCopiarToken}
+                    className="flex shrink-0 items-center gap-1.5 rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-200 transition-colors hover:bg-navy-700"
+                  >
+                    <span key={copiado ? 'copiado' : 'copiar'} className="anim-pop flex items-center gap-1.5">
+                      <Icon name={copiado ? 'check' : 'content_copy'} className="text-base" />
+                      {copiado ? 'Copiado' : 'Copiar'}
+                    </span>
+                  </button>
+                </div>
               </div>
 
               <div className="flex items-center justify-end gap-2">
-                {!jaCopiou && <span className="text-xs text-gold-300/70">Copie o token para poder fechar.</span>}
+                {!jaCopiou && <span className="text-xs text-neutral-500">Copie o token para poder fechar.</span>}
                 <button
                   type="button"
                   onClick={fecharTokenGerado}
