@@ -110,19 +110,24 @@ export function AppLayout() {
   }, [colapsado])
 
   // Colaborador não tem nada pra "escolher" em Configurações (só Perfil existe pra ele — Chaves de
-  // API é só do gestor) — vira link direto pro Perfil, sem seta/dropdown, visão antiga de antes da
-  // árvore existir. Gestor continua com a árvore de verdade (Perfil + Chaves de API).
+  // API é só do gestor) — vira link direto pro Perfil, com o nome "Perfil" mesmo (sem seta/
+  // dropdown), visão antiga de antes da árvore existir. Gestor continua com a árvore de verdade
+  // ("Configurações", Perfil + Chaves de API).
   const itensMenuBase = NAV.filter(
     (item) => !item.papel || (item.papel === 'gestor' ? isGestor : !isGestor),
-  ).map((item) => (item.to === '/configuracoes' && !isGestor ? { ...item, to: '/perfil', filhosFixos: false } : item))
-  // Ordem pedida é diferente por papel (gestor: Configurações antes de Admin; colaborador:
-  // Configurações por último) — não dá pra resolver só filtrando o array base (mesma posição pros
-  // dois), então o colaborador reordena essa 1 entrada pro fim depois do filtro.
+  ).map((item) =>
+    item.to === '/configuracoes' && !isGestor
+      ? { ...item, to: '/perfil', label: 'Perfil', filhosFixos: false }
+      : item,
+  )
+  // Ordem pedida é diferente por papel (gestor: Configurações antes de Admin; colaborador: Perfil
+  // por último) — não dá pra resolver só filtrando o array base (mesma posição pros dois), então o
+  // colaborador reordena essa 1 entrada pro fim depois do filtro.
   const itensMenu = isGestor
     ? itensMenuBase
     : [
-        ...itensMenuBase.filter((item) => item.label !== 'Configurações'),
-        ...itensMenuBase.filter((item) => item.label === 'Configurações'),
+        ...itensMenuBase.filter((item) => item.to !== '/perfil'),
+        ...itensMenuBase.filter((item) => item.to === '/perfil'),
       ]
 
   // Galhos da árvore: nomes de fase/módulo, na ordem que o back já devolve — carregados uma vez,
