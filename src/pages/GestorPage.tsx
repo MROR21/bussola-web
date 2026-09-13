@@ -285,11 +285,11 @@ export function GestorPage() {
                   key={u.id}
                   className="anim-pop flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
                 >
-                  <div className="flex min-w-0 flex-col">
+                  <div className="flex min-w-0 flex-col gap-1">
                     <span className="truncate text-neutral-100">{u.nome}</span>
                     <span className="truncate text-sm text-neutral-500">{u.email}</span>
                     {u.gestorNome && (
-                      <span className="truncate text-xs text-gold-500">
+                      <span className="w-fit truncate rounded-full bg-gold-500/10 px-2 py-0.5 text-xs font-medium text-gold-400">
                         Supervisionado por {u.gestorNome}
                       </span>
                     )}
