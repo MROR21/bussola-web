@@ -5,8 +5,8 @@ import { MapCorners } from '../components/MapCorners'
 import { MapIllustration } from '../components/MapIllustration'
 import { useTitulo } from '../hooks/useTitulo'
 import { AcessosAdmin } from '../features/admin/AcessosAdmin'
-import { GuiasAdmin } from '../features/admin/GuiasAdmin'
-import { PassosAdmin } from '../features/admin/PassosAdmin'
+import { FluxosDoModulo } from '../features/admin/FluxosDoModulo'
+import { PassosDaFase } from '../features/admin/PassosDaFase'
 import { SimpleEntityCrud } from '../features/admin/SimpleEntityCrud'
 import { UsuariosAdmin } from '../features/admin/UsuariosAdmin'
 import {
@@ -38,13 +38,11 @@ function contarPor<T>(lista: T[], chaveDe: (item: T) => string): Record<string, 
   return contagem
 }
 
-const ABAS = ['fases', 'passos', 'guias', 'modulos', 'squads', 'acessos', 'usuarios'] as const
+const ABAS = ['jornada', 'guias', 'squads', 'acessos', 'usuarios'] as const
 type Aba = (typeof ABAS)[number]
 
 const LABEL: Record<Aba, string> = {
-  fases: 'Fases',
-  modulos: 'Módulos',
-  passos: 'Passos',
+  jornada: 'Jornada',
   guias: 'Guias',
   squads: 'Squads',
   acessos: 'Acessos',
@@ -55,7 +53,7 @@ const LABEL: Record<Aba, string> = {
 // (sem depender de alteração de código pra editar texto, ordem ou estrutura).
 export function AdminPage() {
   useTitulo('Admin')
-  const [aba, setAba] = useState<Aba>('fases')
+  const [aba, setAba] = useState<Aba>('jornada')
 
   return (
     <div className="relative flex w-full max-w-4xl flex-col gap-5">
@@ -89,10 +87,14 @@ export function AdminPage() {
         ))}
       </div>
 
-      {aba === 'fases' && (
+      {/* Uma aba só, com o mesmo comportamento de sempre (lista + reorder por setas + CRUD em
+          modal) — o dropdown de cada fase (renderFilhos) é onde os passos dela aparecem, em vez
+          de uma aba separada. Antes eram 2 abas com rótulo/componente trocados de propósito
+          (histórico); unificado a pedido do Miguel pra melhorar a coerência. */}
+      {aba === 'jornada' && (
         <div className="anim-page">
           <SimpleEntityCrud
-            titulo="Fases"
+            titulo="Jornada"
             icone="route"
             singular="fase"
             labelFilhos="passos"
@@ -101,38 +103,40 @@ export function AdminPage() {
             editar={editarFase}
             apagar={apagarFase}
             contarFilhos={async () => contarPor(await listarPassosAdmin(), (p) => p.faseId)}
+            renderFilhos={(fase) => <PassosDaFase faseId={fase.id} />}
           />
         </div>
       )}
-      {/* Rótulo e conteúdo trocados de propósito (pedido do Miguel): a aba "Módulos" mostra o
-          editor de Fluxos (GuiasAdmin) e a aba "Guias" mostra o CRUD simples de categorias — o
-          `aba` de cada bloco decide só POSIÇÃO/rótulo na barra, o componente renderizado é livre.
-          O título/ícone interno de cada componente também foi ajustado (`titulo="Guias"` aqui,
-          `<h2>Módulos</h2>` dentro de GuiasAdmin.tsx) pra bater com a aba que os envolve agora,
-          mesmo os dois continuando a mexer nos registros de Módulo (`singular="módulo"` etc.) por
-          baixo — só o texto visível mudou, não a entidade/CRUD de verdade. */}
-      {aba === 'modulos' && (
-        <div className="anim-page">
-          <GuiasAdmin />
-        </div>
-      )}
-      {aba === 'passos' && (
-        <div className="anim-page">
-          <PassosAdmin />
-        </div>
-      )}
+      {/* Mesma ideia da Jornada: módulos com reorder + CRUD, dropdown de cada um mostrando seu
+          conteúdo (Fluxos/Documentação). Duas seções (Squads / Padrões do sistema) em vez de uma
+          lista só, pra separar visualmente o que nasceu de um squad do que foi criado à mão — a
+          contagem por squad na aba Squads e a categorização aqui usam o mesmo campo real
+          (Modulo.squadId), sem dicionário de nome hardcoded. */}
       {aba === 'guias' && (
-        <div className="anim-page">
+        <div className="anim-page flex flex-col gap-6">
           <SimpleEntityCrud
-            titulo="Guias"
-            icone="menu_book"
+            titulo="Squads"
+            icone="groups"
             singular="módulo"
-            labelFilhos="fluxos"
-            listar={listarModulos}
+            labelFilhos="itens"
+            listar={async () => (await listarModulos()).filter((m) => m.squadId !== null)}
             criar={criarModulo}
             editar={editarModulo}
             apagar={apagarModulo}
             contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
+            renderFilhos={(modulo) => <FluxosDoModulo moduloId={modulo.id} />}
+          />
+          <SimpleEntityCrud
+            titulo="Padrões do sistema"
+            icone="handyman"
+            singular="módulo"
+            labelFilhos="itens"
+            listar={async () => (await listarModulos()).filter((m) => m.squadId === null)}
+            criar={criarModulo}
+            editar={editarModulo}
+            apagar={apagarModulo}
+            contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
+            renderFilhos={(modulo) => <FluxosDoModulo moduloId={modulo.id} />}
           />
         </div>
       )}
