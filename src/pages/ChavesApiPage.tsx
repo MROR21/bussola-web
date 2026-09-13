@@ -136,8 +136,8 @@ export function ChavesApiPage() {
 
   return (
     <div className="relative flex w-full max-w-2xl flex-col gap-6">
-      <CompassRose className="pointer-events-none fixed right-8 bottom-8 size-72 text-gold-500 opacity-[0.15]" />
-      <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] top-20 w-56 text-gold-500 opacity-[0.25]" />
+      <CompassRose className="pointer-events-none fixed right-8 bottom-8 size-72 text-gold-500 opacity-[var(--opacidade-marca-dagua)]" />
+      <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] top-20 w-56 text-gold-500 opacity-[var(--opacidade-marca-dagua-mapa)]" />
       <Link
         to="/configuracoes"
         className="relative flex items-center gap-1 self-start text-sm text-neutral-400 transition-colors hover:text-neutral-200"

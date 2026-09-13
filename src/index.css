@@ -16,6 +16,16 @@
   --color-gold-300: #e8c968;
 }
 
+/* Opacidade das marcas d'água de fundo (CompassRose/MapIllustration, ~15 telas) — mesmo número
+   nos dois temas fazia elas sumirem quase por completo no claro (o dourado mais escuro/saturado
+   do tema claro, ver bloco abaixo, "pesa" diferente contra um fundo claro do que contra o navy
+   escuro). Uma variável central em vez de duplicar valor em cada arquivo — troca aqui, vale em
+   toda tela de uma vez. */
+:root {
+  --opacidade-marca-dagua: 0.15;
+  --opacidade-marca-dagua-mapa: 0.25;
+}
+
 /* Modo claro — segunda versão (2026-09-06), refeita com pesquisa de verdade depois que a 1ª
    tentativa (texto cinza puro, espelhado matematicamente) saiu "pouco profissional". Duas ideias
    centrais, baseadas em como sistemas de design sérios fazem essa conversão (Material Design 3 e
@@ -47,6 +57,9 @@
   --color-gold-500: oklch(52% 0.145 88);
   --color-gold-400: oklch(58% 0.15 89);
   --color-gold-300: oklch(66% 0.135 90);
+
+  --opacidade-marca-dagua: 0.35;
+  --opacidade-marca-dagua-mapa: 0.45;
 
   --color-neutral-100: oklch(22% 0.025 265);
   --color-neutral-200: oklch(30% 0.022 265);

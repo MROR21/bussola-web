@@ -256,8 +256,8 @@ export function GuiasPage() {
 
     return (
       <div className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
-        <CompassRose className="pointer-events-none fixed right-8 top-20 size-64 text-gold-500 opacity-[0.15]" />
-        <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] bottom-8 w-56 text-gold-500 opacity-[0.25]" />
+        <CompassRose className="pointer-events-none fixed right-8 top-20 size-64 text-gold-500 opacity-[var(--opacidade-marca-dagua)]" />
+        <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] bottom-8 w-56 text-gold-500 opacity-[var(--opacidade-marca-dagua-mapa)]" />
         <button
           type="button"
           onClick={sairModulo}
@@ -338,8 +338,8 @@ export function GuiasPage() {
   // ---- Lista de módulos (cards) + busca global ----
   return (
     <div className="anim-fade relative flex w-full max-w-2xl flex-col gap-6">
-      <CompassRose className="pointer-events-none fixed right-8 top-20 size-64 text-gold-500 opacity-[0.15]" />
-      <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] bottom-8 w-56 text-gold-500 opacity-[0.25]" />
+      <CompassRose className="pointer-events-none fixed right-8 top-20 size-64 text-gold-500 opacity-[var(--opacidade-marca-dagua)]" />
+      <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] bottom-8 w-56 text-gold-500 opacity-[var(--opacidade-marca-dagua-mapa)]" />
       <header className="relative flex flex-col gap-1 self-start p-5">
         <MapCorners tamanho={5} opacidade={25} />
         <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">

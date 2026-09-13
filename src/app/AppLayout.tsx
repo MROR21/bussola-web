@@ -297,7 +297,7 @@ export function AppLayout() {
         )}
       >
         <CompassRose
-          className="pointer-events-none absolute bottom-0 left-0 size-56 text-gold-500 opacity-[0.15]"
+          className="pointer-events-none absolute bottom-0 left-0 size-56 text-gold-500 opacity-[var(--opacidade-marca-dagua)]"
         />
 
         <div
@@ -491,7 +491,7 @@ export function AppLayout() {
               header inteiro, senão corta o dropdown de notificação, que precisa abrir PRA FORA
               da faixa de 64px do header. */}
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <CompassRose className="absolute -right-6 -top-10 size-32 text-gold-500 opacity-[0.15]" />
+            <CompassRose className="absolute -right-6 -top-10 size-32 text-gold-500 opacity-[var(--opacidade-marca-dagua)]" />
           </div>
           <div
             className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gold-500/50 to-transparent"

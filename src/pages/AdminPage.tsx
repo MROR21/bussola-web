@@ -102,8 +102,8 @@ export function AdminPage() {
 
   return (
     <div className="relative flex w-full max-w-4xl flex-col gap-5">
-      <CompassRose className="pointer-events-none fixed right-8 top-20 size-72 text-gold-500 opacity-[0.15]" />
-      <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] bottom-8 w-64 text-gold-500 opacity-[0.25]" />
+      <CompassRose className="pointer-events-none fixed right-8 top-20 size-72 text-gold-500 opacity-[var(--opacidade-marca-dagua)]" />
+      <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] bottom-8 w-64 text-gold-500 opacity-[var(--opacidade-marca-dagua-mapa)]" />
       <div className="relative flex flex-col gap-1 self-start p-5">
         <MapCorners tamanho={5} opacidade={25} />
         <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-100">

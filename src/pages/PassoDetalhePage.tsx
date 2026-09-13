@@ -348,8 +348,8 @@ export function PassoDetalhePage({
         layoutAula ? 'max-w-6xl' : 'max-w-2xl',
       )}
     >
-      <CompassRose className="pointer-events-none fixed right-8 top-20 size-64 text-gold-500 opacity-[0.15]" />
-      <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] bottom-8 w-56 text-gold-500 opacity-[0.25]" />
+      <CompassRose className="pointer-events-none fixed right-8 top-20 size-64 text-gold-500 opacity-[var(--opacidade-marca-dagua)]" />
+      <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] bottom-8 w-56 text-gold-500 opacity-[var(--opacidade-marca-dagua-mapa)]" />
       {/* Sempre volta pra visão geral da fase (nunca pro passo anterior) — mesmo entrando pelas
           setinhas de navegação da trilha, "Voltar" tem destino fixo. */}
       <button

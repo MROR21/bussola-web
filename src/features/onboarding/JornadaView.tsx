@@ -434,8 +434,8 @@ export function JornadaView({
 
     return (
       <div className="anim-fade relative flex w-full max-w-2xl flex-col gap-5">
-        <CompassRose className="pointer-events-none fixed right-8 top-20 size-64 text-gold-500 opacity-[0.15]" />
-        <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] bottom-8 w-56 text-gold-500 opacity-[0.25]" />
+        <CompassRose className="pointer-events-none fixed right-8 top-20 size-64 text-gold-500 opacity-[var(--opacidade-marca-dagua)]" />
+        <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] bottom-8 w-56 text-gold-500 opacity-[var(--opacidade-marca-dagua-mapa)]" />
         <button
           type="button"
           onClick={sairFase}
@@ -614,14 +614,14 @@ export function JornadaView({
           da nova stacking context). O padrão do resto do app nunca usa z-index negativo — só
           confia na ordem do DOM (primeiro elemento = mais atrás) — por isso não tem essa
           armadilha; usando o mesmo padrão aqui em vez de manter a solução alternativa antiga. */}
-      <CompassRose className="pointer-events-none fixed right-8 top-20 size-72 text-gold-500 opacity-[0.15]" />
-      <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] bottom-8 w-64 text-gold-500 opacity-[0.25]" />
+      <CompassRose className="pointer-events-none fixed right-8 top-20 size-72 text-gold-500 opacity-[var(--opacidade-marca-dagua)]" />
+      <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] bottom-8 w-64 text-gold-500 opacity-[var(--opacidade-marca-dagua-mapa)]" />
       {/* Hero — anel de progresso + próximo passo num único cartão (antes eram duas caixas soltas
           empilhadas; agora lê como um bloco só, com o glow sutil atrás do anel). */}
       <div className="relative overflow-hidden rounded-3xl border border-navy-700 bg-navy-800 shadow-xl shadow-black/20">
         <MapCorners />
         <CompassRose
-          className="pointer-events-none absolute -bottom-10 -right-10 size-40 text-gold-500 opacity-[0.15]"
+          className="pointer-events-none absolute -bottom-10 -right-10 size-40 text-gold-500 opacity-[var(--opacidade-marca-dagua)]"
         />
         <div
           className="pointer-events-none absolute -left-12 -top-16 size-56 rounded-full bg-gold-500/10 blur-3xl"
