@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CompassRose } from '../components/CompassRose'
 import { Icon } from '../components/Icon'
 import { MapCorners } from '../components/MapCorners'
@@ -10,9 +10,8 @@ import { NovoModuloButton } from '../features/admin/NovoModuloButton'
 import { PassosDaFase } from '../features/admin/PassosDaFase'
 import { SimpleEntityCrud } from '../features/admin/SimpleEntityCrud'
 import { SquadsAdmin } from '../features/admin/SquadsAdmin'
-import { TrocarSquadModuloModal } from '../features/admin/TrocarSquadModuloModal'
 import { UsuariosAdmin } from '../features/admin/UsuariosAdmin'
-import type { EntidadeSimples } from '../features/admin/types'
+import type { EntidadeSimples, Modulo } from '../features/admin/types'
 import {
   apagarFase,
   apagarModulo,
@@ -23,7 +22,10 @@ import {
   listarFluxosAdmin,
   listarModulos,
   listarPassosAdmin,
+  mudarSquadModulo,
 } from '../features/admin/adminService'
+import { listarSquads } from '../features/squads/squadsService'
+import type { Squad } from '../features/squads/types'
 import { cx } from '../utils/cx'
 
 // Conta quantos itens de `lista` apontam pra cada valor retornado por `chaveDe` — usado pra
@@ -65,20 +67,21 @@ function abaInicial(): Aba {
 export function AdminPage() {
   useTitulo('Admin')
   const [aba, setAba] = useState<Aba>(abaInicial)
-  // Bump depois de criar módulo pelo NovoModuloButton — vira `key` das duas listas de baixo pra
-  // remontarem e buscarem de novo (elas não têm um jeito próprio de "refetch por fora").
+  // Bump depois de criar módulo pelo NovoModuloButton, ou de mudar a categoria de um módulo já
+  // existente pelo próprio "Editar" — vira `key` das duas listas de baixo pra remontarem e
+  // buscarem de novo (elas não têm um jeito próprio de "refetch por fora").
   const [refreshGuias, setRefreshGuias] = useState(0)
-  // Módulo com o modal de "Mudar categoria" aberto (ver TrocarSquadModuloModal) — o jeito de
-  // corrigir/desfazer um vínculo com squad feito na criação, já que antes disso não existia
-  // nenhum jeito de reverter isso pela tela.
-  const [moduloTrocando, setModuloTrocando] = useState<{ item: EntidadeSimples; squadIdAtual: string | null } | null>(
-    null,
-  )
+  const [squads, setSquads] = useState<Squad[]>([])
 
-  async function abrirTrocaCategoria(item: EntidadeSimples) {
-    const modulos = await listarModulos()
-    const atual = modulos.find((m) => m.id === item.id)
-    setModuloTrocando({ item, squadIdAtual: atual?.squadId ?? null })
+  useEffect(() => {
+    listarSquads().then(setSquads).catch(() => {})
+  }, [])
+
+  // Passado como `squadPicker` pras duas listas de Módulo — dá ao "Editar" comum a opção de trocar
+  // (ou zerar) o squad vinculado, em vez de precisar de uma ação separada só pra isso.
+  async function salvarCategoriaModulo(id: string, squadId: string | null) {
+    await mudarSquadModulo(id, squadId)
+    setRefreshGuias((n) => n + 1)
   }
 
   function selecionarAba(chave: Aba) {
@@ -178,7 +181,11 @@ export function AdminPage() {
               apagar={apagarModulo}
               contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
               renderFilhos={(modulo, aoMudar) => <FluxosDoModulo moduloId={modulo.id} aoMudar={aoMudar} />}
-              acoesExtras={(item) => [{ label: 'Mudar categoria', onClick: () => abrirTrocaCategoria(item) }]}
+              squadPicker={{
+                squads,
+                squadIdAtual: (item) => (item as Modulo).squadId,
+                salvar: salvarCategoriaModulo,
+              }}
             />
           </section>
           <section className="flex flex-col gap-3">
@@ -199,18 +206,13 @@ export function AdminPage() {
               apagar={apagarModulo}
               contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
               renderFilhos={(modulo, aoMudar) => <FluxosDoModulo moduloId={modulo.id} aoMudar={aoMudar} />}
-              acoesExtras={(item) => [{ label: 'Mudar categoria', onClick: () => abrirTrocaCategoria(item) }]}
+              squadPicker={{
+                squads,
+                squadIdAtual: (item) => (item as Modulo).squadId,
+                salvar: salvarCategoriaModulo,
+              }}
             />
           </section>
-          <TrocarSquadModuloModal
-            modulo={moduloTrocando?.item ?? null}
-            squadIdAtual={moduloTrocando?.squadIdAtual ?? null}
-            onFechar={() => setModuloTrocando(null)}
-            onSalvo={() => {
-              setModuloTrocando(null)
-              setRefreshGuias((n) => n + 1)
-            }}
-          />
         </div>
       )}
       {aba === 'squads' && (

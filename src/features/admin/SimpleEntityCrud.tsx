@@ -3,10 +3,10 @@ import type { ReactNode } from 'react'
 import { EstadoErro } from '../../components/EstadoErro'
 import { Icon } from '../../components/Icon'
 import { KebabMenu } from '../../components/KebabMenu'
-import type { AcaoKebab } from '../../components/KebabMenu'
 import { Carregando, Spinner } from '../../components/Spinner'
 import { useSaidaValor } from '../../hooks/useSaida'
 import { cx } from '../../utils/cx'
+import type { Squad } from '../squads/types'
 import type { EntidadeSimples } from './types'
 
 // CRUD de Fase ou Módulo — a mesma forma (nome+ordem) serve pros dois, só troca os services e os
@@ -27,7 +27,7 @@ export function SimpleEntityCrud({
   renderFilhos,
   ocultarTitulo,
   ocultarNovo,
-  acoesExtras,
+  squadPicker,
 }: {
   titulo: string
   icone: string
@@ -54,9 +54,15 @@ export function SimpleEntityCrud({
   // módulos têm categoria pra escolher na criação, então isso mora num botão único por fora,
   // fora das duas instâncias filtradas por categoria).
   ocultarNovo?: boolean
-  // Ações extras no kebab de cada linha, ANTES de Editar/Apagar (ex.: "Mudar categoria" só pros
-  // Módulos, que Fase não tem) — opcional, sem isso o menu fica só com Editar/Apagar de sempre.
-  acoesExtras?: (item: EntidadeSimples) => AcaoKebab[]
+  // Dá ao modal de EDIÇÃO um campo extra de categoria (squad vinculado, ou nenhum pra "padrão do
+  // sistema") — só faz sentido pra Módulo (Fase não tem squad), então é opcional. Não aparece na
+  // criação de propósito: a criação de módulo é centralizada no NovoModuloButton (ver ocultarNovo),
+  // que já escolhe a categoria lá.
+  squadPicker?: {
+    squads: Squad[]
+    squadIdAtual: (item: EntidadeSimples) => string | null
+    salvar: (id: string, squadId: string | null) => Promise<void>
+  }
 }) {
   const [itens, setItens] = useState<EntidadeSimples[]>([])
   const [filhosPorId, setFilhosPorId] = useState<Record<string, number>>({})
@@ -65,6 +71,8 @@ export function SimpleEntityCrud({
   const [editando, setEditando] = useState<EntidadeSimples | 'novo' | null>(null)
   const [nome, setNome] = useState('')
   const [order, setOrder] = useState(1)
+  const [categoria, setCategoria] = useState<'padrao' | 'squad'>('padrao')
+  const [squadId, setSquadId] = useState('')
   const [salvando, setSalvando] = useState(false)
   const [apagando, setApagando] = useState<EntidadeSimples | null>(null)
   const [movendo, setMovendo] = useState<string | null>(null)
@@ -176,6 +184,11 @@ export function SimpleEntityCrud({
     setNome(item.nome)
     setOrder(item.order)
     setEditando(item)
+    if (squadPicker) {
+      const atual = squadPicker.squadIdAtual(item)
+      setCategoria(atual ? 'squad' : 'padrao')
+      setSquadId(atual ?? '')
+    }
   }
 
   async function salvar() {
@@ -187,6 +200,12 @@ export function SimpleEntityCrud({
         await criar(nome.trim(), order)
       } else if (editando) {
         await editar(editando.id, nome.trim(), order)
+        if (squadPicker) {
+          const squadIdNovo = categoria === 'squad' ? squadId : null
+          if (squadIdNovo !== squadPicker.squadIdAtual(editando)) {
+            await squadPicker.salvar(editando.id, squadIdNovo)
+          }
+        }
       }
       setEditando(null)
       await carregar()
@@ -311,7 +330,6 @@ export function SimpleEntityCrud({
               </div>
               <KebabMenu
                 acoes={[
-                  ...(acoesExtras?.(item) ?? []),
                   { label: 'Editar', onClick: () => abrirEdicao(item) },
                   { label: 'Apagar', onClick: () => setApagando(item), tone: 'perigo' },
                 ]}
@@ -371,6 +389,40 @@ export function SimpleEntityCrud({
                 className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
               />
             </label>
+            {squadPicker && modalEdicao.valor !== 'novo' && (
+              <>
+                <label className="flex flex-col gap-1 text-sm text-neutral-400">
+                  Categoria
+                  <select
+                    value={categoria}
+                    onChange={(e) => setCategoria(e.target.value as 'padrao' | 'squad')}
+                    className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
+                  >
+                    <option value="padrao">Padrão do sistema</option>
+                    <option value="squad">Squad</option>
+                  </select>
+                </label>
+                {categoria === 'squad' && (
+                  <label className="flex flex-col gap-1 text-sm text-neutral-400">
+                    Squad
+                    <select
+                      value={squadId}
+                      onChange={(e) => setSquadId(e.target.value)}
+                      className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
+                    >
+                      <option value="" disabled>
+                        Escolha um squad
+                      </option>
+                      {squadPicker.squads.map((squad) => (
+                        <option key={squad.id} value={squad.id}>
+                          {squad.nome}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+              </>
+            )}
             <div className="flex justify-end gap-2">
               <button
                 type="button"
@@ -382,7 +434,7 @@ export function SimpleEntityCrud({
               <button
                 type="button"
                 onClick={salvar}
-                disabled={!nome.trim() || salvando}
+                disabled={!nome.trim() || (Boolean(squadPicker) && categoria === 'squad' && !squadId) || salvando}
                 className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {salvando ? (
