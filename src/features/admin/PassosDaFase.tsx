@@ -16,7 +16,10 @@ const SKILL_AREAS: SkillArea[] = ['None', 'Frontend', 'Backend', 'Git', 'Sql', '
 // criar/editar). Busca por conta própria (mesmo padrão de item independente que FluxosDoModulo
 // usa) — o dado é filtrado aqui, mas a lista de Fases pro seletor do modal continua vindo inteira
 // (um passo pode ser movido pra outra fase).
-export function PassosDaFase({ faseId }: { faseId: string }) {
+// `aoMudar` avisa o SimpleEntityCrud de Jornada (que renderiza isso no dropdown de uma fase) pra
+// atualizar a badge "N passos" daquela fase depois de criar/apagar um passo aqui dentro — sem
+// isso a contagem só refletia a próxima vez que a própria fase fosse editada/reordenada.
+export function PassosDaFase({ faseId, aoMudar }: { faseId: string; aoMudar?: () => void }) {
   const [passos, setPassos] = useState<PassoAdmin[]>([])
   const [fases, setFases] = useState<Fase[]>([])
   const [loading, setLoading] = useState(true)
@@ -95,6 +98,9 @@ export function PassosDaFase({ faseId }: { faseId: string }) {
       setForm(null)
       setEditando(null)
       await carregar()
+      // Sempre (não só ao criar): editar também pode trocar a fase do passo, o que muda a
+      // contagem de DUAS fases (a antiga e a nova), não só a que está aberta agora.
+      aoMudar?.()
       setFeedback({ texto: criando ? 'Passo criado.' : 'Passo salvo.', ok: true })
     } catch (e) {
       setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao salvar', ok: false })
@@ -110,6 +116,7 @@ export function PassosDaFase({ faseId }: { faseId: string }) {
     try {
       await apagarPasso(alvo.id)
       await carregar()
+      aoMudar?.()
       setFeedback({ texto: 'Passo apagado.', ok: true })
     } catch (e) {
       setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao apagar', ok: false })

@@ -38,8 +38,12 @@ export function SimpleEntityCrud({
   contarFilhos?: () => Promise<Record<string, number>>
   // Conteúdo extra por linha (ex.: os passos daquela fase, os fluxos daquele módulo) — dropdown
   // próprio, cada item cuida do seu próprio fetch/estado de aberto-fechado. Opcional: sem isso a
-  // linha fica exatamente como sempre foi (nome + reorder + editar/apagar).
-  renderFilhos?: (item: EntidadeSimples) => ReactNode
+  // linha fica exatamente como sempre foi (nome + reorder + editar/apagar). Segundo argumento
+  // (`aoMudar`) é o jeito do filho avisar "mudei uma criança sua" — sem isso a badge "N itens" só
+  // atualiza quando O PRÓPRIO SimpleEntityCrud recarrega (editar/apagar/reordenar A FASE/MÓDULO
+  // em si), então criar/apagar um passo/fluxo por dentro do dropdown deixava a contagem visível
+  // desatualizada até a próxima ação na linha de fora.
+  renderFilhos?: (item: EntidadeSimples, aoMudar: () => void) => ReactNode
   // Esconde o ícone+título internos (mantém só o botão "+ Novo(a)") — usado quando o chamador já
   // mostra um cabeçalho próprio por fora (ex.: duas instâncias lado a lado que representam a MESMA
   // entidade, só filtradas diferente — não faz sentido repetir "Módulos" duas vezes).
@@ -108,6 +112,17 @@ export function SimpleEntityCrud({
       setError(e instanceof Error ? e.message : 'Erro ao carregar')
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Só recalcula a contagem (sem re-listar itens nem piscar loading) — chamado pelo filho via
+  // `aoMudar` quando ele cria/edita/apaga algo por dentro do próprio dropdown.
+  async function atualizarContagem() {
+    if (!contarFilhos) return
+    try {
+      setFilhosPorId(await contarFilhos())
+    } catch {
+      // silencioso — a próxima carga completa (editar/apagar/reordenar a linha de fora) corrige
     }
   }
 
@@ -292,7 +307,7 @@ export function SimpleEntityCrud({
                 )}
               >
                 <div className="overflow-hidden">
-                  <div className="pt-1">{renderFilhos(item)}</div>
+                  <div className="pt-1">{renderFilhos(item, atualizarContagem)}</div>
                 </div>
               </div>
             )}

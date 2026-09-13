@@ -132,7 +132,7 @@ export function AdminPage() {
             editar={editarFase}
             apagar={apagarFase}
             contarFilhos={async () => contarPor(await listarPassosAdmin(), (p) => p.faseId)}
-            renderFilhos={(fase) => <PassosDaFase faseId={fase.id} />}
+            renderFilhos={(fase, aoMudar) => <PassosDaFase faseId={fase.id} aoMudar={aoMudar} />}
           />
         </div>
       )}
@@ -164,7 +164,7 @@ export function AdminPage() {
               editar={editarModulo}
               apagar={apagarModulo}
               contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
-              renderFilhos={(modulo) => <FluxosDoModulo moduloId={modulo.id} />}
+              renderFilhos={(modulo, aoMudar) => <FluxosDoModulo moduloId={modulo.id} aoMudar={aoMudar} />}
             />
           </section>
           <section className="flex flex-col gap-3">
@@ -184,7 +184,7 @@ export function AdminPage() {
               editar={editarModulo}
               apagar={apagarModulo}
               contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
-              renderFilhos={(modulo) => <FluxosDoModulo moduloId={modulo.id} />}
+              renderFilhos={(modulo, aoMudar) => <FluxosDoModulo moduloId={modulo.id} aoMudar={aoMudar} />}
             />
           </section>
         </div>

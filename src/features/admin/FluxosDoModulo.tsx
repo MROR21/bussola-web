@@ -19,7 +19,10 @@ const ABAS: { value: FluxoAdmin['tipo']; label: string }[] = [
 // Guias (o próprio SimpleEntityCrud controla o abrir/fechar da linha, aqui só o miolo: sub-abas +
 // lista + criar/editar). Duas sub-abas (Fluxos/Documentação) filtram o mesmo registro Fluxo pelo
 // campo Tipo — não são listas/entidades diferentes.
-export function FluxosDoModulo({ moduloId }: { moduloId: string }) {
+// `aoMudar` avisa o SimpleEntityCrud de Guias (que renderiza isso no dropdown de um módulo) pra
+// atualizar a badge "N itens" daquele módulo depois de criar/apagar um fluxo aqui dentro — sem
+// isso a contagem só refletia a próxima vez que o próprio módulo fosse editado/reordenado.
+export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMudar?: () => void }) {
   const [aba, setAba] = useState<FluxoAdmin['tipo']>('Fluxo')
   const [fluxos, setFluxos] = useState<FluxoAdmin[]>([])
   const [modulos, setModulos] = useState<Modulo[]>([])
@@ -105,6 +108,9 @@ export function FluxosDoModulo({ moduloId }: { moduloId: string }) {
       setForm(null)
       setEditando(null)
       await carregar()
+      // Sempre (não só ao criar): editar também pode trocar o módulo do fluxo, o que muda a
+      // contagem de DOIS módulos (o antigo e o novo), não só o que está aberto agora.
+      aoMudar?.()
       setFeedback({
         texto: criando
           ? form.tipo === 'Fluxo'
@@ -129,6 +135,7 @@ export function FluxosDoModulo({ moduloId }: { moduloId: string }) {
     try {
       await apagarFluxo(alvo.id)
       await carregar()
+      aoMudar?.()
       setFeedback({ texto: alvo.tipo === 'Fluxo' ? 'Fluxo apagado.' : 'Documento apagado.', ok: true })
     } catch (e) {
       setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao apagar', ok: false })
