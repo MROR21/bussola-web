@@ -65,14 +65,18 @@ export function GuiasPage() {
   const sairModulo = () => navigate('/guias')
   const [destacado, setDestacado] = useState<string | null>(null)
   // Aba de conteúdo dentro de um módulo (Fluxos passo-a-passo vs Documentação do squad) — reseta
-  // toda vez que entra num módulo diferente, sempre começa em Fluxos.
+  // toda vez que entra num módulo diferente. Um módulo "padrão do sistema" (sem squad) só tem
+  // Documentação (Fluxo é reservado pra vídeo do sistema de um squad específico), então começa
+  // direto lá pra esse caso — senão começa em Fluxos como sempre.
   const [abaConteudo, setAbaConteudo] = useState<TipoConteudo>('Fluxo')
+  const moduloAtual = modulos.find((m) => m.nome === moduloSelecionado)
+  const moduloEhPadrao = moduloAtual?.squadId === null
 
   useTitulo(moduloSelecionado ?? 'Guia pelo sistema')
 
   useEffect(() => {
-    setAbaConteudo('Fluxo')
-  }, [moduloSelecionado])
+    setAbaConteudo(moduloEhPadrao ? 'Documentacao' : 'Fluxo')
+  }, [moduloSelecionado, moduloEhPadrao])
 
   useEffect(() => {
     let cancelado = false
@@ -275,18 +279,20 @@ export function GuiasPage() {
         </div>
 
         <div className="relative flex gap-2">
-          <button
-            type="button"
-            onClick={() => setAbaConteudo('Fluxo')}
-            className={cx(
-              'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
-              abaConteudo === 'Fluxo'
-                ? 'bg-gold-500/20 text-gold-300'
-                : 'text-neutral-400 hover:text-neutral-200',
-            )}
-          >
-            Fluxos ({qtdFluxos})
-          </button>
+          {!moduloEhPadrao && (
+            <button
+              type="button"
+              onClick={() => setAbaConteudo('Fluxo')}
+              className={cx(
+                'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                abaConteudo === 'Fluxo'
+                  ? 'bg-gold-500/20 text-gold-300'
+                  : 'text-neutral-400 hover:text-neutral-200',
+              )}
+            >
+              Fluxos ({qtdFluxos})
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setAbaConteudo('Documentacao')}

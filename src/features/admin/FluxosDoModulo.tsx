@@ -63,6 +63,17 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
     return () => clearTimeout(t)
   }, [feedback])
 
+  // Módulo "padrão do sistema" (sem squad) só tem Documentação — Fluxo é reservado pra conteúdo em
+  // vídeo do sistema de um squad específico (ver comentário em FluxoSeeder.cs). `moduloAtual` fica
+  // undefined até `modulos` carregar; nesse meio tempo `ehPadrao` cai em `false` (mostra as duas
+  // abas por um instante em vez de esconder Fluxos por engano de um módulo com squad).
+  const moduloAtual = modulos.find((m) => m.id === moduloId)
+  const ehPadrao = moduloAtual?.squadId === null
+
+  useEffect(() => {
+    if (ehPadrao && aba === 'Fluxo') setAba('Documentacao')
+  }, [ehPadrao, aba])
+
   const itensDaAba = fluxos.filter((f) => f.tipo === aba)
 
   function abrirNovo() {
@@ -71,7 +82,7 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
       order: fluxos.length > 0 ? Math.max(...fluxos.map((f) => f.order)) + 1 : 1,
       moduloId,
       squadId: null,
-      tipo: aba,
+      tipo: ehPadrao ? 'Documentacao' : aba,
       categoria: '',
       titulo: '',
       descricao: '',
@@ -147,7 +158,7 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-2">
           <div className="flex gap-1.5">
-            {ABAS.map((a) => (
+            {ABAS.filter((a) => !ehPadrao || a.value === 'Documentacao').map((a) => (
               <button
                 key={a.value}
                 type="button"
@@ -229,7 +240,17 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
                     Módulo
                     <select
                       value={form.moduloId}
-                      onChange={(e) => setForm({ ...form, moduloId: e.target.value })}
+                      onChange={(e) => {
+                        const novoModuloId = e.target.value
+                        const novoEhPadrao = modulos.find((m) => m.id === novoModuloId)?.squadId === null
+                        setForm({
+                          ...form,
+                          moduloId: novoModuloId,
+                          // Módulo "padrão do sistema" só tem Documentação — trocar pra um desses
+                          // já força o tipo, em vez de deixar um Fluxo "escondido" lá (ver ehPadrao).
+                          tipo: novoEhPadrao ? 'Documentacao' : form.tipo,
+                        })
+                      }}
                       className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                     >
                       {modulos.map((m) => (
@@ -272,9 +293,14 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
                     <select
                       value={form.tipo}
                       onChange={(e) => setForm({ ...form, tipo: e.target.value as FluxoAdmin['tipo'] })}
-                      className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
+                      disabled={modulos.find((m) => m.id === form.moduloId)?.squadId === null}
+                      className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {ABAS.map((a) => (
+                      {ABAS.filter(
+                        (a) =>
+                          modulos.find((m) => m.id === form.moduloId)?.squadId !== null ||
+                          a.value === 'Documentacao',
+                      ).map((a) => (
                         <option key={a.value} value={a.value}>
                           {a.label}
                         </option>
