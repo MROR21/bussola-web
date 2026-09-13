@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { EstadoErro } from '../../components/EstadoErro'
 import { Icon } from '../../components/Icon'
+import { KebabMenu } from '../../components/KebabMenu'
 import { Carregando, Spinner } from '../../components/Spinner'
 import { useSaidaValor } from '../../hooks/useSaida'
 import { cx } from '../../utils/cx'
@@ -269,22 +270,12 @@ export function SimpleEntityCrud({
                   </span>
                 )}
               </div>
-              <div className="flex shrink-0 gap-3">
-                <button
-                  type="button"
-                  onClick={() => abrirEdicao(item)}
-                  className="text-sm text-gold-400 transition-colors hover:text-gold-300"
-                >
-                  Editar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setApagando(item)}
-                  className="text-sm text-red-400 transition-colors hover:text-red-300"
-                >
-                  Apagar
-                </button>
-              </div>
+              <KebabMenu
+                acoes={[
+                  { label: 'Editar', onClick: () => abrirEdicao(item) },
+                  { label: 'Apagar', onClick: () => setApagando(item), tone: 'perigo' },
+                ]}
+              />
             </div>
             {renderFilhos && (
               <div

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../../components/Icon'
+import { KebabMenu } from '../../components/KebabMenu'
 import { MarkdownEditor } from '../../components/MarkdownEditor'
 import { Spinner } from '../../components/Spinner'
 import { useSaidaValor } from '../../hooks/useSaida'
@@ -181,22 +182,12 @@ export function FluxosDoModulo({ moduloId }: { moduloId: string }) {
                   <span className="truncate text-neutral-100">{f.titulo}</span>
                   <span className="text-xs text-neutral-500">{f.squad ?? 'Todos os squads'}</span>
                 </div>
-                <div className="flex shrink-0 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => abrirEdicao(f)}
-                    className="text-sm text-gold-400 transition-colors hover:text-gold-300"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setApagando(f)}
-                    className="text-sm text-red-400 transition-colors hover:text-red-300"
-                  >
-                    Apagar
-                  </button>
-                </div>
+                <KebabMenu
+                  acoes={[
+                    { label: 'Editar', onClick: () => abrirEdicao(f) },
+                    { label: 'Apagar', onClick: () => setApagando(f), tone: 'perigo' },
+                  ]}
+                />
               </li>
             ))}
           </ul>

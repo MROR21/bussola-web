@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { EstadoErro } from '../../components/EstadoErro'
 import { Icon } from '../../components/Icon'
+import { KebabMenu } from '../../components/KebabMenu'
 import { Carregando } from '../../components/Spinner'
 import { useAuthStore } from '../auth/authStore'
 import { useRefetchOnFocus } from '../../hooks/useAtualizarEmSegundoPlano'
@@ -172,39 +173,31 @@ function ListaUsuarios() {
                   Supervisor
                 </span>
               )}
-              <button
-                type="button"
-                onClick={() => setConfirmando({ usuario, acao: 'gestor' })}
-                disabled={alterando === usuario.id || souEuMesmo || naoPodeTornarSupervisor}
-                title={
-                  souEuMesmo
-                    ? 'Você não pode alterar sua própria permissão de supervisor.'
-                    : naoPodeTornarSupervisor
-                      ? 'Não dá para tornar supervisor alguém com o acesso revogado.'
-                      : undefined
-                }
-                className="text-sm text-gold-400 transition-all hover:text-gold-300 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                {usuario.isGestor ? 'Remover supervisor' : 'Tornar supervisor'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setConfirmando({ usuario, acao: 'ativo' })}
-                disabled={alterando === usuario.id || souEuMesmo || naoPodeMexerNoAcesso}
-                title={
-                  souEuMesmo
-                    ? 'Você não pode revogar o seu próprio acesso.'
-                    : naoPodeMexerNoAcesso
-                      ? 'Só o gestor desse supervisionado pode mexer no acesso dele.'
-                      : undefined
-                }
-                className={cx(
-                  'text-sm transition-all disabled:cursor-not-allowed disabled:opacity-40',
-                  usuario.ativo ? 'text-red-400 hover:text-red-300' : 'text-green-400 hover:text-green-300',
-                )}
-              >
-                {usuario.ativo ? 'Revogar acesso' : 'Reativar acesso'}
-              </button>
+              <KebabMenu
+                acoes={[
+                  {
+                    label: usuario.isGestor ? 'Remover supervisor' : 'Tornar supervisor',
+                    onClick: () => setConfirmando({ usuario, acao: 'gestor' }),
+                    disabled: alterando === usuario.id || souEuMesmo || naoPodeTornarSupervisor,
+                    title: souEuMesmo
+                      ? 'Você não pode alterar sua própria permissão de supervisor.'
+                      : naoPodeTornarSupervisor
+                        ? 'Não dá para tornar supervisor alguém com o acesso revogado.'
+                        : undefined,
+                  },
+                  {
+                    label: usuario.ativo ? 'Revogar acesso' : 'Reativar acesso',
+                    onClick: () => setConfirmando({ usuario, acao: 'ativo' }),
+                    disabled: alterando === usuario.id || souEuMesmo || naoPodeMexerNoAcesso,
+                    title: souEuMesmo
+                      ? 'Você não pode revogar o seu próprio acesso.'
+                      : naoPodeMexerNoAcesso
+                        ? 'Só o gestor desse supervisionado pode mexer no acesso dele.'
+                        : undefined,
+                    tone: usuario.ativo ? 'perigo' : 'sucesso',
+                  },
+                ]}
+              />
             </div>
           </li>
           )

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../../components/Icon'
+import { KebabMenu } from '../../components/KebabMenu'
 import { MarkdownEditor } from '../../components/MarkdownEditor'
 import { Spinner } from '../../components/Spinner'
 import { useSaidaValor } from '../../hooks/useSaida'
@@ -138,22 +139,12 @@ export function PassosDaFase({ faseId }: { faseId: string }) {
                 className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
               >
                 <span className="truncate text-neutral-100">{p.title}</span>
-                <div className="flex shrink-0 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => abrirEdicao(p)}
-                    className="text-sm text-gold-400 transition-colors hover:text-gold-300"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setApagando(p)}
-                    className="text-sm text-red-400 transition-colors hover:text-red-300"
-                  >
-                    Apagar
-                  </button>
-                </div>
+                <KebabMenu
+                  acoes={[
+                    { label: 'Editar', onClick: () => abrirEdicao(p) },
+                    { label: 'Apagar', onClick: () => setApagando(p), tone: 'perigo' },
+                  ]}
+                />
               </li>
             ))}
           </ul>
