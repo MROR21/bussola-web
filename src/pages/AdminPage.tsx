@@ -108,17 +108,21 @@ export function AdminPage() {
         </div>
       )}
       {/* Mesma ideia da Jornada: módulos com reorder + CRUD, dropdown de cada um mostrando seu
-          conteúdo (Fluxos/Documentação). Duas seções (Squads / Padrões do sistema) em vez de uma
-          lista só, pra separar visualmente o que nasceu de um squad do que foi criado à mão — a
-          contagem por squad na aba Squads e a categorização aqui usam o mesmo campo real
-          (Modulo.squadId), sem dicionário de nome hardcoded. */}
+          conteúdo (Fluxos/Documentação). UMA identidade "Módulos" só (ícone/título únicos, como já
+          era antigamente) — Squads/Padrões do sistema são sub-divisões por baixo, não duas seções
+          repetindo "Módulos". A categorização usa o campo real (Modulo.squadId), sem dicionário de
+          nome hardcoded. */}
       {aba === 'guias' && (
-        <div className="anim-page flex flex-col gap-6">
+        <div className="anim-page flex flex-col gap-5">
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
+            <Icon name="inventory_2" className="text-xl text-gold-400" /> Módulos
+          </h2>
           <section className="flex flex-col gap-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">Squads</h2>
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">Squads</h3>
             <SimpleEntityCrud
               titulo="Módulos"
-              icone="groups"
+              icone="inventory_2"
+              ocultarTitulo
               singular="módulo"
               labelFilhos="itens"
               listar={async () => (await listarModulos()).filter((m) => m.squadId !== null)}
@@ -130,12 +134,13 @@ export function AdminPage() {
             />
           </section>
           <section className="flex flex-col gap-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
               Padrões do sistema
-            </h2>
+            </h3>
             <SimpleEntityCrud
               titulo="Módulos"
-              icone="handyman"
+              icone="inventory_2"
+              ocultarTitulo
               singular="módulo"
               labelFilhos="itens"
               listar={async () => (await listarModulos()).filter((m) => m.squadId === null)}

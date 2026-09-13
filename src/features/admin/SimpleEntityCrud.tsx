@@ -23,6 +23,7 @@ export function SimpleEntityCrud({
   apagar,
   contarFilhos,
   renderFilhos,
+  ocultarTitulo,
 }: {
   titulo: string
   icone: string
@@ -37,6 +38,10 @@ export function SimpleEntityCrud({
   // próprio, cada item cuida do seu próprio fetch/estado de aberto-fechado. Opcional: sem isso a
   // linha fica exatamente como sempre foi (nome + reorder + editar/apagar).
   renderFilhos?: (item: EntidadeSimples) => ReactNode
+  // Esconde o ícone+título internos (mantém só o botão "+ Novo(a)") — usado quando o chamador já
+  // mostra um cabeçalho próprio por fora (ex.: duas instâncias lado a lado que representam a MESMA
+  // entidade, só filtradas diferente — não faz sentido repetir "Módulos" duas vezes).
+  ocultarTitulo?: boolean
 }) {
   const [itens, setItens] = useState<EntidadeSimples[]>([])
   const [filhosPorId, setFilhosPorId] = useState<Record<string, number>>({})
@@ -189,9 +194,13 @@ export function SimpleEntityCrud({
   return (
     <div className="anim-fade flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
-          <Icon name={icone} className="text-xl text-gold-400" /> {titulo}
-        </h2>
+        {ocultarTitulo ? (
+          <span />
+        ) : (
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
+            <Icon name={icone} className="text-xl text-gold-400" /> {titulo}
+          </h2>
+        )}
         <button
           type="button"
           onClick={abrirNovo}
@@ -216,19 +225,6 @@ export function SimpleEntityCrud({
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                {renderFilhos && (
-                  <button
-                    type="button"
-                    onClick={() => setAbertos((a) => ({ ...a, [item.id]: !a[item.id] }))}
-                    aria-label={abertos[item.id] ? 'Recolher' : 'Expandir'}
-                    className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-navy-600 text-neutral-400 transition-colors hover:border-gold-500/50 hover:text-gold-400"
-                  >
-                    <Icon
-                      name="expand_more"
-                      className={cx('text-lg transition-transform duration-200', abertos[item.id] && 'rotate-180')}
-                    />
-                  </button>
-                )}
                 {movendo === item.id ? (
                   <Spinner className="text-gold-400" />
                 ) : (
@@ -252,6 +248,19 @@ export function SimpleEntityCrud({
                       <Icon name="arrow_drop_down" className="text-lg" />
                     </button>
                   </div>
+                )}
+                {renderFilhos && (
+                  <button
+                    type="button"
+                    onClick={() => setAbertos((a) => ({ ...a, [item.id]: !a[item.id] }))}
+                    aria-label={abertos[item.id] ? 'Recolher' : 'Expandir'}
+                    className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-navy-600 text-neutral-400 transition-colors hover:border-gold-500/50 hover:text-gold-400"
+                  >
+                    <Icon
+                      name="expand_more"
+                      className={cx('text-lg transition-transform duration-200', abertos[item.id] && 'rotate-180')}
+                    />
+                  </button>
                 )}
                 <span className="text-neutral-100">{item.nome}</span>
                 {contarFilhos && (
