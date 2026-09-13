@@ -12,9 +12,9 @@ import { useTitulo } from '../../hooks/useTitulo'
 import { cx } from '../../utils/cx'
 import { useAuthStore } from '../auth/authStore'
 import { getFluxosConcluidos } from '../fluxos/fluxosService'
-// import type { AcessoProgresso } from '../gestor/types'
+import type { AcessoProgresso } from '../gestor/types'
 import { ProgressRing } from './ProgressRing'
-import { getMeuCardLink, getProgresso } from './progressService'
+import { getMeuCardLink, getMeusAcessos, getProgresso } from './progressService'
 import type { TrailStep } from './types'
 
 // Ícone por fase (fallback genérico se aparecer uma fase nova).
@@ -227,9 +227,10 @@ export function JornadaView({
   // comprovação como avanço mesmo antes da aprovação.
   const [passosPendentes, setPassosPendentes] = useState<Set<string>>(new Set())
   const [fluxosConcluidos, setFluxosConcluidos] = useState<Set<string>>(new Set())
-  // ENGAVETADO junto com o container "Seus acessos" logo abaixo (ver comentário lá) — descomentar
-  // os dois juntos se o gestor confirmar que faz sentido ter essa visão pro colaborador.
-  // const [acessos, setAcessos] = useState<AcessoProgresso[]>([])
+  // Progresso de acessos do próprio colaborador (leitura só — quem marca é o gestor, ver
+  // SupervisionadoPage.tsx). Reativado 2026-09-14: o gestor do Miguel confirmou que faz sentido
+  // ter essa visão aqui.
+  const [acessos, setAcessos] = useState<AcessoProgresso[]>([])
   // Link do card que o gestor enviou pra fase "Primeiro Card" — null = ainda não enviou, e é
   // isso que trava os passos dessa fase (ver o branch de faseNome === 'Primeiro Card' abaixo).
   const [cardLink, setCardLink] = useState<string | null>(null)
@@ -272,20 +273,19 @@ export function JornadaView({
       })
       .catch(() => {})
     const pFluxos = getFluxosConcluidos().then((ids) => setFluxosConcluidos(new Set(ids))).catch(() => {})
-    // getMeusAcessos(userId).then(setAcessos).catch(() => {})
+    const pAcessos = getMeusAcessos(userId).then(setAcessos).catch(() => {})
     const pCardLink = getMeuCardLink(userId).then((r) => setCardLink(r.url)).catch(() => {})
     // Cada promise acima já engole o próprio erro (.catch(() => {})), então o Promise.all abaixo
-    // sempre resolve assim que as 3 terminarem — nunca fica preso esperando por causa de uma falha.
-    Promise.all([pProgresso, pFluxos, pCardLink]).then(() => setDadosProntos(true))
+    // sempre resolve assim que todas terminarem — nunca fica preso esperando por causa de uma falha.
+    Promise.all([pProgresso, pFluxos, pAcessos, pCardLink]).then(() => setDadosProntos(true))
   }, [userId])
 
   // O gestor libera um acesso na tela do Supervisionado enquanto o colaborador já pode estar com a
   // Jornada aberta — busca de novo, em silêncio, quando a aba volta a ficar em foco (mesmo padrão
   // de JornadaPage.tsx pra trilha/fase editada pelo Admin).
-  // ENGAVETADO junto com "Seus acessos" (ver acima) — sem uso enquanto o hook não tem call site.
-  // useRefetchOnFocus(() => {
-  //   getMeusAcessos(userId).then(setAcessos).catch(() => {})
-  // })
+  useRefetchOnFocus(() => {
+    getMeusAcessos(userId).then(setAcessos).catch(() => {})
+  })
 
   // O gestor envia o card na tela do Supervisionado enquanto o colaborador já pode estar com a
   // fase Primeiro Card aberta esperando — mesmo padrão de refetch-on-focus de cima.
@@ -748,11 +748,8 @@ export function JornadaView({
         )}
       </div>
 
-      {/* ENGAVETADO a pedido do Miguel (2026-09-09): tirado de vista até ele confirmar com o gestor
-          se faz sentido o colaborador ver o próprio progresso de acessos aqui. Se a resposta for
-          sim, descomentar o bloco abaixo; se não, apagar de vez. (Motivo original de existir: sem
-          isso o modal de boas-vindas prometia "acompanhe seus acessos" sem nenhuma tela de verdade
-          por trás pro colaborador ver o próprio progresso.)
+      {/* Reativado 2026-09-14 (confirmado com o gestor) — antes ficava engavetado porque o modal
+          de boas-vindas prometia "acompanhe seus acessos" sem nenhuma tela de verdade por trás. */}
       {acessos.length > 0 && (
         <section className="flex flex-col gap-3">
           <h3 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
@@ -788,7 +785,6 @@ export function JornadaView({
           </div>
         </section>
       )}
-      */}
 
       {/* Trilha central — um caminho sinuoso ligando as fases, marco por marco (em vez de um
           grid de cards): o pedido foi um sentido de trilha literal, não uma lista disfarçada. */}
