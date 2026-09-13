@@ -333,7 +333,7 @@ export function GuiasPage() {
           <Icon name="menu_book" className="text-2xl text-gold-400" /> Guia pelo sistema
         </h1>
         <p className="text-sm text-neutral-400">
-          Consulte qualquer fluxo do sistema, de qualquer squad, quando precisar.
+          Consulte os módulos do sistema — fluxos e documentações de qualquer squad, quando precisar.
         </p>
         {fluxos.length > 0 && (
           <p className="text-xs text-neutral-500">
