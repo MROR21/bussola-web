@@ -72,17 +72,9 @@ export function SquadsAdmin() {
 
   function abrirNovo() {
     setEditando('novo')
-    // Começa em "vincular" quando existe algo pra vincular — é o caminho mais comum (adotar um
-    // módulo "padrão do sistema" que já tinha fluxos soltos); só cai pra "criar novo" de saída
-    // quando não há nenhum módulo padrão disponível.
-    const temExistente = modulosPadrao.length > 0
-    setForm({
-      nome: '',
-      moduloNome: '',
-      moduloAutoSync: true,
-      modoModulo: temExistente ? 'existente' : 'novo',
-      moduloIdExistente: temExistente ? modulosPadrao[0].id : '',
-    })
+    // "Criar módulo novo" é o padrão — vincular um já existente é a exceção (e some da vista sem
+    // querer o vínculo antigo dele, ver comentário no botão), então não faz sentido pré-selecionar.
+    setForm({ nome: '', moduloNome: '', moduloAutoSync: true, modoModulo: 'novo', moduloIdExistente: '' })
   }
 
   function abrirEdicao(squad: SquadAdmin) {
@@ -230,6 +222,18 @@ export function SquadsAdmin() {
                     <div className="flex gap-1 rounded-lg border border-navy-600 bg-navy-900 p-1">
                       <button
                         type="button"
+                        onClick={() => setForm({ ...form, modoModulo: 'novo' })}
+                        className={cx(
+                          'flex-1 rounded-md px-2 py-1 text-xs font-medium transition-colors',
+                          form.modoModulo === 'novo'
+                            ? 'bg-gold-500/20 text-gold-300'
+                            : 'text-neutral-400 hover:text-neutral-200',
+                        )}
+                      >
+                        Criar módulo novo
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => setForm({ ...form, modoModulo: 'existente' })}
                         disabled={modulosPadrao.length === 0}
                         className={cx(
@@ -240,18 +244,6 @@ export function SquadsAdmin() {
                         )}
                       >
                         Vincular módulo existente
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setForm({ ...form, modoModulo: 'novo' })}
-                        className={cx(
-                          'flex-1 rounded-md px-2 py-1 text-xs font-medium transition-colors',
-                          form.modoModulo === 'novo'
-                            ? 'bg-gold-500/20 text-gold-300'
-                            : 'text-neutral-400 hover:text-neutral-200',
-                        )}
-                      >
-                        Criar módulo novo
                       </button>
                     </div>
                   </div>
