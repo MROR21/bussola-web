@@ -183,6 +183,10 @@ export function SquadsAdmin() {
                     autoFocus
                     className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                   />
+                  <span className="text-xs text-neutral-500">
+                    Identifica o squad no sistema — é essa a opção que o colaborador escolhe no
+                    nivelamento (ex.: "Mão de Obra", "Quiz Quality").
+                  </span>
                 </label>
                 <label className="flex flex-col gap-1 text-sm text-neutral-400">
                   Nome do módulo (Guia pelo sistema)
@@ -192,7 +196,11 @@ export function SquadsAdmin() {
                     className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                   />
                   <span className="text-xs text-neutral-500">
-                    Acompanha o nome do squad por padrão — só muda se você editar aqui.
+                    Todo squad ganha um módulo próprio na tela de Guias, onde ficam os fluxos e a
+                    documentação desse squad — este é o nome que o colaborador vê lá (pode ser
+                    diferente do nome do squad, ex.: squad "Agilean", módulo "Agilean (desktop)").
+                    Acompanha o nome do squad acima por padrão; só para de seguir se você editar
+                    aqui.
                   </span>
                 </label>
                 <div className="flex justify-end gap-2">
