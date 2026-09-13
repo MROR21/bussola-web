@@ -47,10 +47,15 @@ export interface PassoProgresso {
   aguardandoConfirmacao: boolean
 }
 
-// Progresso detalhado de um supervisionado (GET /gestor/usuarios/{id}/progresso).
+// Progresso detalhado de um usuário (GET /gestor/usuarios/{id}/progresso) — QUALQUER gestor pode
+// ver ("Ver jornada"), não só quem o supervisiona de fato. `gestorId` é o dono de verdade (ou
+// null): o front compara com o próprio id pra saber se está numa visão "de fora" e, nesse caso,
+// esconder as ações que continuam restritas ao gestor real (aprovar/pedir correção — ver
+// Program.cs); liberar acesso e enviar o link do card continuam liberados pra qualquer gestor.
 export interface ProgressoSupervisionado {
   nome: string
   cargo: Cargo
+  gestorId: string | null
   passos: PassoProgresso[]
 }
 

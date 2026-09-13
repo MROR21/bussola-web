@@ -294,17 +294,27 @@ export function GestorPage() {
                       </span>
                     )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (noLimite) setMostrandoLimite(true)
-                      else if (u.gestorNome) setConfirmandoReatribuir(u)
-                      else adicionar(u.id, u.nome)
-                    }}
-                    className="shrink-0 text-sm text-gold-400 transition-colors hover:text-gold-300"
-                  >
-                    {u.gestorNome ? 'Reatribuir' : 'Adicionar'}
-                  </button>
+                  <div className="flex shrink-0 items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => navegar(`/supervisionado/${u.id}`)}
+                      title="Ver o progresso dessa pessoa, mesmo sem ser seu supervisionado"
+                      className="text-sm text-neutral-400 transition-colors hover:text-neutral-200"
+                    >
+                      Ver jornada
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (noLimite) setMostrandoLimite(true)
+                        else if (u.gestorNome) setConfirmandoReatribuir(u)
+                        else adicionar(u.id, u.nome)
+                      }}
+                      className="text-sm text-gold-400 transition-colors hover:text-gold-300"
+                    >
+                      {u.gestorNome ? 'Reatribuir' : 'Adicionar'}
+                    </button>
+                  </div>
                 </li>
               ))}
               </ul>

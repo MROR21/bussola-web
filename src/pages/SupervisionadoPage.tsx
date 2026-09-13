@@ -11,6 +11,7 @@ import { usePolling } from '../hooks/useAtualizarEmSegundoPlano'
 import { useSaidaValor } from '../hooks/useSaida'
 import { useTitulo } from '../hooks/useTitulo'
 import { cx } from '../utils/cx'
+import { useAuthStore } from '../features/auth/authStore'
 import { NOME_CARGO } from '../features/gestor/acessosPorCargo'
 import {
   confirmarCorrecaoPasso,
@@ -32,6 +33,7 @@ const inputCls =
 // Tela de detalhe de um supervisionado, com abas: Passos (jornada) e Fluxos.
 export function SupervisionadoPage() {
   const { id = '' } = useParams()
+  const usuarioLogado = useAuthStore((s) => s.usuario)
   const [searchParams] = useSearchParams()
   const cardSecaoRef = useRef<HTMLDivElement>(null)
   const jaDestacouRef = useRef(false)
@@ -208,6 +210,12 @@ export function SupervisionadoPage() {
   if (error) return <EstadoErro onRetry={() => setTentativa((t) => t + 1)} />
   if (!dados) return null
 
+  // "Ver jornada" (GestorPage.tsx) traz aqui alguém que não é seu supervisionado de fato — o back
+  // já libera ver tudo e agir em acesso/card-link pra qualquer gestor, só aprovar/pedir correção
+  // continua restrito ao dono de verdade (ver Program.cs). Isso aqui é só pra esconder esses dois
+  // botões e mostrar o aviso; se o back recusar mesmo assim, o toast de erro cobre o resto.
+  const souSupervisorDele = dados.gestorId === usuarioLogado?.id
+
   // Estrito — o rótulo da aba mostra quantos passos JÁ foram aprovados de verdade, não só
   // enviados/pendentes (coerência com o resto das telas do gestor).
   const passosFeitos = dados.passos.filter((p) => p.concluido && !p.precisaCorrecao && !p.aguardandoConfirmacao).length
@@ -243,6 +251,14 @@ export function SupervisionadoPage() {
           {NOME_CARGO[dados.cargo]}
         </span>
       </div>
+
+      {!souSupervisorDele && (
+        <p className="flex items-center gap-1.5 rounded-lg border border-navy-600 bg-navy-800 px-3 py-2 text-xs text-neutral-400">
+          <Icon name="visibility" className="text-sm text-gold-400" />
+          Você está vendo de fora — não é o supervisor direto de {dados.nome}. Aprovar e pedir
+          correção continuam só com o supervisor dele.
+        </p>
+      )}
 
       <Acordeao
         titulo={
@@ -433,7 +449,7 @@ export function SupervisionadoPage() {
                           ? 'Correção aprovada'
                           : 'Aprovado'}
                     </span>
-                    {ultimoPassoPrimeiroCard.aguardandoConfirmacao && (
+                    {souSupervisorDele && ultimoPassoPrimeiroCard.aguardandoConfirmacao && (
                       <button
                         type="button"
                         onClick={() => confirmarCorrecao(ultimoPassoPrimeiroCard.id)}
@@ -447,6 +463,7 @@ export function SupervisionadoPage() {
                             : 'Aprovar'}
                       </button>
                     )}
+                    {souSupervisorDele && (
                     <button
                       type="button"
                       onClick={() => pedirCorrecao(ultimoPassoPrimeiroCard.id)}
@@ -459,6 +476,7 @@ export function SupervisionadoPage() {
                           ? 'Pedir outra correção'
                           : 'Pedir correção'}
                     </button>
+                    )}
                   </div>
                 </div>
               )}
