@@ -608,18 +608,14 @@ export function JornadaView({
   return (
     <div className="relative flex w-full max-w-2xl flex-col gap-8">
       <BoasVindasModal aberto={mostrarBoasVindas} onFechar={fecharBoasVindas} papel="colaborador" />
-      {/* Atmosfera da página inteira — igual à técnica do hero (absoluto + DOM antes dos
-          irmãos "opacos", sem z-index negativo): um `position:fixed` com z negativo parecia
-          funcionar, mas quebrou quando o `AppLayout` ganhou `position:relative` lá em cima (o
-          fixed passou a ficar preso na stacking context do layout, atrás do próprio fundo do
-          app). absolute+DOM-order não tem essa armadilha. Dois motivos, cantos opostos, pra dar
-          mais vida (rosa dos ventos em cima, mapa embaixo) sem competir com a do hero. */}
-      <CompassRose
-        className="pointer-events-none absolute -right-16 -top-10 size-[520px] text-gold-500 opacity-[0.15]"
-      />
-      <MapIllustration
-        className="pointer-events-none absolute -bottom-10 -left-20 w-[420px] text-gold-500 opacity-[0.25]"
-      />
+      {/* Mesmo padrão fixed+DOM-order de marca d'água usado em todo o resto do app (AdminPage,
+          GuiasPage, etc.) — a versão antiga usava fixed+z-index NEGATIVO, que quebrou quando o
+          AppLayout ganhou position:relative (ficou preso atrás do próprio fundo do layout, dentro
+          da nova stacking context). O padrão do resto do app nunca usa z-index negativo — só
+          confia na ordem do DOM (primeiro elemento = mais atrás) — por isso não tem essa
+          armadilha; usando o mesmo padrão aqui em vez de manter a solução alternativa antiga. */}
+      <CompassRose className="pointer-events-none fixed right-8 top-20 size-72 text-gold-500 opacity-[0.15]" />
+      <MapIllustration className="pointer-events-none fixed transition-[left] duration-200 left-[calc(var(--sidebar-w)+1rem)] bottom-8 w-64 text-gold-500 opacity-[0.25]" />
       {/* Hero — anel de progresso + próximo passo num único cartão (antes eram duas caixas soltas
           empilhadas; agora lê como um bloco só, com o glow sutil atrás do anel). */}
       <div className="relative overflow-hidden rounded-3xl border border-navy-700 bg-navy-800 shadow-xl shadow-black/20">

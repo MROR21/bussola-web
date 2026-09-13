@@ -94,11 +94,15 @@ export function NovoModuloButton({ onCriado }: { onCriado: () => void }) {
                 className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
               >
                 <option value="">Padrão do sistema</option>
-                {squads.map((squad) => (
-                  <option key={squad.id} value={squad.id}>
-                    {squad.nome}
-                  </option>
-                ))}
+                {squads.length > 0 && (
+                  <optgroup label="Squads">
+                    {squads.map((squad) => (
+                      <option key={squad.id} value={squad.id}>
+                        {squad.nome}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
               </select>
               <span className="text-xs text-neutral-500">
                 Define onde o módulo aparece na tela de Guias: dentro do squad escolhido, ou em
