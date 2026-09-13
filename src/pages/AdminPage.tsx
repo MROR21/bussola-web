@@ -94,7 +94,7 @@ export function AdminPage() {
       {aba === 'jornada' && (
         <div className="anim-page">
           <SimpleEntityCrud
-            titulo="Jornada"
+            titulo="Fases"
             icone="route"
             singular="fase"
             labelFilhos="passos"
@@ -114,30 +114,38 @@ export function AdminPage() {
           (Modulo.squadId), sem dicionário de nome hardcoded. */}
       {aba === 'guias' && (
         <div className="anim-page flex flex-col gap-6">
-          <SimpleEntityCrud
-            titulo="Squads"
-            icone="groups"
-            singular="módulo"
-            labelFilhos="itens"
-            listar={async () => (await listarModulos()).filter((m) => m.squadId !== null)}
-            criar={criarModulo}
-            editar={editarModulo}
-            apagar={apagarModulo}
-            contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
-            renderFilhos={(modulo) => <FluxosDoModulo moduloId={modulo.id} />}
-          />
-          <SimpleEntityCrud
-            titulo="Padrões do sistema"
-            icone="handyman"
-            singular="módulo"
-            labelFilhos="itens"
-            listar={async () => (await listarModulos()).filter((m) => m.squadId === null)}
-            criar={criarModulo}
-            editar={editarModulo}
-            apagar={apagarModulo}
-            contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
-            renderFilhos={(modulo) => <FluxosDoModulo moduloId={modulo.id} />}
-          />
+          <section className="flex flex-col gap-3">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">Squads</h2>
+            <SimpleEntityCrud
+              titulo="Módulos"
+              icone="groups"
+              singular="módulo"
+              labelFilhos="itens"
+              listar={async () => (await listarModulos()).filter((m) => m.squadId !== null)}
+              criar={criarModulo}
+              editar={editarModulo}
+              apagar={apagarModulo}
+              contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
+              renderFilhos={(modulo) => <FluxosDoModulo moduloId={modulo.id} />}
+            />
+          </section>
+          <section className="flex flex-col gap-3">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+              Padrões do sistema
+            </h2>
+            <SimpleEntityCrud
+              titulo="Módulos"
+              icone="handyman"
+              singular="módulo"
+              labelFilhos="itens"
+              listar={async () => (await listarModulos()).filter((m) => m.squadId === null)}
+              criar={criarModulo}
+              editar={editarModulo}
+              apagar={apagarModulo}
+              contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
+              renderFilhos={(modulo) => <FluxosDoModulo moduloId={modulo.id} />}
+            />
+          </section>
         </div>
       )}
       {aba === 'squads' && (

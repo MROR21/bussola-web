@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Acordeao } from '../../components/Acordeao'
 import { Icon } from '../../components/Icon'
 import { MarkdownEditor } from '../../components/MarkdownEditor'
 import { Spinner } from '../../components/Spinner'
@@ -15,11 +14,11 @@ const ABAS: { value: FluxoAdmin['tipo']; label: string }[] = [
   { value: 'Documentacao', label: 'Documentação' },
 ]
 
-// Conteúdo de UM módulo específico — o dropdown (renderFilhos) que fica dentro da linha desse
-// módulo no SimpleEntityCrud de Guias. Duas sub-abas (Fluxos/Documentação) filtram o mesmo
-// registro Fluxo pelo campo Tipo — não são listas/entidades diferentes.
+// Conteúdo de UM módulo específico — o CONTEÚDO do dropdown daquele módulo no SimpleEntityCrud de
+// Guias (o próprio SimpleEntityCrud controla o abrir/fechar da linha, aqui só o miolo: sub-abas +
+// lista + criar/editar). Duas sub-abas (Fluxos/Documentação) filtram o mesmo registro Fluxo pelo
+// campo Tipo — não são listas/entidades diferentes.
 export function FluxosDoModulo({ moduloId }: { moduloId: string }) {
-  const [aberto, setAberto] = useState(false)
   const [aba, setAba] = useState<FluxoAdmin['tipo']>('Fluxo')
   const [fluxos, setFluxos] = useState<FluxoAdmin[]>([])
   const [modulos, setModulos] = useState<Modulo[]>([])
@@ -137,80 +136,72 @@ export function FluxosDoModulo({ moduloId }: { moduloId: string }) {
 
   return (
     <>
-      <Acordeao
-        titulo="Conteúdo"
-        contagem={fluxos.length}
-        variante="linha"
-        aberto={aberto}
-        onToggle={() => setAberto((a) => !a)}
-      >
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex gap-1.5">
-              {ABAS.map((a) => (
-                <button
-                  key={a.value}
-                  type="button"
-                  onClick={() => setAba(a.value)}
-                  className={cx(
-                    'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
-                    aba === a.value
-                      ? 'bg-gold-500/20 text-gold-300'
-                      : 'text-neutral-400 hover:text-neutral-200',
-                  )}
-                >
-                  {a.label} ({fluxos.filter((f) => f.tipo === a.value).length})
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={abrirNovo}
-              className="shrink-0 rounded-lg bg-gold-500 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gold-400"
-            >
-              + Novo {aba === 'Fluxo' ? 'fluxo' : 'documento'}
-            </button>
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex gap-1.5">
+            {ABAS.map((a) => (
+              <button
+                key={a.value}
+                type="button"
+                onClick={() => setAba(a.value)}
+                className={cx(
+                  'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                  aba === a.value
+                    ? 'bg-gold-500/20 text-gold-300'
+                    : 'text-neutral-400 hover:text-neutral-200',
+                )}
+              >
+                {a.label} ({fluxos.filter((f) => f.tipo === a.value).length})
+              </button>
+            ))}
           </div>
-
-          {loading ? (
-            <p className="text-sm text-neutral-500">Carregando...</p>
-          ) : itensDaAba.length === 0 ? (
-            <p className="text-sm text-neutral-500">
-              {aba === 'Fluxo' ? 'Nenhum fluxo' : 'Nenhum documento'} nesse módulo ainda.
-            </p>
-          ) : (
-            <ul className="flex max-h-[19rem] flex-col gap-2 overflow-y-auto pr-1">
-              {itensDaAba.map((f) => (
-                <li
-                  key={f.id}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
-                >
-                  <div className="flex min-w-0 flex-col">
-                    <span className="truncate text-neutral-100">{f.titulo}</span>
-                    <span className="text-xs text-neutral-500">{f.squad ?? 'Todos os squads'}</span>
-                  </div>
-                  <div className="flex shrink-0 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => abrirEdicao(f)}
-                      className="text-sm text-gold-400 transition-colors hover:text-gold-300"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setApagando(f)}
-                      className="text-sm text-red-400 transition-colors hover:text-red-300"
-                    >
-                      Apagar
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+          <button
+            type="button"
+            onClick={abrirNovo}
+            className="shrink-0 rounded-lg bg-gold-500 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gold-400"
+          >
+            + Novo {aba === 'Fluxo' ? 'fluxo' : 'documento'}
+          </button>
         </div>
-      </Acordeao>
+
+        {loading ? (
+          <p className="text-sm text-neutral-500">Carregando...</p>
+        ) : itensDaAba.length === 0 ? (
+          <p className="text-sm text-neutral-500">
+            {aba === 'Fluxo' ? 'Nenhum fluxo' : 'Nenhum documento'} nesse módulo ainda.
+          </p>
+        ) : (
+          <ul className="flex max-h-[19rem] flex-col gap-2 overflow-y-auto pr-1">
+            {itensDaAba.map((f) => (
+              <li
+                key={f.id}
+                className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
+              >
+                <div className="flex min-w-0 flex-col">
+                  <span className="truncate text-neutral-100">{f.titulo}</span>
+                  <span className="text-xs text-neutral-500">{f.squad ?? 'Todos os squads'}</span>
+                </div>
+                <div className="flex shrink-0 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => abrirEdicao(f)}
+                    className="text-sm text-gold-400 transition-colors hover:text-gold-300"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setApagando(f)}
+                    className="text-sm text-red-400 transition-colors hover:text-red-300"
+                  >
+                    Apagar
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       {modalForm.montado && (
         <div

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Acordeao } from '../../components/Acordeao'
 import { Icon } from '../../components/Icon'
 import { MarkdownEditor } from '../../components/MarkdownEditor'
 import { Spinner } from '../../components/Spinner'
@@ -11,12 +10,12 @@ import type { Fase, PassoAdmin, PassoAdminInput } from './types'
 
 const SKILL_AREAS: SkillArea[] = ['None', 'Frontend', 'Backend', 'Git', 'Sql', 'Jira']
 
-// Passos de UMA fase específica — o dropdown (renderFilhos) que fica dentro da linha dessa fase
-// no SimpleEntityCrud de Jornada. Busca por conta própria (mesmo padrão de item independente que
-// FluxosDoModulo usa) — o dado é filtrado aqui, mas a lista de Fases pro seletor do modal continua
-// vindo inteira (um passo pode ser movido pra outra fase).
+// Passos de UMA fase específica — o CONTEÚDO do dropdown daquela fase no SimpleEntityCrud de
+// Jornada (o próprio SimpleEntityCrud controla o abrir/fechar da linha, aqui só o miolo: lista +
+// criar/editar). Busca por conta própria (mesmo padrão de item independente que FluxosDoModulo
+// usa) — o dado é filtrado aqui, mas a lista de Fases pro seletor do modal continua vindo inteira
+// (um passo pode ser movido pra outra fase).
 export function PassosDaFase({ faseId }: { faseId: string }) {
-  const [aberto, setAberto] = useState(false)
   const [passos, setPassos] = useState<PassoAdmin[]>([])
   const [fases, setFases] = useState<Fase[]>([])
   const [loading, setLoading] = useState(true)
@@ -118,56 +117,48 @@ export function PassosDaFase({ faseId }: { faseId: string }) {
 
   return (
     <>
-      <Acordeao
-        titulo="Passos"
-        contagem={passos.length}
-        variante="linha"
-        aberto={aberto}
-        onToggle={() => setAberto((a) => !a)}
-      >
-        <div className="flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={abrirNovo}
-            className="self-end rounded-lg bg-gold-500 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gold-400"
-          >
-            + Novo passo
-          </button>
+      <div className="flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={abrirNovo}
+          className="self-end rounded-lg bg-gold-500 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gold-400"
+        >
+          + Novo passo
+        </button>
 
-          {loading ? (
-            <p className="text-sm text-neutral-500">Carregando...</p>
-          ) : passos.length === 0 ? (
-            <p className="text-sm text-neutral-500">Nenhum passo nessa fase ainda.</p>
-          ) : (
-            <ul className="flex max-h-[19rem] flex-col gap-2 overflow-y-auto pr-1">
-              {passos.map((p) => (
-                <li
-                  key={p.id}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
-                >
-                  <span className="truncate text-neutral-100">{p.title}</span>
-                  <div className="flex shrink-0 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => abrirEdicao(p)}
-                      className="text-sm text-gold-400 transition-colors hover:text-gold-300"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setApagando(p)}
-                      className="text-sm text-red-400 transition-colors hover:text-red-300"
-                    >
-                      Apagar
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </Acordeao>
+        {loading ? (
+          <p className="text-sm text-neutral-500">Carregando...</p>
+        ) : passos.length === 0 ? (
+          <p className="text-sm text-neutral-500">Nenhum passo nessa fase ainda.</p>
+        ) : (
+          <ul className="flex max-h-[19rem] flex-col gap-2 overflow-y-auto pr-1">
+            {passos.map((p) => (
+              <li
+                key={p.id}
+                className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
+              >
+                <span className="truncate text-neutral-100">{p.title}</span>
+                <div className="flex shrink-0 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => abrirEdicao(p)}
+                    className="text-sm text-gold-400 transition-colors hover:text-gold-300"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setApagando(p)}
+                    className="text-sm text-red-400 transition-colors hover:text-red-300"
+                  >
+                    Apagar
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       {modalForm.montado && (
         <div

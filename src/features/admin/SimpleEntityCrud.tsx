@@ -49,6 +49,9 @@ export function SimpleEntityCrud({
   const [apagando, setApagando] = useState<EntidadeSimples | null>(null)
   const [movendo, setMovendo] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
+  // Abrir/fechar do dropdown de cada linha (renderFilhos) — o chevron mora na própria linha, sem
+  // um sub-título repetindo a badge que já mostra a contagem.
+  const [abertos, setAbertos] = useState<Record<string, boolean>>({})
 
   const modalEdicao = useSaidaValor(editando)
   const modalApagar = useSaidaValor(apagando)
@@ -213,6 +216,19 @@ export function SimpleEntityCrud({
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
+                {renderFilhos && (
+                  <button
+                    type="button"
+                    onClick={() => setAbertos((a) => ({ ...a, [item.id]: !a[item.id] }))}
+                    aria-label={abertos[item.id] ? 'Recolher' : 'Expandir'}
+                    className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-navy-600 text-neutral-400 transition-colors hover:border-gold-500/50 hover:text-gold-400"
+                  >
+                    <Icon
+                      name="expand_more"
+                      className={cx('text-lg transition-transform duration-200', abertos[item.id] && 'rotate-180')}
+                    />
+                  </button>
+                )}
                 {movendo === item.id ? (
                   <Spinner className="text-gold-400" />
                 ) : (
@@ -261,7 +277,18 @@ export function SimpleEntityCrud({
                 </button>
               </div>
             </div>
-            {renderFilhos?.(item)}
+            {renderFilhos && (
+              <div
+                className={cx(
+                  'grid transition-[grid-template-rows] duration-200 ease-out',
+                  abertos[item.id] ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+                )}
+              >
+                <div className="overflow-hidden">
+                  <div className="pt-1">{renderFilhos(item)}</div>
+                </div>
+              </div>
+            )}
           </li>
         ))}
         {itens.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nada cadastrado ainda.</p>}
