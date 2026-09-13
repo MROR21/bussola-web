@@ -410,7 +410,7 @@ export function GuiasPage() {
               Squads/Padrões do sistema são só a categorização por cima, não duas coisas
               diferentes. */}
           <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
-            <Icon name="inventory_2" className="text-xl text-gold-400" /> Módulos
+            <Icon name="inventory_2" className="text-xl text-gold-400" /> Módulos do Guia
           </h2>
           {porTopico.map(([topico, modulos]) => (
             <section key={topico} className="flex flex-col gap-3">

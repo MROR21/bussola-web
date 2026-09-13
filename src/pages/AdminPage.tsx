@@ -161,7 +161,7 @@ export function AdminPage() {
         <div className="anim-page flex flex-col gap-5">
           <div className="flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
-              <Icon name="inventory_2" className="text-xl text-gold-400" /> Módulos
+              <Icon name="inventory_2" className="text-xl text-gold-400" /> Módulos do Guia
             </h2>
             <NovoModuloButton onCriado={() => setRefreshGuias((n) => n + 1)} />
           </div>
