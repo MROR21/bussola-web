@@ -10,6 +10,7 @@ import { NovoModuloButton } from '../features/admin/NovoModuloButton'
 import { PassosDaFase } from '../features/admin/PassosDaFase'
 import { SimpleEntityCrud } from '../features/admin/SimpleEntityCrud'
 import { SquadsAdmin } from '../features/admin/SquadsAdmin'
+import { TrocarSquadModuloModal } from '../features/admin/TrocarSquadModuloModal'
 import { UsuariosAdmin } from '../features/admin/UsuariosAdmin'
 import type { EntidadeSimples } from '../features/admin/types'
 import {
@@ -67,6 +68,18 @@ export function AdminPage() {
   // Bump depois de criar módulo pelo NovoModuloButton — vira `key` das duas listas de baixo pra
   // remontarem e buscarem de novo (elas não têm um jeito próprio de "refetch por fora").
   const [refreshGuias, setRefreshGuias] = useState(0)
+  // Módulo com o modal de "Mudar categoria" aberto (ver TrocarSquadModuloModal) — o jeito de
+  // corrigir/desfazer um vínculo com squad feito na criação, já que antes disso não existia
+  // nenhum jeito de reverter isso pela tela.
+  const [moduloTrocando, setModuloTrocando] = useState<{ item: EntidadeSimples; squadIdAtual: string | null } | null>(
+    null,
+  )
+
+  async function abrirTrocaCategoria(item: EntidadeSimples) {
+    const modulos = await listarModulos()
+    const atual = modulos.find((m) => m.id === item.id)
+    setModuloTrocando({ item, squadIdAtual: atual?.squadId ?? null })
+  }
 
   function selecionarAba(chave: Aba) {
     setAba(chave)
@@ -165,6 +178,7 @@ export function AdminPage() {
               apagar={apagarModulo}
               contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
               renderFilhos={(modulo, aoMudar) => <FluxosDoModulo moduloId={modulo.id} aoMudar={aoMudar} />}
+              acoesExtras={(item) => [{ label: 'Mudar categoria', onClick: () => abrirTrocaCategoria(item) }]}
             />
           </section>
           <section className="flex flex-col gap-3">
@@ -185,8 +199,18 @@ export function AdminPage() {
               apagar={apagarModulo}
               contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
               renderFilhos={(modulo, aoMudar) => <FluxosDoModulo moduloId={modulo.id} aoMudar={aoMudar} />}
+              acoesExtras={(item) => [{ label: 'Mudar categoria', onClick: () => abrirTrocaCategoria(item) }]}
             />
           </section>
+          <TrocarSquadModuloModal
+            modulo={moduloTrocando?.item ?? null}
+            squadIdAtual={moduloTrocando?.squadIdAtual ?? null}
+            onFechar={() => setModuloTrocando(null)}
+            onSalvo={() => {
+              setModuloTrocando(null)
+              setRefreshGuias((n) => n + 1)
+            }}
+          />
         </div>
       )}
       {aba === 'squads' && (

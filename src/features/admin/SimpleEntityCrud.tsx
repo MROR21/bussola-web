@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { EstadoErro } from '../../components/EstadoErro'
 import { Icon } from '../../components/Icon'
 import { KebabMenu } from '../../components/KebabMenu'
+import type { AcaoKebab } from '../../components/KebabMenu'
 import { Carregando, Spinner } from '../../components/Spinner'
 import { useSaidaValor } from '../../hooks/useSaida'
 import { cx } from '../../utils/cx'
@@ -26,6 +27,7 @@ export function SimpleEntityCrud({
   renderFilhos,
   ocultarTitulo,
   ocultarNovo,
+  acoesExtras,
 }: {
   titulo: string
   icone: string
@@ -52,6 +54,9 @@ export function SimpleEntityCrud({
   // módulos têm categoria pra escolher na criação, então isso mora num botão único por fora,
   // fora das duas instâncias filtradas por categoria).
   ocultarNovo?: boolean
+  // Ações extras no kebab de cada linha, ANTES de Editar/Apagar (ex.: "Mudar categoria" só pros
+  // Módulos, que Fase não tem) — opcional, sem isso o menu fica só com Editar/Apagar de sempre.
+  acoesExtras?: (item: EntidadeSimples) => AcaoKebab[]
 }) {
   const [itens, setItens] = useState<EntidadeSimples[]>([])
   const [filhosPorId, setFilhosPorId] = useState<Record<string, number>>({})
@@ -306,6 +311,7 @@ export function SimpleEntityCrud({
               </div>
               <KebabMenu
                 acoes={[
+                  ...(acoesExtras?.(item) ?? []),
                   { label: 'Editar', onClick: () => abrirEdicao(item) },
                   { label: 'Apagar', onClick: () => setApagando(item), tone: 'perigo' },
                 ]}
