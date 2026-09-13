@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { CompassRose } from '../components/CompassRose'
+import { ConteudoArtigo } from '../components/ConteudoArtigo'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
 import { MapCorners } from '../components/MapCorners'
 import { MapIllustration } from '../components/MapIllustration'
-import { Markdown } from '../components/Markdown'
 import { MarkdownEditor } from '../components/MarkdownEditor'
 import { Carregando, Spinner } from '../components/Spinner'
 import { cx } from '../utils/cx'
@@ -364,14 +364,14 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
 
           <div
             className={cx(
-              'flex flex-col gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed',
+              'flex flex-col gap-4',
               layoutAula && 'lg:flex-[2] lg:self-stretch',
             )}
           >
-            <Markdown>{fluxo.conteudo}</Markdown>
+            {/* Leitura solta, tipo artigo — sem caixa pesada. ConteudoArtigo decide sozinho se
+                abre em modo slide (várias seções `##`) ou corrido. */}
+            <ConteudoArtigo conteudo={fluxo.conteudo} />
 
-            {/* Concluir/desmarcar mora no MESMO container da descrição — não é mais uma caixa à
-                parte só pra isso. */}
             <div className="border-t border-navy-700 pt-4">
               {concluido ? (
                 <div className="anim-fade flex items-center justify-between gap-3">

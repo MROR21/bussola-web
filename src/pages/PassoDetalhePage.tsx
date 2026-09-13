@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CompassRose } from '../components/CompassRose'
+import { ConteudoArtigo } from '../components/ConteudoArtigo'
 import { EstadoErro } from '../components/EstadoErro'
 import { Icon } from '../components/Icon'
 import { MapCorners } from '../components/MapCorners'
 import { MapIllustration } from '../components/MapIllustration'
-import { Markdown } from '../components/Markdown'
 import { MarkdownEditor } from '../components/MarkdownEditor'
 import { Carregando, Spinner } from '../components/Spinner'
 import { usePolling, useRefetchOnFocus } from '../hooks/useAtualizarEmSegundoPlano'
@@ -474,19 +474,15 @@ export function PassoDetalhePage({
           )}
           <div
             className={cx(
-              'flex flex-col gap-3 rounded-2xl border border-navy-700 bg-navy-800 p-6 leading-relaxed',
+              'flex flex-col gap-4',
               layoutAula && 'lg:flex-[2] lg:self-stretch',
             )}
           >
-            {/* Conteúdo rola dentro de si mesmo (altura travada) — passos com várias imagens
-                (Ambientação) ficavam gigantes, empurrando concluir/desmarcar lá pro fundo da
-                página. A barra de rolagem personalizada (index.css) já cobre o visual. */}
-            <div className="max-h-[32rem] overflow-y-auto pr-1">
-              <Markdown>{step.conteudo}</Markdown>
-            </div>
+            {/* Leitura solta, tipo artigo — sem caixa/scroll travado (era um problema real nos
+                passos com várias imagens, ex. Ambientação). ConteudoArtigo decide sozinho se abre
+                em modo slide (várias seções `##`, como a Ambientação segue) ou corrido. */}
+            <ConteudoArtigo conteudo={step.conteudo} />
 
-            {/* Concluir/desmarcar mora no MESMO container da descrição — não é mais uma caixa à
-                parte só pra isso. */}
             <div className="border-t border-navy-700 pt-4">
               {concluido ? (
                 !exigeComprovacao ? (
