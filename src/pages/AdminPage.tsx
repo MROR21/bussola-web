@@ -12,14 +12,18 @@ import { UsuariosAdmin } from '../features/admin/UsuariosAdmin'
 import {
   apagarFase,
   apagarModulo,
+  apagarSquad,
   criarFase,
   criarModulo,
+  criarSquad,
   editarFase,
   editarModulo,
+  editarSquad,
   listarFases,
   listarFluxosAdmin,
   listarModulos,
   listarPassosAdmin,
+  listarSquadsAdmin,
 } from '../features/admin/adminService'
 import { cx } from '../utils/cx'
 
@@ -34,7 +38,7 @@ function contarPor<T>(lista: T[], chaveDe: (item: T) => string): Record<string, 
   return contagem
 }
 
-const ABAS = ['fases', 'passos', 'guias', 'modulos', 'acessos', 'usuarios'] as const
+const ABAS = ['fases', 'passos', 'guias', 'modulos', 'squads', 'acessos', 'usuarios'] as const
 type Aba = (typeof ABAS)[number]
 
 const LABEL: Record<Aba, string> = {
@@ -42,6 +46,7 @@ const LABEL: Record<Aba, string> = {
   modulos: 'Módulos',
   passos: 'Passos',
   guias: 'Guias',
+  squads: 'Squads',
   acessos: 'Acessos',
   usuarios: 'Usuários',
 }
@@ -128,6 +133,27 @@ export function AdminPage() {
             editar={editarModulo}
             apagar={apagarModulo}
             contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
+          />
+        </div>
+      )}
+      {aba === 'squads' && (
+        <div className="anim-page">
+          <SimpleEntityCrud
+            titulo="Squads"
+            icone="groups"
+            singular="squad"
+            labelFilhos="módulos"
+            listar={listarSquadsAdmin}
+            criar={criarSquad}
+            editar={editarSquad}
+            apagar={apagarSquad}
+            contarFilhos={async () => {
+              const modulos = await listarModulos()
+              return contarPor(
+                modulos.filter((m) => m.squadId !== null),
+                (m) => m.squadId as string,
+              )
+            }}
           />
         </div>
       )}

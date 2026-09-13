@@ -10,7 +10,13 @@ export interface EntidadeSimples {
 }
 
 export type Fase = EntidadeSimples
-export type Modulo = EntidadeSimples
+export type SquadAdmin = EntidadeSimples
+
+// Módulo já vem com o vínculo de squad (nullable — null = "padrão do sistema", ex. "Básico do
+// dev", criado à mão; preenchido = nasceu junto de um squad, ver POST /admin/squads).
+export interface Modulo extends EntidadeSimples {
+  squadId: string | null
+}
 
 // Um passo da Jornada como o admin edita (espelha PassoRequest/a projeção de GET /admin/passos).
 export interface PassoAdmin {

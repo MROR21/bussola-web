@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
 import { EstadoErro } from '../../components/EstadoErro'
 import { Icon } from '../../components/Icon'
 import { Carregando, Spinner } from '../../components/Spinner'
@@ -21,6 +22,7 @@ export function SimpleEntityCrud({
   editar,
   apagar,
   contarFilhos,
+  renderFilhos,
 }: {
   titulo: string
   icone: string
@@ -31,6 +33,10 @@ export function SimpleEntityCrud({
   editar: (id: string, nome: string, order: number) => Promise<void>
   apagar: (id: string) => Promise<void>
   contarFilhos?: () => Promise<Record<string, number>>
+  // Conteúdo extra por linha (ex.: os passos daquela fase, os fluxos daquele módulo) — dropdown
+  // próprio, cada item cuida do seu próprio fetch/estado de aberto-fechado. Opcional: sem isso a
+  // linha fica exatamente como sempre foi (nome + reorder + editar/apagar).
+  renderFilhos?: (item: EntidadeSimples) => ReactNode
 }) {
   const [itens, setItens] = useState<EntidadeSimples[]>([])
   const [filhosPorId, setFilhosPorId] = useState<Record<string, number>>({})
@@ -201,58 +207,61 @@ export function SimpleEntityCrud({
               else refsLinhas.current.delete(item.id)
             }}
             className={cx(
-              'flex items-center justify-between gap-3 rounded-xl border p-3 transition-colors',
+              'flex flex-col gap-2 rounded-xl border p-3 transition-colors',
               movendo === item.id ? 'border-gold-500/50 bg-navy-700' : 'border-navy-700 bg-navy-800',
             )}
           >
-            <div className="flex items-center gap-3">
-              {movendo === item.id ? (
-                <Spinner className="text-gold-400" />
-              ) : (
-                <div className="flex flex-col">
-                  <button
-                    type="button"
-                    onClick={() => mover(item, -1)}
-                    disabled={indice === 0 || movendo !== null}
-                    className="leading-none text-neutral-500 transition-all hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
-                    aria-label="Mover para cima"
-                  >
-                    <Icon name="arrow_drop_up" className="text-lg" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => mover(item, 1)}
-                    disabled={indice === itens.length - 1 || movendo !== null}
-                    className="-mt-2 leading-none text-neutral-500 transition-all hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
-                    aria-label="Mover para baixo"
-                  >
-                    <Icon name="arrow_drop_down" className="text-lg" />
-                  </button>
-                </div>
-              )}
-              <span className="text-neutral-100">{item.nome}</span>
-              {contarFilhos && (
-                <span className="rounded-full bg-navy-700 px-2 py-0.5 text-xs text-neutral-400">
-                  {filhosPorId[item.id] ?? 0} {labelFilhos ?? 'itens'}
-                </span>
-              )}
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                {movendo === item.id ? (
+                  <Spinner className="text-gold-400" />
+                ) : (
+                  <div className="flex flex-col">
+                    <button
+                      type="button"
+                      onClick={() => mover(item, -1)}
+                      disabled={indice === 0 || movendo !== null}
+                      className="leading-none text-neutral-500 transition-all hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
+                      aria-label="Mover para cima"
+                    >
+                      <Icon name="arrow_drop_up" className="text-lg" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => mover(item, 1)}
+                      disabled={indice === itens.length - 1 || movendo !== null}
+                      className="-mt-2 leading-none text-neutral-500 transition-all hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
+                      aria-label="Mover para baixo"
+                    >
+                      <Icon name="arrow_drop_down" className="text-lg" />
+                    </button>
+                  </div>
+                )}
+                <span className="text-neutral-100">{item.nome}</span>
+                {contarFilhos && (
+                  <span className="rounded-full bg-navy-700 px-2 py-0.5 text-xs text-neutral-400">
+                    {filhosPorId[item.id] ?? 0} {labelFilhos ?? 'itens'}
+                  </span>
+                )}
+              </div>
+              <div className="flex shrink-0 gap-3">
+                <button
+                  type="button"
+                  onClick={() => abrirEdicao(item)}
+                  className="text-sm text-gold-400 transition-colors hover:text-gold-300"
+                >
+                  Editar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setApagando(item)}
+                  className="text-sm text-red-400 transition-colors hover:text-red-300"
+                >
+                  Apagar
+                </button>
+              </div>
             </div>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => abrirEdicao(item)}
-                className="text-sm text-gold-400 transition-colors hover:text-gold-300"
-              >
-                Editar
-              </button>
-              <button
-                type="button"
-                onClick={() => setApagando(item)}
-                className="text-sm text-red-400 transition-colors hover:text-red-300"
-              >
-                Apagar
-              </button>
-            </div>
+            {renderFilhos?.(item)}
           </li>
         ))}
         {itens.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nada cadastrado ainda.</p>}

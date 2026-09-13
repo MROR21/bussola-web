@@ -3,6 +3,7 @@ import type {
   EntidadeSimples,
   Fase,
   Modulo,
+  SquadAdmin,
   FluxoAdmin,
   FluxoAdminInput,
   PassoAdmin,
@@ -12,6 +13,14 @@ import type {
   AcessoAdmin,
   AcessoAdminInput,
 } from './types'
+
+// Squads
+export const listarSquadsAdmin = () => apiGet<SquadAdmin[]>('/admin/squads')
+export const criarSquad = (nome: string, order: number) =>
+  apiPost<EntidadeSimples>('/admin/squads', { nome, order })
+export const editarSquad = (id: string, nome: string, order: number) =>
+  apiSend('PUT', `/admin/squads/${id}`, { nome, order })
+export const apagarSquad = (id: string) => apiSend('DELETE', `/admin/squads/${id}`)
 
 // Fases
 export const listarFases = () => apiGet<Fase[]>('/admin/fases')
