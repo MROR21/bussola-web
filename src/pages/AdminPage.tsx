@@ -43,7 +43,7 @@ type Aba = (typeof ABAS)[number]
 
 const LABEL: Record<Aba, string> = {
   jornada: 'Jornada',
-  guias: 'Guias',
+  guias: 'Guia',
   squads: 'Squads',
   acessos: 'Acessos',
   usuarios: 'Usuários',

@@ -66,8 +66,11 @@ const NAV: {
   filhosFixos?: boolean
 }[] = [
   { to: '/gestor', label: 'Supervisionados', icon: <Icon name="group" className="text-[18px]" />, end: false, papel: 'gestor' },
-  { to: '/', label: 'Jornada', icon: <TrilhaIcon />, end: true, papel: 'colaborador', arvore: 'fase' },
-  { to: '/guias', label: 'Guias', icon: <Icon name="menu_book" className="text-[18px]" />, end: false, arvore: 'modulo' },
+  { to: '/', label: 'Minha Jornada', icon: <TrilhaIcon />, end: true, papel: 'colaborador', arvore: 'fase' },
+  // "Guia" no singular de propósito: é UM guia do sistema (a referência), não uma coleção de
+  // "guias" soltos — o que tem dentro dele são Módulos, não "guias" (evita a ambiguidade de achar
+  // que o conteúdo interno também se chama "guia").
+  { to: '/guias', label: 'Guia', icon: <Icon name="menu_book" className="text-[18px]" />, end: false, arvore: 'modulo' },
   { to: '/configuracoes', label: 'Configurações', icon: <Icon name="settings" className="text-[18px]" />, end: false, filhosFixos: true },
   { to: '/admin', label: 'Admin', icon: <Icon name="build" className="text-[18px]" />, end: false, papel: 'gestor' },
   { to: '/chat', label: 'Assistente', icon: <Icon name="chat" className="text-[18px]" />, end: false },
@@ -400,8 +403,10 @@ export function AppLayout() {
 
                 {/* Grid-rows em vez de montar/desmontar o <ul> na hora — o truque de "0fr → 1fr"
                     dá uma transição suave de altura sem precisar medir pixel nenhum (só Tailwind,
-                    sem CSS próprio). O padding/gap fica DENTRO do <ul> (não no grid pai), assim ele
-                    encolhe junto com a linha em vez de deixar um respiro fixo quando fechado. */}
+                    sem CSS próprio). O `overflow-hidden` mora num wrapper PRÓPRIO (não só no
+                    `<ul>`) — só no `<ul>` deixava um fiapo do acento de "Módulos" (o "ó" sobe um
+                    pouco acima da caixa do texto) vazar mesmo com a árvore fechada; com o wrapper
+                    dedicado o corte é garantido antes de qualquer padding/conteúdo. */}
                 {!colapsado && galhos.length > 0 && (
                   <div
                     className={cx(
@@ -409,7 +414,8 @@ export function AppLayout() {
                       aberto ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
                     )}
                   >
-                    <ul className="flex flex-col gap-0.5 overflow-hidden py-1">
+                    <div className="overflow-hidden">
+                    <ul className="flex flex-col gap-0.5 py-1">
                       {/* Rótulo da categoria (Fases/Módulos) — sem isso, a árvore expandida só
                           mostrava os nomes soltos, sem deixar claro que tipo de item é aquele. */}
                       {item.arvore && (
@@ -452,6 +458,7 @@ export function AppLayout() {
                         )
                       })}
                     </ul>
+                    </div>
                   </div>
                 )}
               </div>
