@@ -145,11 +145,10 @@ function ListaUsuarios() {
         {itensFiltrados.map((usuario) => {
           const souEuMesmo = usuario.id === usuarioLogado?.id
           // Promover pra supervisor exige acesso ativo (não faz sentido dar o papel pra quem nem
-          // consegue entrar). Revogar/reativar só pode quem já é o gestor DESSA pessoa — sem
-          // gestor vinculado, qualquer gestor pode (caso de off-boarding sem dono ainda).
+          // consegue entrar). Revogar/reativar acesso é ação de QUALQUER supervisor, pra qualquer
+          // usuário — sem essa trava de "só o gestor vinculado", que travava o off-boarding sempre
+          // que o dono específico não estava disponível.
           const naoPodeTornarSupervisor = !usuario.isGestor && !usuario.ativo
-          const naoPodeMexerNoAcesso =
-            usuario.gestorId !== null && usuario.gestorId !== usuarioLogado?.id
           return (
           <li
             key={usuario.id}
@@ -188,12 +187,8 @@ function ListaUsuarios() {
                   {
                     label: usuario.ativo ? 'Revogar acesso' : 'Reativar acesso',
                     onClick: () => setConfirmando({ usuario, acao: 'ativo' }),
-                    disabled: alterando === usuario.id || souEuMesmo || naoPodeMexerNoAcesso,
-                    title: souEuMesmo
-                      ? 'Você não pode revogar o seu próprio acesso.'
-                      : naoPodeMexerNoAcesso
-                        ? 'Só o gestor desse supervisionado pode mexer no acesso dele.'
-                        : undefined,
+                    disabled: alterando === usuario.id || souEuMesmo,
+                    title: souEuMesmo ? 'Você não pode revogar o seu próprio acesso.' : undefined,
                     tone: usuario.ativo ? 'perigo' : 'sucesso',
                   },
                 ]}

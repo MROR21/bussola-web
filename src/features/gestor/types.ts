@@ -16,12 +16,15 @@ export interface UsuarioProgresso {
   foto?: string | null
 }
 
-// Colaborador disponível pra virar supervisionado (GET /gestor/disponiveis).
+// Colaborador disponível pra virar supervisionado (GET /gestor/disponiveis) — já exclui quem é
+// supervisionado do PRÓPRIO gestor logado, mas inclui quem já é supervisionado de OUTRO gestor
+// (nesse caso `gestorNome` vem preenchido, pra avisar antes de reatribuir).
 export interface UsuarioDisponivel {
   id: string
   nome: string
   email: string
   cargo: Cargo
+  gestorNome: string | null
 }
 
 // Um passo com a flag de concluído (detalhe do progresso de um supervisionado).

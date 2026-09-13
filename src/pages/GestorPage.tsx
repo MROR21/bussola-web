@@ -41,8 +41,13 @@ export function GestorPage() {
   const [confirmandoRemover, setConfirmandoRemover] = useState<UsuarioProgresso | null>(null)
   const [removendoId, setRemovendoId] = useState<string | null>(null)
   const [mostrandoLimite, setMostrandoLimite] = useState(false)
+  // Alguém que já é supervisionado de OUTRO gestor pede confirmação antes de reatribuir — o back
+  // sobrescreve o vínculo sem perguntar, então a única trava contra "roubar" supervisionado de
+  // outro gestor sem querer é essa aqui.
+  const [confirmandoReatribuir, setConfirmandoReatribuir] = useState<UsuarioDisponivel | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
   const modalRemover = useSaidaValor(confirmandoRemover)
+  const modalReatribuir = useSaidaValor(confirmandoReatribuir)
   const modalLimite = useSaida(mostrandoLimite)
   const toastFeedback = useSaidaValor(feedback)
   const navegar = useNavigate()
@@ -283,13 +288,22 @@ export function GestorPage() {
                   <div className="flex min-w-0 flex-col">
                     <span className="truncate text-neutral-100">{u.nome}</span>
                     <span className="truncate text-sm text-neutral-500">{u.email}</span>
+                    {u.gestorNome && (
+                      <span className="truncate text-xs text-gold-500">
+                        Supervisionado por {u.gestorNome}
+                      </span>
+                    )}
                   </div>
                   <button
                     type="button"
-                    onClick={() => (noLimite ? setMostrandoLimite(true) : adicionar(u.id, u.nome))}
+                    onClick={() => {
+                      if (noLimite) setMostrandoLimite(true)
+                      else if (u.gestorNome) setConfirmandoReatribuir(u)
+                      else adicionar(u.id, u.nome)
+                    }}
                     className="shrink-0 text-sm text-gold-400 transition-colors hover:text-gold-300"
                   >
-                    Adicionar
+                    {u.gestorNome ? 'Reatribuir' : 'Adicionar'}
                   </button>
                 </li>
               ))}
@@ -333,6 +347,51 @@ export function GestorPage() {
                 className="rounded-lg bg-red-500/90 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-500"
               >
                 Remover
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {modalReatribuir.montado && modalReatribuir.valor && (
+        <div
+          className={cx(
+            'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
+            modalReatribuir.saindo ? 'anim-fade-out' : 'anim-fade',
+          )}
+          onClick={() => setConfirmandoReatribuir(null)}
+        >
+          <div
+            className={cx(
+              'flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-navy-700 bg-navy-800 p-6',
+              modalReatribuir.saindo ? 'anim-pop-out' : 'anim-pop',
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold text-neutral-100">Reatribuir supervisionado?</h3>
+            <p className="text-sm text-neutral-400">
+              "{modalReatribuir.valor.nome}" já é supervisionado por{' '}
+              <strong className="text-neutral-200">{modalReatribuir.valor.gestorNome}</strong> —
+              adicionar aqui tira essa pessoa de lá e passa a ser você o supervisor dela.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmandoReatribuir(null)}
+                className="rounded-lg px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-navy-700"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const alvo = modalReatribuir.valor
+                  setConfirmandoReatribuir(null)
+                  if (alvo) adicionar(alvo.id, alvo.nome)
+                }}
+                className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
+              >
+                Reatribuir
               </button>
             </div>
           </div>
