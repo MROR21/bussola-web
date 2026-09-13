@@ -126,13 +126,16 @@ export function PassosDaFase({ faseId, aoMudar }: { faseId: string; aoMudar?: ()
   return (
     <>
       <div className="flex flex-col gap-2">
-        <button
-          type="button"
-          onClick={abrirNovo}
-          className="self-end rounded-lg bg-gold-500 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gold-400"
-        >
-          + Novo passo
-        </button>
+        <div className="flex items-center justify-between gap-2">
+          <h4 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">Passos</h4>
+          <button
+            type="button"
+            onClick={abrirNovo}
+            className="rounded-lg bg-gold-500 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gold-400"
+          >
+            + Novo passo
+          </button>
+        </div>
 
         {loading ? (
           <p className="text-sm text-neutral-500">Carregando...</p>

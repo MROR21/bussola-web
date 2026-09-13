@@ -247,7 +247,7 @@ export function SimpleEntityCrud({
             )}
           >
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
                 {movendo === item.id ? (
                   <Spinner className="text-gold-400" />
                 ) : (
@@ -272,24 +272,36 @@ export function SimpleEntityCrud({
                     </button>
                   </div>
                 )}
-                {renderFilhos && (
+                {renderFilhos ? (
                   <button
                     type="button"
                     onClick={() => setAbertos((a) => ({ ...a, [item.id]: !a[item.id] }))}
-                    aria-label={abertos[item.id] ? 'Recolher' : 'Expandir'}
-                    className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-navy-600 text-neutral-400 transition-colors hover:border-gold-500/50 hover:text-gold-400"
+                    aria-expanded={Boolean(abertos[item.id])}
+                    className="flex min-w-0 flex-1 items-center gap-2 text-left"
                   >
                     <Icon
                       name="expand_more"
-                      className={cx('text-lg transition-transform duration-200', abertos[item.id] && 'rotate-180')}
+                      className={cx(
+                        'shrink-0 text-neutral-500 transition-transform duration-200',
+                        abertos[item.id] && 'rotate-180',
+                      )}
                     />
+                    <span className="truncate text-neutral-100">{item.nome}</span>
+                    {contarFilhos && (
+                      <span className="shrink-0 rounded-full bg-navy-700 px-2 py-0.5 text-xs text-neutral-400">
+                        {filhosPorId[item.id] ?? 0} {labelFilhos ?? 'itens'}
+                      </span>
+                    )}
                   </button>
-                )}
-                <span className="text-neutral-100">{item.nome}</span>
-                {contarFilhos && (
-                  <span className="rounded-full bg-navy-700 px-2 py-0.5 text-xs text-neutral-400">
-                    {filhosPorId[item.id] ?? 0} {labelFilhos ?? 'itens'}
-                  </span>
+                ) : (
+                  <>
+                    <span className="text-neutral-100">{item.nome}</span>
+                    {contarFilhos && (
+                      <span className="rounded-full bg-navy-700 px-2 py-0.5 text-xs text-neutral-400">
+                        {filhosPorId[item.id] ?? 0} {labelFilhos ?? 'itens'}
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
               <KebabMenu
