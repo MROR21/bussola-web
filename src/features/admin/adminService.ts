@@ -14,10 +14,21 @@ import type {
   AcessoAdminInput,
 } from './types'
 
-// Squads (sem reordenação exposta — order é gerido por conta própria dentro de SquadsAdmin.tsx)
+// Squads (sem reordenação exposta — order é gerido por conta própria dentro de SquadsAdmin.tsx).
+// Criar aceita OU um nome de módulo novo OU o id de um módulo "padrão do sistema" já existente pra
+// adotar (nunca os dois — ver SquadRequest no back); editar só mexe no nome do vínculo já feito.
 export const listarSquadsAdmin = () => apiGet<SquadAdmin[]>('/admin/squads')
-export const criarSquad = (nome: string, moduloNome: string, order: number) =>
-  apiPost<SquadAdmin>('/admin/squads', { nome, moduloNome, order })
+export const criarSquad = (
+  nome: string,
+  order: number,
+  modulo: { nome: string } | { id: string },
+) =>
+  apiPost<SquadAdmin>('/admin/squads', {
+    nome,
+    order,
+    moduloNome: 'nome' in modulo ? modulo.nome : null,
+    moduloId: 'id' in modulo ? modulo.id : null,
+  })
 export const editarSquad = (id: string, nome: string, moduloNome: string, order: number) =>
   apiSend('PUT', `/admin/squads/${id}`, { nome, moduloNome, order })
 export const apagarSquad = (id: string) => apiSend('DELETE', `/admin/squads/${id}`)
@@ -30,10 +41,12 @@ export const editarFase = (id: string, nome: string, order: number) =>
   apiSend('PUT', `/admin/fases/${id}`, { nome, order })
 export const apagarFase = (id: string) => apiSend('DELETE', `/admin/fases/${id}`)
 
-// Módulos
+// Módulos. `criarModulo` escolhe a categoria na hora (squadId ou null pra "padrão do sistema") —
+// `editarModulo` continua só nome+ordem, o vínculo com squad não muda por ali (ver
+// CriarModuloRequest no back).
 export const listarModulos = () => apiGet<Modulo[]>('/admin/modulos')
-export const criarModulo = (nome: string, order: number) =>
-  apiPost<EntidadeSimples>('/admin/modulos', { nome, order })
+export const criarModulo = (nome: string, squadId: string | null, order: number) =>
+  apiPost<EntidadeSimples>('/admin/modulos', { nome, squadId, order })
 export const editarModulo = (id: string, nome: string, order: number) =>
   apiSend('PUT', `/admin/modulos/${id}`, { nome, order })
 export const apagarModulo = (id: string) => apiSend('DELETE', `/admin/modulos/${id}`)

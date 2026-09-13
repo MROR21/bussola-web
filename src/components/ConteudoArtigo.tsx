@@ -5,13 +5,14 @@ import { Icon } from './Icon'
 import { Markdown } from './Markdown'
 
 // Mostra o Conteudo de um Passo/Fluxo/Documentação. Conteúdo com várias seções `##` (a convenção
-// que a Ambientação já segue, uma por slide da apresentação original) abre em modo slide —
-// apresentação de verdade, uma seção por vez, com "Ver tudo de uma vez" pra quem preferir ler
-// corrido. Conteúdo sem múltiplas seções (a maioria dos Fluxos, e 2 dos 7 passos da Ambientação)
-// não tem o que paginar — vira só um artigo solto, sem caixa nenhuma.
+// que a Ambientação já segue, uma por slide da apresentação original) PODE abrir em modo slide —
+// apresentação de verdade, uma seção por vez — mas começa no modo artigo (leitura corrida) por
+// padrão; quem quiser navegar seção a seção troca com "Ver em slides". Conteúdo sem múltiplas
+// seções (a maioria dos Fluxos, e 2 dos 7 passos da Ambientação) não tem o que paginar — vira só
+// um artigo solto, sem caixa nenhuma, sem opção de slide pra escolher.
 export function ConteudoArtigo({ conteudo }: { conteudo: string }) {
   const slides = useMemo(() => dividirEmSlides(conteudo), [conteudo])
-  const [modoSlide, setModoSlide] = useState(slides.length > 1)
+  const [modoSlide, setModoSlide] = useState(false)
   const [indice, setIndice] = useState(0)
 
   if (slides.length <= 1) {

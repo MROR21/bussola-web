@@ -6,15 +6,16 @@ import { MapIllustration } from '../components/MapIllustration'
 import { useTitulo } from '../hooks/useTitulo'
 import { AcessosAdmin } from '../features/admin/AcessosAdmin'
 import { FluxosDoModulo } from '../features/admin/FluxosDoModulo'
+import { NovoModuloButton } from '../features/admin/NovoModuloButton'
 import { PassosDaFase } from '../features/admin/PassosDaFase'
 import { SimpleEntityCrud } from '../features/admin/SimpleEntityCrud'
 import { SquadsAdmin } from '../features/admin/SquadsAdmin'
 import { UsuariosAdmin } from '../features/admin/UsuariosAdmin'
+import type { EntidadeSimples } from '../features/admin/types'
 import {
   apagarFase,
   apagarModulo,
   criarFase,
-  criarModulo,
   editarFase,
   editarModulo,
   listarFases,
@@ -48,9 +49,40 @@ const LABEL: Record<Aba, string> = {
 
 // Shell de administração: CRUD completo do conteúdo da Jornada e do Guia, direto no sistema
 // (sem depender de alteração de código pra editar texto, ordem ou estrutura).
+const CHAVE_ABA = 'bussola:admin:aba'
+
+function abaInicial(): Aba {
+  try {
+    const salva = localStorage.getItem(CHAVE_ABA)
+    if (salva && (ABAS as readonly string[]).includes(salva)) return salva as Aba
+  } catch {
+    // localStorage indisponível (ex.: modo privado) — cai no padrão
+  }
+  return 'jornada'
+}
+
 export function AdminPage() {
   useTitulo('Admin')
-  const [aba, setAba] = useState<Aba>('jornada')
+  const [aba, setAba] = useState<Aba>(abaInicial)
+  // Bump depois de criar módulo pelo NovoModuloButton — vira `key` das duas listas de baixo pra
+  // remontarem e buscarem de novo (elas não têm um jeito próprio de "refetch por fora").
+  const [refreshGuias, setRefreshGuias] = useState(0)
+
+  function selecionarAba(chave: Aba) {
+    setAba(chave)
+    try {
+      localStorage.setItem(CHAVE_ABA, chave)
+    } catch {
+      // localStorage indisponível — só não persiste, sem quebrar a troca de aba
+    }
+  }
+
+  // `criar` do SimpleEntityCrud nunca é chamado aqui de verdade (ocultarNovo esconde o botão local
+  // — a criação de módulo é só pelo NovoModuloButton, que já escolhe a categoria); existe só pra
+  // satisfazer o tipo da prop.
+  async function criarModuloIndisponivel(): Promise<EntidadeSimples> {
+    throw new Error('Use o botão "+ Novo módulo".')
+  }
 
   return (
     <div className="relative flex w-full max-w-4xl flex-col gap-5">
@@ -71,7 +103,7 @@ export function AdminPage() {
           <button
             key={chave}
             type="button"
-            onClick={() => setAba(chave)}
+            onClick={() => selecionarAba(chave)}
             className={cx(
               'rounded-lg px-4 py-1.5 text-sm font-medium transition-colors',
               aba === chave
@@ -91,7 +123,7 @@ export function AdminPage() {
       {aba === 'jornada' && (
         <div className="anim-page">
           <SimpleEntityCrud
-            titulo="Fases"
+            titulo="Fases da Jornada"
             icone="route"
             singular="fase"
             labelFilhos="passos"
@@ -111,19 +143,24 @@ export function AdminPage() {
           nome hardcoded. */}
       {aba === 'guias' && (
         <div className="anim-page flex flex-col gap-5">
-          <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
-            <Icon name="inventory_2" className="text-xl text-gold-400" /> Módulos
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
+              <Icon name="inventory_2" className="text-xl text-gold-400" /> Módulos
+            </h2>
+            <NovoModuloButton onCriado={() => setRefreshGuias((n) => n + 1)} />
+          </div>
           <section className="flex flex-col gap-3">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">Squads</h3>
             <SimpleEntityCrud
+              key={`squads-${refreshGuias}`}
               titulo="Módulos"
               icone="inventory_2"
               ocultarTitulo
+              ocultarNovo
               singular="módulo"
               labelFilhos="itens"
               listar={async () => (await listarModulos()).filter((m) => m.squadId !== null)}
-              criar={criarModulo}
+              criar={criarModuloIndisponivel}
               editar={editarModulo}
               apagar={apagarModulo}
               contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}
@@ -135,13 +172,15 @@ export function AdminPage() {
               Padrões do sistema
             </h3>
             <SimpleEntityCrud
+              key={`padroes-${refreshGuias}`}
               titulo="Módulos"
               icone="inventory_2"
               ocultarTitulo
+              ocultarNovo
               singular="módulo"
               labelFilhos="itens"
               listar={async () => (await listarModulos()).filter((m) => m.squadId === null)}
-              criar={criarModulo}
+              criar={criarModuloIndisponivel}
               editar={editarModulo}
               apagar={apagarModulo}
               contarFilhos={async () => contarPor(await listarFluxosAdmin(), (f) => f.moduloId)}

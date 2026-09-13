@@ -25,6 +25,7 @@ export function SimpleEntityCrud({
   contarFilhos,
   renderFilhos,
   ocultarTitulo,
+  ocultarNovo,
 }: {
   titulo: string
   icone: string
@@ -43,6 +44,10 @@ export function SimpleEntityCrud({
   // mostra um cabeçalho próprio por fora (ex.: duas instâncias lado a lado que representam a MESMA
   // entidade, só filtradas diferente — não faz sentido repetir "Módulos" duas vezes).
   ocultarTitulo?: boolean
+  // Esconde o botão "+ Novo(a)" — usado quando a criação é centralizada em outro lugar (ex.: os
+  // módulos têm categoria pra escolher na criação, então isso mora num botão único por fora,
+  // fora das duas instâncias filtradas por categoria).
+  ocultarNovo?: boolean
 }) {
   const [itens, setItens] = useState<EntidadeSimples[]>([])
   const [filhosPorId, setFilhosPorId] = useState<Record<string, number>>({})
@@ -202,13 +207,15 @@ export function SimpleEntityCrud({
             <Icon name={icone} className="text-xl text-gold-400" /> {titulo}
           </h2>
         )}
-        <button
-          type="button"
-          onClick={abrirNovo}
-          className="rounded-lg bg-gold-500 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gold-400"
-        >
-          + Novo(a) {singular}
-        </button>
+        {!ocultarNovo && (
+          <button
+            type="button"
+            onClick={abrirNovo}
+            className="rounded-lg bg-gold-500 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gold-400"
+          >
+            + Novo(a) {singular}
+          </button>
+        )}
       </div>
 
       <ul className="flex flex-col gap-2">
