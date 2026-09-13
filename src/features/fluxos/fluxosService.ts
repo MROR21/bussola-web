@@ -1,11 +1,16 @@
 import { apiGet, apiSend } from '../../services/api'
-import type { Fluxo } from './types'
+import type { Fluxo, ModuloPublico } from './types'
 
 // Todos os fluxos do Guia pelo sistema — aberto a qualquer colaborador logado (sem recorte por
 // squad). Já traz o conteúdo em Markdown de cada um, então a página de detalhe (rota por título)
 // também usa esta lista, sem precisar de busca por id.
 export function listarFluxos(): Promise<Fluxo[]> {
   return apiGet<Fluxo[]>('/fluxos')
+}
+
+// Todos os módulos que existem (mesmo os sem nenhum fluxo ainda) — ver ModuloPublico.
+export function listarModulosPublico(): Promise<ModuloPublico[]> {
+  return apiGet<ModuloPublico[]>('/modulos')
 }
 
 // Ids dos fluxos que o usuário logado já concluiu.

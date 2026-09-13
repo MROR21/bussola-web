@@ -7,8 +7,8 @@ import { MapCorners } from '../components/MapCorners'
 import { MapIllustration } from '../components/MapIllustration'
 import { Carregando } from '../components/Spinner'
 import { useTitulo } from '../hooks/useTitulo'
-import { getFluxosConcluidos, listarFluxos } from '../features/fluxos/fluxosService'
-import type { Fluxo, TipoConteudo } from '../features/fluxos/types'
+import { getFluxosConcluidos, listarFluxos, listarModulosPublico } from '../features/fluxos/fluxosService'
+import type { Fluxo, ModuloPublico, TipoConteudo } from '../features/fluxos/types'
 import { useRefetchOnFocus } from '../hooks/useAtualizarEmSegundoPlano'
 import { cx } from '../utils/cx'
 
@@ -32,14 +32,12 @@ const MODULO_RESUMO: Record<string, string> = {
   'Agilean (desktop)': 'Aplicativo desktop usado pelas equipes em campo para registrar e acompanhar o andamento da obra.',
 }
 
-// Tópico agrupa os Módulos em "Squads" (nasceram vinculados a um squad, ver Modulo.squadId) ou
-// "Padrões do sistema" (módulo criado à mão, sem squad — ex. "Básico do dev"). Vem de um campo
-// real (denormalizado em cada Fluxo como `moduloSquadId`), não mais de um dicionário por nome —
-// todo fluxo de um mesmo módulo compartilha o mesmo valor, então o 1º item do grupo já resolve.
+// Tópico agrupa os Módulos em "Squads" (têm squadId, ver Modulo.squadId) ou "Padrões do sistema"
+// (módulo criado à mão, sem squad — ex. "Básico do dev"). Vem do módulo em si (GET /modulos), não
+// mais derivado dos fluxos dentro dele — assim um módulo vazio ainda cai na categoria certa.
 const TOPICO_SQUADS = 'Squads'
 const TOPICO_PADRAO = 'Padrões do sistema'
-const topicoDoModulo = (itensDoModulo: Fluxo[]) =>
-  itensDoModulo[0]?.moduloSquadId ? TOPICO_SQUADS : TOPICO_PADRAO
+const topicoDoModulo = (modulo: ModuloPublico) => (modulo.squadId ? TOPICO_SQUADS : TOPICO_PADRAO)
 // "Squads" sempre lidera; "Padrões do sistema" (e qualquer outro tópico futuro) depois.
 const pesoTopico = (t: string) => (t === TOPICO_SQUADS ? '' : t)
 
@@ -49,6 +47,7 @@ const pesoTopico = (t: string) => (t === TOPICO_SQUADS ? '' : t)
 // consulta livre de tudo.
 export function GuiasPage() {
   const [fluxos, setFluxos] = useState<Fluxo[]>([])
+  const [modulos, setModulos] = useState<ModuloPublico[]>([])
   const [concluidos, setConcluidos] = useState<Set<string>>(new Set())
   const [busca, setBusca] = useState('')
   const [loading, setLoading] = useState(true)
@@ -79,10 +78,11 @@ export function GuiasPage() {
     let cancelado = false
     setLoading(true)
     setError(null)
-    Promise.all([listarFluxos(), getFluxosConcluidos()])
-      .then(([f, ids]) => {
+    Promise.all([listarFluxos(), listarModulosPublico(), getFluxosConcluidos()])
+      .then(([f, ms, ids]) => {
         if (cancelado) return
         setFluxos(f)
+        setModulos(ms)
         setConcluidos(new Set(ids))
       })
       .catch((e) => {
@@ -100,9 +100,10 @@ export function GuiasPage() {
   // colaborador já está navegando o Guia (às vezes por vários minutos, entre módulos) — busca de
   // novo, em silêncio, quando a aba volta a ficar em foco.
   useRefetchOnFocus(() => {
-    Promise.all([listarFluxos(), getFluxosConcluidos()])
-      .then(([f, ids]) => {
+    Promise.all([listarFluxos(), listarModulosPublico(), getFluxosConcluidos()])
+      .then(([f, ms, ids]) => {
         setFluxos(f)
+        setModulos(ms)
         setConcluidos(new Set(ids))
       })
       .catch(() => {})
@@ -142,28 +143,34 @@ export function GuiasPage() {
 
   const feitos = fluxos.filter((f) => concluidos.has(f.id)).length
 
+  // Parte de TODOS os módulos que existem (não só os que já têm algum fluxo) — um módulo
+  // recém-criado (ainda vazio) precisa aparecer aqui do mesmo jeito, só que sem nenhum item dentro.
   const porModulo = useMemo(() => {
-    const grupos = new Map<string, Fluxo[]>()
+    const porNome = new Map<string, Fluxo[]>()
     for (const fluxo of fluxos) {
-      const lista = grupos.get(fluxo.modulo) ?? []
+      const lista = porNome.get(fluxo.modulo) ?? []
       lista.push(fluxo)
-      grupos.set(fluxo.modulo, lista)
+      porNome.set(fluxo.modulo, lista)
     }
-    return [...grupos.entries()]
-  }, [fluxos])
+    return [...modulos]
+      .sort((a, b) => a.order - b.order)
+      .map((modulo): [string, Fluxo[]] => [modulo.nome, porNome.get(modulo.nome) ?? []])
+  }, [modulos, fluxos])
 
   // Agrupa os módulos (já com seus fluxos) por Tópico — "Squads" sempre primeiro, "Padrões do
-  // sistema" depois. Vem de Modulo.squadId (via `moduloSquadId` denormalizado), não é mais visual.
+  // sistema" depois. Vem do próprio módulo (squadId), não mais derivado dos fluxos dentro dele.
   const porTopico = useMemo(() => {
+    const moduloPorNome = new Map(modulos.map((m) => [m.nome, m]))
     const grupos = new Map<string, [string, Fluxo[]][]>()
     for (const entrada of porModulo) {
-      const topico = topicoDoModulo(entrada[1])
+      const modulo = moduloPorNome.get(entrada[0])
+      const topico = modulo ? topicoDoModulo(modulo) : TOPICO_PADRAO
       const lista = grupos.get(topico) ?? []
       lista.push(entrada)
       grupos.set(topico, lista)
     }
     return [...grupos.entries()].sort((a, b) => pesoTopico(a[0]).localeCompare(pesoTopico(b[0]), 'pt'))
-  }, [porModulo])
+  }, [porModulo, modulos])
 
   // Busca agrupada por módulo (mesma organização de "dentro de um módulo" — reaproveita `porModulo`,
   // então sai na mesma ordem de módulos usada em todo o Guia) + concluídos primeiro dentro de cada
