@@ -154,12 +154,17 @@ function ListaUsuarios() {
             key={usuario.id}
             className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
           >
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-1">
               <span className={cx(usuario.ativo ? 'text-neutral-100' : 'text-neutral-500 line-through')}>
                 {usuario.nome}
                 {souEuMesmo && <span className="ml-1.5 text-xs text-neutral-500">(você)</span>}
               </span>
               <span className="text-xs text-neutral-500">{usuario.email}</span>
+              {usuario.gestorNome && (
+                <span className="w-fit truncate rounded-full bg-gold-500/10 px-2 py-0.5 text-xs font-medium text-gold-400">
+                  Supervisionado por {usuario.gestorNome}
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-3">
               {!usuario.ativo && (

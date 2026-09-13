@@ -73,6 +73,7 @@ export interface UsuarioAdmin {
   isGestor: boolean
   ativo: boolean
   gestorId: string | null
+  gestorNome: string | null
 }
 
 // Um e-mail pré-autorizado a virar gestor no cadastro (espelha GET /admin/emails-autorizados).
