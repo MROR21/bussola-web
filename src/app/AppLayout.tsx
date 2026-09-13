@@ -410,6 +410,13 @@ export function AppLayout() {
                     )}
                   >
                     <ul className="flex flex-col gap-0.5 overflow-hidden py-1">
+                      {/* Rótulo da categoria (Fases/Módulos) — sem isso, a árvore expandida só
+                          mostrava os nomes soltos, sem deixar claro que tipo de item é aquele. */}
+                      {item.arvore && (
+                        <li className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-wide text-neutral-600">
+                          {item.arvore === 'fase' ? 'Fases' : 'Módulos'}
+                        </li>
+                      )}
                       {galhos.map((galho) => {
                         const galhoForcado =
                           (item.to === '/guias' &&

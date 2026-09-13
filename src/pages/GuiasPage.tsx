@@ -393,12 +393,18 @@ export function GuiasPage() {
         )
       ) : (
         <div className="anim-fade flex flex-col gap-6">
+          {/* "Módulos" é a identidade real por trás dos cards abaixo (mesmo nome usado no Admin) —
+              Squads/Padrões do sistema são só a categorização por cima, não duas coisas
+              diferentes. */}
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-100">
+            <Icon name="inventory_2" className="text-xl text-gold-400" /> Módulos
+          </h2>
           {porTopico.map(([topico, modulos]) => (
             <section key={topico} className="flex flex-col gap-3">
               {porTopico.length > 1 && (
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
                   {topico}
-                </h2>
+                </h3>
               )}
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {modulos.map(([modulo, itens]) => {
