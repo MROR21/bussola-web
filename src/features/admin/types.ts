@@ -60,14 +60,16 @@ export interface FluxoAdmin {
 
 export type FluxoAdminInput = Omit<FluxoAdmin, 'id' | 'squad'>
 
-// Um usuário como a tela "Usuários" do admin lista (espelha GET /admin/usuarios).
+// Um usuário como a tela "Usuários" do admin lista (espelha GET /admin/usuarios). `squadId`/`squad`
+// só ficam null no caso raro de um usuário REVOGADO cujo squad foi apagado (ver DELETE
+// /admin/squads) — usuário ativo sempre tem um (nivelamento exige escolher).
 export interface UsuarioAdmin {
   id: string
   nome: string
   email: string
   cargo: Cargo
-  squadId: string
-  squad: string
+  squadId: string | null
+  squad: string | null
   isGestor: boolean
   ativo: boolean
   gestorId: string | null
