@@ -1,5 +1,6 @@
 import type { SkillArea } from '../onboarding/types'
-import type { Cargo, Squad } from '../nivelamento/types'
+import type { Cargo } from '../nivelamento/types'
+import type { TipoConteudo } from '../fluxos/types'
 
 // Fase e Módulo são só nome+ordem — a mesma forma serve pros dois (ver SimpleEntityCrud).
 export interface EntidadeSimples {
@@ -27,11 +28,14 @@ export interface PassoAdmin {
 export type PassoAdminInput = Omit<PassoAdmin, 'id'>
 
 // Um fluxo do Guia como o admin edita (espelha FluxoRequest/a projeção de GET /admin/fluxos).
+// `squad` já vem com o nome pronto (denormalizado pelo back) — só exibição; quem edita usa `squadId`.
 export interface FluxoAdmin {
   id: string
   order: number
   moduloId: string
-  squad: Squad | null
+  squadId: string | null
+  squad: string | null
+  tipo: TipoConteudo
   categoria: string
   titulo: string
   descricao: string
@@ -39,7 +43,7 @@ export interface FluxoAdmin {
   videoUrl: string
 }
 
-export type FluxoAdminInput = Omit<FluxoAdmin, 'id'>
+export type FluxoAdminInput = Omit<FluxoAdmin, 'id' | 'squad'>
 
 // Um usuário como a tela "Usuários" do admin lista (espelha GET /admin/usuarios).
 export interface UsuarioAdmin {
@@ -47,7 +51,8 @@ export interface UsuarioAdmin {
   nome: string
   email: string
   cargo: Cargo
-  squad: Squad | null
+  squadId: string
+  squad: string
   isGestor: boolean
   ativo: boolean
   gestorId: string | null

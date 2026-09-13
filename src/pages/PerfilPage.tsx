@@ -12,14 +12,11 @@ import { useTitulo } from '../hooks/useTitulo'
 import { Avatar } from '../features/perfil/Avatar'
 import { lerImagemReduzida } from '../features/perfil/imagem'
 import { trocarEmail, trocarFoto, trocarSenha } from '../features/perfil/perfilService'
-import type { Cargo, Squad } from '../features/nivelamento/types'
+import type { Cargo } from '../features/nivelamento/types'
+import { listarSquads } from '../features/squads/squadsService'
+import type { Squad } from '../features/squads/types'
 import { useTemaStore, type Tema } from '../features/tema/temaStore'
 
-const SQUAD_LABEL: Record<Squad, string> = {
-  MaoDeObra: 'Mão de Obra',
-  QuizQuality: 'Quiz Quality',
-  Agilean: 'Agilean (desktop)',
-}
 const CARGO_LABEL: Record<Cargo, string> = {
   Estagiario: 'Estagiário',
   Junior: 'Júnior',
@@ -36,6 +33,12 @@ export function PerfilPage() {
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
   const toastFeedback = useSaidaValor(feedback)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  // Squad é só um id na sessão — busca a lista pra achar o nome bonito de exibição no chip.
+  const [squads, setSquads] = useState<Squad[]>([])
+  useEffect(() => {
+    listarSquads().then(setSquads).catch(() => {})
+  }, [])
 
   // Formulário de e-mail.
   const [email, setEmail] = useState(usuario?.email ?? '')
@@ -164,7 +167,7 @@ export function PerfilPage() {
             <span className="truncate text-sm text-neutral-400">{usuario.email}</span>
             <div className="mt-1 flex flex-wrap gap-1.5">
               <span className="rounded-full bg-navy-700 px-2 py-0.5 text-xs text-neutral-300">
-                {SQUAD_LABEL[usuario.squad] ?? usuario.squad}
+                {squads.find((s) => s.id === usuario.squadId)?.nome ?? '...'}
               </span>
               <span className="rounded-full bg-navy-700 px-2 py-0.5 text-xs text-neutral-300">
                 {CARGO_LABEL[usuario.cargo] ?? usuario.cargo}

@@ -157,7 +157,8 @@ export function FluxoDetalhePage({ perfil }: { perfil: Perfil | null }) {
       const req: FluxoAdminInput = {
         order: base.order,
         moduloId: base.moduloId,
-        squad: base.squad,
+        squadId: base.squadId,
+        tipo: base.tipo,
         ...campos,
         titulo: campos.titulo.trim(),
       }

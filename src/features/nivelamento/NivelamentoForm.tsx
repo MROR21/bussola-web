@@ -1,17 +1,12 @@
-import { useState } from 'react'
-import type { Cargo, Perfil, SkillLevel, Squad } from './types'
+import { useEffect, useState } from 'react'
+import { listarSquads } from '../squads/squadsService'
+import type { Cargo, Perfil, SkillLevel } from './types'
 import { perfilPadrao } from './types'
 
 const CARGOS: { value: Cargo; label: string }[] = [
   { value: 'Estagiario', label: 'Estagiário' },
   { value: 'Junior', label: 'Júnior' },
   { value: 'Pleno', label: 'Pleno' },
-]
-
-const SQUADS: { value: Squad; label: string }[] = [
-  { value: 'MaoDeObra', label: 'Mão de Obra' },
-  { value: 'QuizQuality', label: 'Quiz Quality' },
-  { value: 'Agilean', label: 'Agilean (desktop)' },
 ]
 
 const NIVEIS: { value: SkillLevel; label: string }[] = [
@@ -57,12 +52,24 @@ export function NivelamentoForm({
   onSubmit,
   onSkip,
 }: {
-  onSubmit: (perfil: Perfil, squad: Squad) => void
-  onSkip: (squad: Squad) => void
+  onSubmit: (perfil: Perfil, squadId: string) => void
+  onSkip: (squadId: string) => void
 }) {
-  const [squad, setSquad] = useState<Squad>('MaoDeObra')
+  const [squads, setSquads] = useState<{ value: string; label: string }[]>([])
+  const [carregandoSquads, setCarregandoSquads] = useState(true)
+  const [squadId, setSquadId] = useState('')
   const [cargo, setCargo] = useState<Cargo>('Estagiario')
   const [git, setGit] = useState<SkillLevel>('Nenhum')
+
+  useEffect(() => {
+    listarSquads()
+      .then((lista) => {
+        const opcoes = lista.map((s) => ({ value: s.id, label: s.nome }))
+        setSquads(opcoes)
+        setSquadId((atual) => atual || opcoes[0]?.value || '')
+      })
+      .finally(() => setCarregandoSquads(false))
+  }, [])
 
   return (
     <div className="flex w-full max-w-lg flex-col gap-6 rounded-xl border border-navy-700 bg-navy-800 p-6">
@@ -76,7 +83,11 @@ export function NivelamentoForm({
 
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium text-neutral-300">Seu squad</span>
-        <OptionGroup options={SQUADS} value={squad} onChange={setSquad} />
+        {carregandoSquads ? (
+          <p className="text-sm text-neutral-500">Carregando...</p>
+        ) : (
+          <OptionGroup options={squads} value={squadId} onChange={setSquadId} />
+        )}
       </div>
 
       <div className="flex flex-col gap-2">
@@ -94,15 +105,17 @@ export function NivelamentoForm({
       <div className="flex items-center gap-3">
         <button
           type="button"
-          onClick={() => onSubmit({ ...perfilPadrao, cargo, git }, squad)}
-          className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
+          onClick={() => onSubmit({ ...perfilPadrao, cargo, git }, squadId)}
+          disabled={!squadId}
+          className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
         >
           Ver minha trilha
         </button>
         <button
           type="button"
-          onClick={() => onSkip(squad)}
-          className="text-sm text-neutral-400 transition-colors hover:text-neutral-200"
+          onClick={() => onSkip(squadId)}
+          disabled={!squadId}
+          className="text-sm text-neutral-400 transition-colors hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-40"
         >
           Pular (trilha completa)
         </button>

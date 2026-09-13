@@ -6,7 +6,8 @@ import { MarkdownEditor } from '../../components/MarkdownEditor'
 import { Carregando, Spinner } from '../../components/Spinner'
 import { useSaidaValor } from '../../hooks/useSaida'
 import { cx } from '../../utils/cx'
-import type { Squad } from '../nivelamento/types'
+import { listarSquads } from '../squads/squadsService'
+import type { Squad } from '../squads/types'
 import {
   apagarFluxo,
   criarFluxo,
@@ -15,8 +16,6 @@ import {
   listarModulos,
 } from './adminService'
 import type { FluxoAdmin, FluxoAdminInput, Modulo } from './types'
-
-const SQUADS: Squad[] = ['MaoDeObra', 'QuizQuality', 'Agilean']
 
 // Tópico é só um agrupamento VISUAL por cima dos Módulos que já existem (mesma regra da GuiasPage,
 // sem entidade/migration nova) — todo módulo cai em "Fluxos do sistema" por padrão.
@@ -30,6 +29,7 @@ const pesoTopico = (t: string) => (t === TOPICO_PADRAO ? '' : t)
 export function GuiasAdmin() {
   const [fluxos, setFluxos] = useState<FluxoAdmin[]>([])
   const [modulos, setModulos] = useState<Modulo[]>([])
+  const [squads, setSquads] = useState<Squad[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [editando, setEditando] = useState<FluxoAdmin | null>(null)
@@ -50,9 +50,10 @@ export function GuiasAdmin() {
     setLoading(true)
     setError(null)
     try {
-      const [fs, ms] = await Promise.all([listarFluxosAdmin(), listarModulos()])
+      const [fs, ms, sqs] = await Promise.all([listarFluxosAdmin(), listarModulos(), listarSquads()])
       setFluxos([...fs].sort((a, b) => a.order - b.order))
       setModulos([...ms].sort((a, b) => a.order - b.order))
+      setSquads(sqs)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao carregar')
     } finally {
@@ -79,7 +80,8 @@ export function GuiasAdmin() {
     setForm({
       order: fluxos.length > 0 ? Math.max(...fluxos.map((f) => f.order)) + 1 : 1,
       moduloId: modulos[0].id,
-      squad: null,
+      squadId: null,
+      tipo: 'Fluxo',
       categoria: '',
       titulo: '',
       descricao: '',
@@ -93,7 +95,8 @@ export function GuiasAdmin() {
     setForm({
       order: fluxo.order,
       moduloId: fluxo.moduloId,
-      squad: fluxo.squad,
+      squadId: fluxo.squadId,
+      tipo: fluxo.tipo,
       categoria: fluxo.categoria,
       titulo: fluxo.titulo,
       descricao: fluxo.descricao,
@@ -318,16 +321,14 @@ export function GuiasAdmin() {
               <label className="flex flex-col gap-1 text-sm text-neutral-400">
                 Squad
                 <select
-                  value={form.squad ?? ''}
-                  onChange={(e) =>
-                    setForm({ ...form, squad: e.target.value ? (e.target.value as Squad) : null })
-                  }
+                  value={form.squadId ?? ''}
+                  onChange={(e) => setForm({ ...form, squadId: e.target.value || null })}
                   className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                 >
                   <option value="">Todos os squads</option>
-                  {SQUADS.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
+                  {squads.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.nome}
                     </option>
                   ))}
                 </select>

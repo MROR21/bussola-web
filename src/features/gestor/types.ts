@@ -1,12 +1,14 @@
-import type { Cargo, Squad } from '../nivelamento/types'
+import type { Cargo } from '../nivelamento/types'
 
-// Um usuário com o resumo de progresso (resposta de GET /gestor/usuarios).
+// Um usuário com o resumo de progresso (resposta de GET /gestor/usuarios). `squad` já vem com o
+// nome pronto (denormalizado pelo back).
 export interface UsuarioProgresso {
   id: string
   nome: string
   email: string
   cargo: Cargo
-  squad: Squad
+  squadId: string
+  squad: string
   isGestor: boolean
   nivelamentoConcluido: boolean
   passosConcluidos: number
