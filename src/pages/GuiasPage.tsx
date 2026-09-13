@@ -8,8 +8,9 @@ import { MapIllustration } from '../components/MapIllustration'
 import { Carregando } from '../components/Spinner'
 import { useTitulo } from '../hooks/useTitulo'
 import { getFluxosConcluidos, listarFluxos } from '../features/fluxos/fluxosService'
-import type { Fluxo } from '../features/fluxos/types'
+import type { Fluxo, TipoConteudo } from '../features/fluxos/types'
 import { useRefetchOnFocus } from '../hooks/useAtualizarEmSegundoPlano'
+import { cx } from '../utils/cx'
 
 // Ícone por módulo (fallback "extension" = peça/módulo genérico).
 const MODULO_ICONE: Record<string, string> = {
@@ -31,15 +32,16 @@ const MODULO_RESUMO: Record<string, string> = {
   'Agilean (desktop)': 'Aplicativo desktop usado pelas equipes em campo para registrar e acompanhar o andamento da obra.',
 }
 
-// Tópico é só um agrupamento VISUAL por cima dos Módulos que já existem (sem entidade/migration
-// nova) — todo módulo cai em "Fluxos do sistema" por padrão, exceto os listados aqui.
-const TOPICO_POR_MODULO: Record<string, string> = {
-  'Básico do dev': 'Padrões do sistema',
-}
-const TOPICO_PADRAO = 'Fluxos do sistema'
-const topicoDoModulo = (m: string) => TOPICO_POR_MODULO[m] ?? TOPICO_PADRAO
-// "Fluxos do sistema" sempre lidera; "Padrões do sistema" (e qualquer outro tópico futuro) depois.
-const pesoTopico = (t: string) => (t === TOPICO_PADRAO ? '' : t)
+// Tópico agrupa os Módulos em "Squads" (nasceram vinculados a um squad, ver Modulo.squadId) ou
+// "Padrões do sistema" (módulo criado à mão, sem squad — ex. "Básico do dev"). Vem de um campo
+// real (denormalizado em cada Fluxo como `moduloSquadId`), não mais de um dicionário por nome —
+// todo fluxo de um mesmo módulo compartilha o mesmo valor, então o 1º item do grupo já resolve.
+const TOPICO_SQUADS = 'Squads'
+const TOPICO_PADRAO = 'Padrões do sistema'
+const topicoDoModulo = (itensDoModulo: Fluxo[]) =>
+  itensDoModulo[0]?.moduloSquadId ? TOPICO_SQUADS : TOPICO_PADRAO
+// "Squads" sempre lidera; "Padrões do sistema" (e qualquer outro tópico futuro) depois.
+const pesoTopico = (t: string) => (t === TOPICO_SQUADS ? '' : t)
 
 // Guia pelo sistema (referência viva): módulos em cards, agrupados por Tópico → entra → fluxos
 // dentro (+ busca global). Aberto a qualquer colaborador logado, gestor ou não — não há mais
@@ -63,8 +65,15 @@ export function GuiasPage() {
   const entrarModulo = (modulo: string) => navigate(`/guias/${encodeURIComponent(modulo)}`)
   const sairModulo = () => navigate('/guias')
   const [destacado, setDestacado] = useState<string | null>(null)
+  // Aba de conteúdo dentro de um módulo (Fluxos passo-a-passo vs Documentação do squad) — reseta
+  // toda vez que entra num módulo diferente, sempre começa em Fluxos.
+  const [abaConteudo, setAbaConteudo] = useState<TipoConteudo>('Fluxo')
 
   useTitulo(moduloSelecionado ?? 'Guia pelo sistema')
+
+  useEffect(() => {
+    setAbaConteudo('Fluxo')
+  }, [moduloSelecionado])
 
   useEffect(() => {
     let cancelado = false
@@ -143,12 +152,12 @@ export function GuiasPage() {
     return [...grupos.entries()]
   }, [fluxos])
 
-  // Agrupa os módulos (já com seus fluxos) por Tópico — "Fluxos do sistema" sempre primeiro,
-  // "Padrões do sistema" (Básico do dev) depois. Puramente visual, não vem do back.
+  // Agrupa os módulos (já com seus fluxos) por Tópico — "Squads" sempre primeiro, "Padrões do
+  // sistema" depois. Vem de Modulo.squadId (via `moduloSquadId` denormalizado), não é mais visual.
   const porTopico = useMemo(() => {
     const grupos = new Map<string, [string, Fluxo[]][]>()
     for (const entrada of porModulo) {
-      const topico = topicoDoModulo(entrada[0])
+      const topico = topicoDoModulo(entrada[1])
       const lista = grupos.get(topico) ?? []
       lista.push(entrada)
       grupos.set(topico, lista)
@@ -215,7 +224,10 @@ export function GuiasPage() {
 
   // ---- Dentro de um módulo ----
   if (moduloSelecionado) {
-    const itens = porModulo.find(([m]) => m === moduloSelecionado)?.[1] ?? []
+    const todosItens = porModulo.find(([m]) => m === moduloSelecionado)?.[1] ?? []
+    const qtdFluxos = todosItens.filter((f) => f.tipo === 'Fluxo').length
+    const qtdDocumentacao = todosItens.filter((f) => f.tipo === 'Documentacao').length
+    const itens = todosItens.filter((f) => f.tipo === abaConteudo)
 
     // Agrupa por tag (categoria) pra organizar por tópico. Se o módulo só tem uma tag
     // (ex.: os de "Sistema"), mostra lista simples — sem cabeçalho redundante.
@@ -254,8 +266,40 @@ export function GuiasPage() {
             )}
           </div>
         </div>
-        {grupos.length > 1 ? (
-          <div className="flex flex-col gap-6">
+
+        <div className="relative flex gap-2">
+          <button
+            type="button"
+            onClick={() => setAbaConteudo('Fluxo')}
+            className={cx(
+              'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+              abaConteudo === 'Fluxo'
+                ? 'bg-gold-500/20 text-gold-300'
+                : 'text-neutral-400 hover:text-neutral-200',
+            )}
+          >
+            Fluxos ({qtdFluxos})
+          </button>
+          <button
+            type="button"
+            onClick={() => setAbaConteudo('Documentacao')}
+            className={cx(
+              'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+              abaConteudo === 'Documentacao'
+                ? 'bg-gold-500/20 text-gold-300'
+                : 'text-neutral-400 hover:text-neutral-200',
+            )}
+          >
+            Documentação ({qtdDocumentacao})
+          </button>
+        </div>
+
+        {itens.length === 0 ? (
+          <p className="anim-fade text-sm text-neutral-500">
+            {abaConteudo === 'Fluxo' ? 'Nenhum fluxo' : 'Nenhuma documentação'} aqui ainda.
+          </p>
+        ) : grupos.length > 1 ? (
+          <div key={abaConteudo} className="anim-fade flex flex-col gap-6">
             {grupos.map(([tag, fluxosTag]) => (
               <section key={tag} className="flex flex-col gap-2">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
@@ -268,7 +312,9 @@ export function GuiasPage() {
             ))}
           </div>
         ) : (
-          <ul className="flex flex-col gap-2">{itens.map((f) => itemFluxo(f))}</ul>
+          <ul key={abaConteudo} className="anim-fade flex flex-col gap-2">
+            {itens.map((f) => itemFluxo(f))}
+          </ul>
         )}
       </div>
     )
