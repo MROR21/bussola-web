@@ -185,7 +185,9 @@ export function NotificationBell() {
       await marcarLidas()
       setItens((prev) => prev.map((n) => ({ ...n, lida: true })))
     } catch {
-      // silencioso — a lista continua como está
+      // A bolinha de não-lidas volta a aparecer sozinha no próximo poll (o estado local não
+      // mudou) — mas sem aviso nenhum isso parecia só "sumir e voltar" sem explicação.
+      setFeedback({ texto: 'Não deu para marcar as notificações como lidas.', ok: false })
     }
   }
 
