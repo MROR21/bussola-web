@@ -10,7 +10,16 @@ export interface EntidadeSimples {
 }
 
 export type Fase = EntidadeSimples
-export type SquadAdmin = EntidadeSimples
+
+// Squad como o admin edita — `moduloNome` é o nome do módulo vinculado (nasceu junto do squad,
+// mas pode ter nome diferente, ver POST/PUT /admin/squads). Sem `order` exposto pro admin editar
+// (squads não têm reordenação — a lista só mostra na ordem de criação).
+export interface SquadAdmin {
+  id: string
+  nome: string
+  order: number
+  moduloNome: string
+}
 
 // Módulo já vem com o vínculo de squad (nullable — null = "padrão do sistema", ex. "Básico do
 // dev", criado à mão; preenchido = nasceu junto de um squad, ver POST /admin/squads).

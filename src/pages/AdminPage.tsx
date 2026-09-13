@@ -8,22 +8,19 @@ import { AcessosAdmin } from '../features/admin/AcessosAdmin'
 import { FluxosDoModulo } from '../features/admin/FluxosDoModulo'
 import { PassosDaFase } from '../features/admin/PassosDaFase'
 import { SimpleEntityCrud } from '../features/admin/SimpleEntityCrud'
+import { SquadsAdmin } from '../features/admin/SquadsAdmin'
 import { UsuariosAdmin } from '../features/admin/UsuariosAdmin'
 import {
   apagarFase,
   apagarModulo,
-  apagarSquad,
   criarFase,
   criarModulo,
-  criarSquad,
   editarFase,
   editarModulo,
-  editarSquad,
   listarFases,
   listarFluxosAdmin,
   listarModulos,
   listarPassosAdmin,
-  listarSquadsAdmin,
 } from '../features/admin/adminService'
 import { cx } from '../utils/cx'
 
@@ -155,23 +152,7 @@ export function AdminPage() {
       )}
       {aba === 'squads' && (
         <div className="anim-page">
-          <SimpleEntityCrud
-            titulo="Squads"
-            icone="groups"
-            singular="squad"
-            labelFilhos="módulos"
-            listar={listarSquadsAdmin}
-            criar={criarSquad}
-            editar={editarSquad}
-            apagar={apagarSquad}
-            contarFilhos={async () => {
-              const modulos = await listarModulos()
-              return contarPor(
-                modulos.filter((m) => m.squadId !== null),
-                (m) => m.squadId as string,
-              )
-            }}
-          />
+          <SquadsAdmin />
         </div>
       )}
       {aba === 'acessos' && (

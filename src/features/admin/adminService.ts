@@ -14,12 +14,12 @@ import type {
   AcessoAdminInput,
 } from './types'
 
-// Squads
+// Squads (sem reordenação exposta — order é gerido por conta própria dentro de SquadsAdmin.tsx)
 export const listarSquadsAdmin = () => apiGet<SquadAdmin[]>('/admin/squads')
-export const criarSquad = (nome: string, order: number) =>
-  apiPost<EntidadeSimples>('/admin/squads', { nome, order })
-export const editarSquad = (id: string, nome: string, order: number) =>
-  apiSend('PUT', `/admin/squads/${id}`, { nome, order })
+export const criarSquad = (nome: string, moduloNome: string, order: number) =>
+  apiPost<SquadAdmin>('/admin/squads', { nome, moduloNome, order })
+export const editarSquad = (id: string, nome: string, moduloNome: string, order: number) =>
+  apiSend('PUT', `/admin/squads/${id}`, { nome, moduloNome, order })
 export const apagarSquad = (id: string) => apiSend('DELETE', `/admin/squads/${id}`)
 
 // Fases
