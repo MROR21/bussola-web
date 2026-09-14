@@ -10,7 +10,7 @@ import { NotificationBell } from '../features/notificacoes/NotificationBell'
 import { listarSteps } from '../features/onboarding/onboardingService'
 import type { OnboardingStep } from '../features/onboarding/types'
 import { Avatar } from '../features/perfil/Avatar'
-import { useApiStatus } from './useApiStatus'
+import { useApiStatusStore } from './apiStatusStore'
 import { useRefetchOnFocus } from '../hooks/useAtualizarEmSegundoPlano'
 import { useSaida } from '../hooks/useSaida'
 import { cx } from '../utils/cx'
@@ -93,7 +93,7 @@ export function AppLayout() {
   const logout = useAuthStore((state) => state.logout)
   const [confirmandoSaida, setConfirmandoSaida] = useState(false)
   const { montado: modalSaidaMontado, saindo: modalSaidaSaindo } = useSaida(confirmandoSaida)
-  const status = useApiStatus()
+  const status = useApiStatusStore((s) => s.status)
   const location = useLocation()
 
   // Menu lateral ocultável — lembrado entre sessões (localStorage), não é estado de navegação.

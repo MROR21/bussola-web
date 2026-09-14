@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react'
+import { useApiStatusStore } from '../app/apiStatusStore'
 import { PegadasTesouro } from './PegadasTesouro'
 
 // Estado de erro amigável (sem vazar mensagem técnica tipo "502 ao chamar /fluxos/meus").
@@ -11,6 +13,19 @@ export function EstadoErro({
   mensagem?: string
   onRetry?: () => void
 }) {
+  // Antes só saía dessa tela se a pessoa clicasse "Tentar de novo" — mesmo depois da API já ter
+  // voltado (o indicador do header já mostrava "ok" de novo, mas a tela continuava travada aqui).
+  // Reage sozinho na borda offline→ok (não sempre que status==='ok', senão qualquer rerender
+  // tentaria de novo um erro que não tem nada a ver com a API estar fora).
+  const status = useApiStatusStore((s) => s.status)
+  const statusAnteriorRef = useRef(status)
+
+  useEffect(() => {
+    const voltouAgora = statusAnteriorRef.current === 'offline' && status === 'ok'
+    statusAnteriorRef.current = status
+    if (voltouAgora) onRetry?.()
+  }, [status, onRetry])
+
   return (
     <div className="anim-fade flex w-full flex-col items-center gap-3 py-16 text-center">
       <PegadasTesouro />
