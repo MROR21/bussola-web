@@ -4,7 +4,6 @@ import { useAuthStore } from '../features/auth/authStore'
 import { useTitulo } from '../hooks/useTitulo'
 import { NivelamentoForm } from '../features/nivelamento/NivelamentoForm'
 import { salvarPerfil } from '../features/nivelamento/nivelamentoService'
-import { perfilPadrao } from '../features/nivelamento/types'
 import type { Perfil } from '../features/nivelamento/types'
 import type { UsuarioLogado } from '../features/auth/types'
 
@@ -41,10 +40,10 @@ export function NivelamentoPage({
         <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
           <CompassRose className="size-8 text-gold-400" /> Vamos te situar
         </h1>
-        <p className="text-sm text-neutral-400">Responda rápido para personalizar sua jornada.</p>
+        <p className="text-sm text-neutral-400">Só mais um passo antes de começar.</p>
       </div>
       {erro && <p className="anim-fade relative text-sm text-red-400">{erro}</p>}
-      <NivelamentoForm onSubmit={concluir} onSkip={(squadId) => concluir(perfilPadrao, squadId)} />
+      <NivelamentoForm onSubmit={concluir} />
     </main>
   )
 }

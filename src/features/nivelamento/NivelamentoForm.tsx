@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react'
 import { listarSquads } from '../squads/squadsService'
-import type { Cargo, Perfil, SkillLevel } from './types'
+import type { Cargo, Perfil } from './types'
 import { perfilPadrao } from './types'
 
 const CARGOS: { value: Cargo; label: string }[] = [
   { value: 'Estagiario', label: 'Estagiário' },
   { value: 'Junior', label: 'Júnior' },
   { value: 'Pleno', label: 'Pleno' },
-]
-
-const NIVEIS: { value: SkillLevel; label: string }[] = [
-  { value: 'Nenhum', label: 'Nenhum' },
-  { value: 'Basico', label: 'Básico' },
-  { value: 'Confortavel', label: 'Confortável' },
 ]
 
 // Grupo de botões de opção (segmented). Genérico pra reusar em cargo/nível.
@@ -46,20 +40,16 @@ function OptionGroup<T extends string>({
   )
 }
 
-// Questionário de nivelamento. Hoje afina o Git (único que muda a trilha) + guarda o cargo
-// (recomendação do 1º card, futuro). Pulável: "Pular" usa o perfil padrão (trilha completa essencial).
+// Escolha de squad e cargo no primeiro acesso — guarda o cargo (recomendação do 1º card, futuro).
 export function NivelamentoForm({
   onSubmit,
-  onSkip,
 }: {
   onSubmit: (perfil: Perfil, squadId: string) => void
-  onSkip: (squadId: string) => void
 }) {
   const [squads, setSquads] = useState<{ value: string; label: string }[]>([])
   const [carregandoSquads, setCarregandoSquads] = useState(true)
   const [squadId, setSquadId] = useState('')
   const [cargo, setCargo] = useState<Cargo>('Estagiario')
-  const [git, setGit] = useState<SkillLevel>('Nenhum')
 
   useEffect(() => {
     listarSquads()
@@ -74,11 +64,8 @@ export function NivelamentoForm({
   return (
     <div className="flex w-full max-w-lg flex-col gap-6 rounded-xl border border-navy-700 bg-navy-800 p-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-semibold">Vamos personalizar sua trilha</h2>
-        <p className="text-sm text-neutral-400">
-          Rápido — só ajusta a profundidade do que você já domina. O específico da
-          Agilean aparece sempre.
-        </p>
+        <h2 className="text-lg font-semibold">Antes de começar</h2>
+        <p className="text-sm text-neutral-400">Só precisamos saber seu squad e seu cargo.</p>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -95,29 +82,14 @@ export function NivelamentoForm({
         <OptionGroup options={CARGOS} value={cargo} onChange={setCargo} />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium text-neutral-300">
-          Quão confortável você é com Git?
-        </span>
-        <OptionGroup options={NIVEIS} value={git} onChange={setGit} />
-      </div>
-
       <div className="flex items-center gap-3">
         <button
           type="button"
-          onClick={() => onSubmit({ ...perfilPadrao, cargo, git }, squadId)}
+          onClick={() => onSubmit({ ...perfilPadrao, cargo }, squadId)}
           disabled={!squadId}
           className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Ver minha trilha
-        </button>
-        <button
-          type="button"
-          onClick={() => onSkip(squadId)}
-          disabled={!squadId}
-          className="text-sm text-neutral-400 transition-colors hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          Pular (trilha completa)
+          Ver minha jornada
         </button>
       </div>
     </div>
