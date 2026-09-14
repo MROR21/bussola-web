@@ -262,7 +262,7 @@ export function JornadaView({
   const entrarFase = (fase: string) => navigate(`/fase/${encodeURIComponent(fase)}`)
   const sairFase = () => navigate('/')
 
-  useTitulo(faseSelecionada ?? 'Jornada')
+  useTitulo(faseSelecionada ?? 'Minha Jornada')
 
   useEffect(() => {
     setDadosProntos(false)
