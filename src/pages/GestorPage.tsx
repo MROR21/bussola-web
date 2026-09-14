@@ -294,14 +294,20 @@ export function GestorPage() {
                       </span>
                     )}
                   </div>
-                  <div className="flex shrink-0 items-center gap-3">
+                  <div className="flex shrink-0 items-center gap-1">
+                    {/* "Ver jornada" fica só o ícone, discreto — é um espiadinha opcional, não a
+                        razão da linha existir. "Adicionar"/"Reatribuir" continua com texto (peso
+                        de ação principal): são ações diferentes o bastante (uma é reversível na
+                        hora, a outra tira a pessoa de outro gestor) pra não valer esconder as duas
+                        atrás do mesmo menu — só a "Ver jornada" que dá pra reduzir. */}
                     <button
                       type="button"
                       onClick={() => navegar(`/supervisionado/${u.id}`)}
+                      aria-label="Ver jornada"
                       title="Ver o progresso dessa pessoa, mesmo sem ser seu supervisionado"
-                      className="text-sm text-neutral-400 transition-colors hover:text-neutral-200"
+                      className="flex size-8 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:bg-navy-700 hover:text-neutral-200"
                     >
-                      Ver jornada
+                      <Icon name="visibility" className="text-lg" />
                     </button>
                     <button
                       type="button"
@@ -310,8 +316,9 @@ export function GestorPage() {
                         else if (u.gestorNome) setConfirmandoReatribuir(u)
                         else adicionar(u.id, u.nome)
                       }}
-                      className="text-sm text-gold-400 transition-colors hover:text-gold-300"
+                      className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-gold-400 transition-colors hover:bg-gold-500/10 hover:text-gold-300"
                     >
+                      <Icon name={u.gestorNome ? 'swap_horiz' : 'add'} className="text-base" />
                       {u.gestorNome ? 'Reatribuir' : 'Adicionar'}
                     </button>
                   </div>
