@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { EstadoErro } from '../../components/EstadoErro'
 import { Icon } from '../../components/Icon'
@@ -44,7 +44,7 @@ export function SimpleEntityCrud({
   contarFilhos?: () => Promise<Record<string, number>>
   // Conteúdo extra por linha (ex.: os passos daquela fase, os fluxos daquele módulo) — dropdown
   // próprio, cada item cuida do seu próprio fetch/estado de aberto-fechado. Opcional: sem isso a
-  // linha fica exatamente como sempre foi (nome + reorder + editar/apagar). Segundo argumento
+  // linha fica exatamente como sempre foi (nome + editar/apagar). Segundo argumento
   // (`aoMudar`) é o jeito do filho avisar "mudei uma criança sua" — sem isso a badge "N itens" só
   // atualiza quando O PRÓPRIO SimpleEntityCrud recarrega (editar/apagar/reordenar A FASE/MÓDULO
   // em si), então criar/apagar um passo/fluxo por dentro do dropdown deixava a contagem visível
@@ -89,7 +89,6 @@ export function SimpleEntityCrud({
   const [sujo, setSujo] = useState(false)
   const [salvando, setSalvando] = useState(false)
   const [apagando, setApagando] = useState<EntidadeSimples | null>(null)
-  const [movendo, setMovendo] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
   // Abrir/fechar do dropdown de cada linha (renderFilhos) — o chevron mora na própria linha, sem
   // um sub-título repetindo a badge que já mostra a contagem.
@@ -98,32 +97,6 @@ export function SimpleEntityCrud({
   const modalEdicao = useSaidaValor(editando)
   const modalApagar = useSaidaValor(apagando)
   const toastFeedback = useSaidaValor(feedback)
-
-  // FLIP: guarda a posição de cada linha ANTES do reordenar (ainda na ordem antiga) pra, depois
-  // que a lista chega na ordem nova, animar cada linha da posição antiga até a atual em vez de só
-  // "pipocar" direto no lugar certo.
-  const refsLinhas = useRef(new Map<string, HTMLLIElement>())
-  const posicoesAntes = useRef<Map<string, DOMRect> | null>(null)
-
-  useLayoutEffect(() => {
-    const antes = posicoesAntes.current
-    if (!antes) return
-    posicoesAntes.current = null
-
-    refsLinhas.current.forEach((linha, id) => {
-      const rectAntes = antes.get(id)
-      if (!rectAntes) return
-      const deltaY = rectAntes.top - linha.getBoundingClientRect().top
-      if (Math.abs(deltaY) < 1) return
-      linha.style.transition = 'none'
-      linha.style.transform = `translateY(${deltaY}px)`
-      linha.getBoundingClientRect() // força o navegador a aplicar o transform acima antes da próxima linha
-      requestAnimationFrame(() => {
-        linha.style.transition = 'transform 220ms ease-out'
-        linha.style.transform = ''
-      })
-    })
-  }, [itens])
 
   async function carregar() {
     setLoading(true)
@@ -150,30 +123,6 @@ export function SimpleEntityCrud({
       setFilhosPorId(await contarFilhos())
     } catch {
       // silencioso — a próxima carga completa (editar/apagar/reordenar a linha de fora) corrige
-    }
-  }
-
-  // Troca a ordem com o vizinho (cima/baixo) — dois PUTs simples, sem endpoint de reordenar novo.
-  async function mover(item: EntidadeSimples, direcao: -1 | 1) {
-    const indice = itens.findIndex((i) => i.id === item.id)
-    const vizinho = itens[indice + direcao]
-    if (!vizinho) return
-
-    const rects = new Map<string, DOMRect>()
-    refsLinhas.current.forEach((linha, id) => rects.set(id, linha.getBoundingClientRect()))
-    posicoesAntes.current = rects
-
-    setMovendo(item.id)
-    try {
-      await Promise.all([
-        editar(item.id, item.nome, vizinho.order),
-        editar(vizinho.id, vizinho.nome, item.order),
-      ])
-      await carregar()
-    } catch (e) {
-      setFeedback({ texto: e instanceof Error ? e.message : 'Erro ao reordenar', ok: false })
-    } finally {
-      setMovendo(null)
     }
   }
 
@@ -284,44 +233,13 @@ export function SimpleEntityCrud({
       </div>
 
       <ul className="flex flex-col gap-2">
-        {itens.map((item, indice) => (
+        {itens.map((item) => (
           <li
             key={item.id}
-            ref={(el) => {
-              if (el) refsLinhas.current.set(item.id, el)
-              else refsLinhas.current.delete(item.id)
-            }}
-            className={cx(
-              'flex flex-col gap-2 rounded-xl border p-3 transition-colors',
-              movendo === item.id ? 'border-gold-500/50 bg-navy-700' : 'border-navy-700 bg-navy-800',
-            )}
+            className="flex flex-col gap-2 rounded-xl border border-navy-700 bg-navy-800 p-3 transition-colors"
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 flex-1 items-center gap-3">
-                {movendo === item.id ? (
-                  <Spinner className="text-gold-400" />
-                ) : (
-                  <div className="flex flex-col">
-                    <button
-                      type="button"
-                      onClick={() => mover(item, -1)}
-                      disabled={indice === 0 || movendo !== null}
-                      className="leading-none text-neutral-500 transition-all hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
-                      aria-label="Mover para cima"
-                    >
-                      <Icon name="arrow_drop_up" className="text-lg" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => mover(item, 1)}
-                      disabled={indice === itens.length - 1 || movendo !== null}
-                      className="-mt-2 leading-none text-neutral-500 transition-all hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
-                      aria-label="Mover para baixo"
-                    >
-                      <Icon name="arrow_drop_down" className="text-lg" />
-                    </button>
-                  </div>
-                )}
                 {renderFilhos ? (
                   <button
                     type="button"
