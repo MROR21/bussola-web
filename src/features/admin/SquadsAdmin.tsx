@@ -86,14 +86,14 @@ export function SquadsAdmin() {
 
   function abrirEdicao(squad: SquadAdmin) {
     setEditando(squad)
-    const semModulo = squad.moduloNome === null
-    const temExistente = semModulo && modulosPadrao.length > 0
+    // "Criar módulo novo" é o padrão aqui também (mesmo motivo do abrirNovo acima) — mesmo quando
+    // o squad está sem módulo e precisa escolher.
     setForm({
       nome: squad.nome,
       moduloNome: squad.moduloNome ?? '',
       moduloAutoSync: false,
-      modoModulo: temExistente ? 'existente' : 'novo',
-      moduloIdExistente: temExistente ? modulosPadrao[0].id : '',
+      modoModulo: 'novo',
+      moduloIdExistente: '',
     })
   }
 
