@@ -25,6 +25,19 @@ import type { UsuarioDisponivel, UsuarioProgresso } from '../features/gestor/typ
 // esperar o erro do back; o back é quem garante de verdade (nunca confiar só no front).
 const LIMITE_SUPERVISIONADOS = 3
 
+// Guarda se o dropdown de "Adicionar supervisionado" estava aberto — sem isso, ir pra "Ver
+// jornada" de alguém e depois clicar em "Voltar" remonta a página do zero (navegação de rota) e o
+// dropdown fecha sozinho, mesmo que a pessoa tivesse acabado de abrir pra procurar alguém.
+const CHAVE_ADICIONANDO = 'bussola:gestor:adicionando'
+
+function adicionandoInicial(): boolean {
+  try {
+    return localStorage.getItem(CHAVE_ADICIONANDO) === '1'
+  } catch {
+    return false
+  }
+}
+
 // Painel do gestor: progresso dos supervisionados + adicionar/remover supervisionados.
 export function GestorPage() {
   useTitulo('Supervisionados')
@@ -36,7 +49,7 @@ export function GestorPage() {
   const [disponiveis, setDisponiveis] = useState<UsuarioDisponivel[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [adicionando, setAdicionando] = useState(false)
+  const [adicionando, setAdicionando] = useState(adicionandoInicial)
   const [buscaDisponivel, setBuscaDisponivel] = useState('')
   const [confirmandoRemover, setConfirmandoRemover] = useState<UsuarioProgresso | null>(null)
   const [removendoId, setRemovendoId] = useState<string | null>(null)
@@ -239,7 +252,21 @@ export function GestorPage() {
       <div className="flex flex-col gap-3 border-t border-navy-700 pt-4">
         <button
           type="button"
-          onClick={() => (noLimite ? setMostrandoLimite(true) : setAdicionando((v) => !v))}
+          onClick={() => {
+            if (noLimite) {
+              setMostrandoLimite(true)
+              return
+            }
+            setAdicionando((v) => {
+              const novo = !v
+              try {
+                localStorage.setItem(CHAVE_ADICIONANDO, novo ? '1' : '0')
+              } catch {
+                // localStorage indisponível — só não persiste, sem quebrar o toggle
+              }
+              return novo
+            })
+          }}
           className="flex items-center gap-1.5 self-start rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-400"
         >
           <Icon name="add" className="text-base" /> Adicionar supervisionado
