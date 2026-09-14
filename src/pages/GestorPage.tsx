@@ -326,9 +326,9 @@ export function GestorPage() {
                       type="button"
                       onClick={() => navegar(`/supervisionado/${u.id}`)}
                       title="Ver o progresso dessa pessoa, mesmo sem ser seu supervisionado"
-                      className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-neutral-400 transition-colors hover:bg-navy-700 hover:text-neutral-200"
+                      className="rounded-lg px-2 py-1.5 text-sm text-neutral-400 transition-colors hover:bg-navy-700 hover:text-neutral-200"
                     >
-                      <Icon name="visibility" className="text-base" /> Ver jornada
+                      Ver jornada
                     </button>
                     <button
                       type="button"
