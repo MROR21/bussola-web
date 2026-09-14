@@ -321,20 +321,14 @@ export function GestorPage() {
                       </span>
                     )}
                   </div>
-                  <div className="flex shrink-0 items-center gap-1">
-                    {/* "Ver jornada" fica só o ícone, discreto — é um espiadinha opcional, não a
-                        razão da linha existir. "Adicionar"/"Reatribuir" continua com texto (peso
-                        de ação principal): são ações diferentes o bastante (uma é reversível na
-                        hora, a outra tira a pessoa de outro gestor) pra não valer esconder as duas
-                        atrás do mesmo menu — só a "Ver jornada" que dá pra reduzir. */}
+                  <div className="flex shrink-0 items-center gap-3">
                     <button
                       type="button"
                       onClick={() => navegar(`/supervisionado/${u.id}`)}
-                      aria-label="Ver jornada"
                       title="Ver o progresso dessa pessoa, mesmo sem ser seu supervisionado"
-                      className="flex size-8 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:bg-navy-700 hover:text-neutral-200"
+                      className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-neutral-400 transition-colors hover:bg-navy-700 hover:text-neutral-200"
                     >
-                      <Icon name="visibility" className="text-lg" />
+                      <Icon name="visibility" className="text-base" /> Ver jornada
                     </button>
                     <button
                       type="button"
