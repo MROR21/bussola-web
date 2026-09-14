@@ -232,7 +232,9 @@ export function SimpleEntityCrud({
         )}
       </div>
 
-      <ul className="flex flex-col gap-2">
+      {/* Acima de ~4 itens rola dentro de si mesma em vez de esticar a página inteira — mesmo
+          padrão já usado em Usuários/Acessos e nos dropdowns internos (Passos/Fluxos). */}
+      <ul className="flex max-h-[19rem] flex-col gap-2 overflow-y-auto pr-1">
         {itens.map((item) => (
           <li
             key={item.id}
