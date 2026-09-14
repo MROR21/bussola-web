@@ -7,7 +7,7 @@ import { Markdown } from './Markdown'
 // Mostra o Conteudo de um Passo/Fluxo/Documentação. Conteúdo com várias seções `##` (a convenção
 // que a Ambientação já segue, uma por slide da apresentação original) PODE abrir em modo slide —
 // apresentação de verdade, uma seção por vez — mas começa no modo artigo (leitura corrida) por
-// padrão; quem quiser navegar seção a seção troca com "Ver em slides". Conteúdo sem múltiplas
+// padrão; quem quiser navegar seção a seção troca com "Ver em modo slide". Conteúdo sem múltiplas
 // seções (a maioria dos Fluxos, e 2 dos 7 passos da Ambientação) não tem o que paginar — vira só
 // um artigo solto, sem caixa nenhuma, sem opção de slide pra escolher.
 export function ConteudoArtigo({ conteudo }: { conteudo: string }) {
@@ -31,7 +31,7 @@ export function ConteudoArtigo({ conteudo }: { conteudo: string }) {
           onClick={() => setModoSlide(true)}
           className="flex items-center gap-1 self-start text-xs text-gold-400 transition-colors hover:text-gold-300"
         >
-          <Icon name="view_carousel" className="text-sm" /> Ver em slides
+          <Icon name="view_carousel" className="text-sm" /> Ver em modo slide
         </button>
         <article className="leading-relaxed">
           <Markdown>{conteudo}</Markdown>
