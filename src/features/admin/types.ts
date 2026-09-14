@@ -12,13 +12,15 @@ export interface EntidadeSimples {
 export type Fase = EntidadeSimples
 
 // Squad como o admin edita — `moduloNome` é o nome do módulo vinculado (nasceu junto do squad,
-// mas pode ter nome diferente, ver POST/PUT /admin/squads). Sem `order` exposto pro admin editar
-// (squads não têm reordenação — a lista só mostra na ordem de criação).
+// mas pode ter nome diferente, ver POST/PUT /admin/squads). null = squad sem módulo vinculado
+// (estado quebrado, ex.: o módulo foi apagado à parte antes de DELETE /admin/modulos travar isso)
+// — a edição detecta esse caso e deixa escolher um módulo de novo, igual na criação. Sem `order`
+// exposto pro admin editar (squads não têm reordenação — a lista só mostra na ordem de criação).
 export interface SquadAdmin {
   id: string
   nome: string
   order: number
-  moduloNome: string
+  moduloNome: string | null
 }
 
 // Módulo já vem com o vínculo de squad (nullable — null = "padrão do sistema", ex. "Básico do

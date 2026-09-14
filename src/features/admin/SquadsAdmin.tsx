@@ -22,6 +22,13 @@ interface Form {
   moduloIdExistente: string
 }
 
+// Squad sem módulo vinculado (moduloNome null) é um estado quebrado — o módulo dele foi apagado à
+// parte antes de DELETE /admin/modulos travar isso (ver comentário no back). Editando um squad
+// assim precisa da MESMA escolha da criação (módulo novo ou adotar um existente), não só renomear.
+function precisaEscolherModulo(alvo: SquadAdmin | 'novo' | null): boolean {
+  return alvo === 'novo' || (alvo !== null && alvo.moduloNome === null)
+}
+
 // CRUD de Squad — próprio (não reaproveita SimpleEntityCrud) porque squad tem uma particularidade
 // que Fase/Módulo não têm: cada um nasce com um Módulo vinculado (mesmo nome por padrão, mas
 // editável à parte) e não faz sentido ordenar squads manualmente (a lista só importa por nome).
@@ -79,25 +86,28 @@ export function SquadsAdmin() {
 
   function abrirEdicao(squad: SquadAdmin) {
     setEditando(squad)
+    const semModulo = squad.moduloNome === null
+    const temExistente = semModulo && modulosPadrao.length > 0
     setForm({
       nome: squad.nome,
-      moduloNome: squad.moduloNome,
+      moduloNome: squad.moduloNome ?? '',
       moduloAutoSync: false,
-      modoModulo: 'novo',
-      moduloIdExistente: '',
+      modoModulo: temExistente ? 'existente' : 'novo',
+      moduloIdExistente: temExistente ? modulosPadrao[0].id : '',
     })
   }
 
-  function formValido(form: Form, criando: boolean): boolean {
+  function formValido(form: Form, precisaEscolher: boolean): boolean {
     if (!form.nome.trim()) return false
-    if (!criando) return Boolean(form.moduloNome.trim())
+    if (!precisaEscolher) return Boolean(form.moduloNome.trim())
     return form.modoModulo === 'existente' ? Boolean(form.moduloIdExistente) : Boolean(form.moduloNome.trim())
   }
 
   async function salvar() {
     if (!form) return
     const criando = editando === 'novo'
-    if (!formValido(form, criando)) return
+    const precisaEscolher = precisaEscolherModulo(editando)
+    if (!formValido(form, precisaEscolher)) return
     setSalvando(true)
     try {
       if (criando) {
@@ -110,7 +120,11 @@ export function SquadsAdmin() {
             : { nome: form.moduloNome.trim() },
         )
       } else if (editando) {
-        await editarSquad(editando.id, form.nome.trim(), form.moduloNome.trim(), editando.order)
+        const modulo =
+          precisaEscolher && form.modoModulo === 'existente'
+            ? { id: form.moduloIdExistente }
+            : { nome: form.moduloNome.trim() }
+        await editarSquad(editando.id, form.nome.trim(), editando.order, modulo)
       }
       setForm(null)
       setEditando(null)
@@ -216,7 +230,13 @@ export function SquadsAdmin() {
                     nivelamento (ex.: "Mão de Obra", "Quiz Quality").
                   </span>
                 </label>
-                {editando === 'novo' && (
+                {precisaEscolherModulo(editando) && editando !== 'novo' && (
+                  <p className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
+                    <Icon name="warning" className="text-sm" />
+                    Esse squad está sem módulo vinculado — escolha um pra continuar.
+                  </p>
+                )}
+                {precisaEscolherModulo(editando) && (
                   <div className="flex flex-col gap-1 text-sm text-neutral-400">
                     Módulo (Guia pelo sistema)
                     <div className="flex gap-1 rounded-lg border border-navy-600 bg-navy-900 p-1">
@@ -248,7 +268,7 @@ export function SquadsAdmin() {
                     </div>
                   </div>
                 )}
-                {form.modoModulo === 'existente' && editando === 'novo' ? (
+                {form.modoModulo === 'existente' && precisaEscolherModulo(editando) ? (
                   <label className="flex flex-col gap-1 text-sm text-neutral-400">
                     Módulo já existente
                     <select
@@ -298,7 +318,7 @@ export function SquadsAdmin() {
                   <button
                     type="button"
                     onClick={salvar}
-                    disabled={!formValido(form, editando === 'novo') || salvando}
+                    disabled={!formValido(form, precisaEscolherModulo(editando)) || salvando}
                     className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     {salvando ? (

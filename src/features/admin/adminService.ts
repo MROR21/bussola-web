@@ -15,8 +15,10 @@ import type {
 } from './types'
 
 // Squads (sem reordenação exposta — order é gerido por conta própria dentro de SquadsAdmin.tsx).
-// Criar aceita OU um nome de módulo novo OU o id de um módulo "padrão do sistema" já existente pra
-// adotar (nunca os dois — ver SquadRequest no back); editar só mexe no nome do vínculo já feito.
+// Criar e editar aceitam OU um nome de módulo novo OU o id de um módulo "padrão do sistema" já
+// existente pra adotar (nunca os dois — ver SquadRequest no back). Editar normalmente só renomeia
+// o vínculo já feito ({nome}); o formato de escolha ({id}) só entra quando o squad está sem módulo
+// (estado quebrado — ver moduloNome null em SquadAdmin).
 export const listarSquadsAdmin = () => apiGet<SquadAdmin[]>('/admin/squads')
 export const criarSquad = (
   nome: string,
@@ -29,8 +31,18 @@ export const criarSquad = (
     moduloNome: 'nome' in modulo ? modulo.nome : null,
     moduloId: 'id' in modulo ? modulo.id : null,
   })
-export const editarSquad = (id: string, nome: string, moduloNome: string, order: number) =>
-  apiSend('PUT', `/admin/squads/${id}`, { nome, moduloNome, order })
+export const editarSquad = (
+  id: string,
+  nome: string,
+  order: number,
+  modulo: { nome: string } | { id: string },
+) =>
+  apiSend('PUT', `/admin/squads/${id}`, {
+    nome,
+    order,
+    moduloNome: 'nome' in modulo ? modulo.nome : null,
+    moduloId: 'id' in modulo ? modulo.id : null,
+  })
 export const apagarSquad = (id: string) => apiSend('DELETE', `/admin/squads/${id}`)
 
 // Fases
