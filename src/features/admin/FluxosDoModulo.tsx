@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { Icon } from '../../components/Icon'
 import { KebabMenu } from '../../components/KebabMenu'
 import { MarkdownEditor } from '../../components/MarkdownEditor'
+import { ModalConfirmarDescarte } from '../../components/ModalConfirmarDescarte'
 import { Spinner } from '../../components/Spinner'
+import { useConfirmarDescarte } from '../../hooks/useConfirmarDescarte'
 import { useSaidaValor } from '../../hooks/useSaida'
 import { cx } from '../../utils/cx'
 import { listarSquads } from '../squads/squadsService'
@@ -30,6 +32,9 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
   const [loading, setLoading] = useState(true)
   const [editando, setEditando] = useState<FluxoAdmin | null>(null)
   const [form, setForm] = useState<FluxoAdminInput | null>(null)
+  // Vira true em qualquer mudança de campo (ver atualizarForm) — só pra saber se pede confirmação
+  // antes de descartar num clique fora (ver useConfirmarDescarte.ts).
+  const [sujo, setSujo] = useState(false)
   const [salvando, setSalvando] = useState(false)
   const [apagando, setApagando] = useState<FluxoAdmin | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
@@ -89,6 +94,7 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
       conteudo: '',
       videoUrl: '',
     })
+    setSujo(false)
   }
 
   function abrirEdicao(fluxo: FluxoAdmin) {
@@ -104,7 +110,20 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
       conteudo: fluxo.conteudo,
       videoUrl: fluxo.videoUrl,
     })
+    setSujo(false)
   }
+
+  // Atualiza um ou mais campos do form E marca sujo — evita repetir `setSujo(true)` em cada onChange.
+  function atualizarForm(patch: Partial<FluxoAdminInput>) {
+    setForm((f) => (f ? { ...f, ...patch } : f))
+    setSujo(true)
+  }
+
+  const fecharModalForm = () => setForm(null)
+  const { confirmando, aoTentarFechar, confirmarDescarte, cancelarDescarte } = useConfirmarDescarte(
+    sujo,
+    fecharModalForm,
+  )
 
   async function salvar() {
     if (!form || !form.titulo.trim()) return
@@ -218,7 +237,7 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
             'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
             modalForm.saindo ? 'anim-fade-out' : 'anim-fade',
           )}
-          onClick={() => setForm(null)}
+          onClick={aoTentarFechar}
         >
           <div
             className={cx(
@@ -228,7 +247,13 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
             onClick={(e) => e.stopPropagation()}
           >
             {form && (
-              <>
+              <form
+                className="flex flex-col gap-4"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  salvar()
+                }}
+              >
                 <h3 className="text-lg font-semibold text-neutral-100">
                   {editando
                     ? `Editar ${editando.tipo === 'Fluxo' ? 'fluxo' : 'documento'}`
@@ -243,8 +268,7 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
                       onChange={(e) => {
                         const novoModuloId = e.target.value
                         const novoEhPadrao = modulos.find((m) => m.id === novoModuloId)?.squadId === null
-                        setForm({
-                          ...form,
+                        atualizarForm({
                           moduloId: novoModuloId,
                           // Módulo "padrão do sistema" só tem Documentação — trocar pra um desses
                           // já força o tipo, em vez de deixar um Fluxo "escondido" lá (ver ehPadrao).
@@ -266,7 +290,7 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
                       type="number"
                       min={1}
                       value={form.order}
-                      onChange={(e) => setForm({ ...form, order: Math.max(1, Number(e.target.value)) })}
+                      onChange={(e) => atualizarForm({ order: Math.max(1, Number(e.target.value)) })}
                       className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                     />
                   </label>
@@ -277,7 +301,7 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
                     Squad
                     <select
                       value={form.squadId ?? ''}
-                      onChange={(e) => setForm({ ...form, squadId: e.target.value || null })}
+                      onChange={(e) => atualizarForm({ squadId: e.target.value || null })}
                       className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                     >
                       <option value="">Todos os squads</option>
@@ -292,7 +316,7 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
                     Tipo
                     <select
                       value={form.tipo}
-                      onChange={(e) => setForm({ ...form, tipo: e.target.value as FluxoAdmin['tipo'] })}
+                      onChange={(e) => atualizarForm({ tipo: e.target.value as FluxoAdmin['tipo'] })}
                       disabled={modulos.find((m) => m.id === form.moduloId)?.squadId === null}
                       className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500 disabled:cursor-not-allowed disabled:opacity-60"
                     >
@@ -311,7 +335,7 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
                     Categoria
                     <input
                       value={form.categoria}
-                      onChange={(e) => setForm({ ...form, categoria: e.target.value })}
+                      onChange={(e) => atualizarForm({ categoria: e.target.value })}
                       className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                     />
                   </label>
@@ -321,7 +345,7 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
                   Título
                   <input
                     value={form.titulo}
-                    onChange={(e) => setForm({ ...form, titulo: e.target.value })}
+                    onChange={(e) => atualizarForm({ titulo: e.target.value })}
                     className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                   />
                 </label>
@@ -330,7 +354,7 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
                   Descrição (resumo de uma linha)
                   <input
                     value={form.descricao}
-                    onChange={(e) => setForm({ ...form, descricao: e.target.value })}
+                    onChange={(e) => atualizarForm({ descricao: e.target.value })}
                     className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                   />
                 </label>
@@ -339,7 +363,7 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
                   URL do vídeo (opcional)
                   <input
                     value={form.videoUrl}
-                    onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
+                    onChange={(e) => atualizarForm({ videoUrl: e.target.value })}
                     placeholder="https://..."
                     className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                   />
@@ -347,7 +371,7 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
 
                 <div className="flex flex-col gap-1 text-sm text-neutral-400">
                   Conteúdo
-                  <MarkdownEditor value={form.conteudo} onChange={(v) => setForm({ ...form, conteudo: v })} />
+                  <MarkdownEditor value={form.conteudo} onChange={(v) => atualizarForm({ conteudo: v })} />
                 </div>
 
                 <div className="flex justify-end gap-2">
@@ -359,8 +383,7 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
                     Cancelar
                   </button>
                   <button
-                    type="button"
-                    onClick={salvar}
+                    type="submit"
                     disabled={!form.titulo.trim() || salvando}
                     className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
                   >
@@ -373,11 +396,17 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
                     )}
                   </button>
                 </div>
-              </>
+              </form>
             )}
           </div>
         </div>
       )}
+
+      <ModalConfirmarDescarte
+        aberto={confirmando}
+        onDescartar={confirmarDescarte}
+        onCancelar={cancelarDescarte}
+      />
 
       {modalApagar.montado && modalApagar.valor && (
         <div

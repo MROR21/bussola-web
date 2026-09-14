@@ -4,7 +4,9 @@ import { EstadoErro } from '../../components/EstadoErro'
 import { Icon } from '../../components/Icon'
 import { IconePicker } from '../../components/IconePicker'
 import { KebabMenu } from '../../components/KebabMenu'
+import { ModalConfirmarDescarte } from '../../components/ModalConfirmarDescarte'
 import { Carregando, Spinner } from '../../components/Spinner'
+import { useConfirmarDescarte } from '../../hooks/useConfirmarDescarte'
 import { useSaidaValor } from '../../hooks/useSaida'
 import { cx } from '../../utils/cx'
 import type { Squad } from '../squads/types'
@@ -82,6 +84,9 @@ export function SimpleEntityCrud({
   const [categoria, setCategoria] = useState<'padrao' | 'squad'>('padrao')
   const [squadId, setSquadId] = useState('')
   const [iconeEscolhido, setIconeEscolhido] = useState('')
+  // Vira true no onChange de qualquer campo do modal de edição — usado só pra saber se pede
+  // confirmação antes de descartar num clique fora (ver useConfirmarDescarte.ts).
+  const [sujo, setSujo] = useState(false)
   const [salvando, setSalvando] = useState(false)
   const [apagando, setApagando] = useState<EntidadeSimples | null>(null)
   const [movendo, setMovendo] = useState<string | null>(null)
@@ -187,6 +192,7 @@ export function SimpleEntityCrud({
     setNome('')
     setOrder(itens.length > 0 ? Math.max(...itens.map((i) => i.order)) + 1 : 1)
     setEditando('novo')
+    setSujo(false)
   }
 
   function abrirEdicao(item: EntidadeSimples) {
@@ -199,7 +205,14 @@ export function SimpleEntityCrud({
       setSquadId(atual ?? '')
     }
     if (iconePicker) setIconeEscolhido(iconePicker.iconeAtual(item))
+    setSujo(false)
   }
+
+  const fecharModalEdicao = () => setEditando(null)
+  const { confirmando, aoTentarFechar, confirmarDescarte, cancelarDescarte } = useConfirmarDescarte(
+    sujo,
+    fecharModalEdicao,
+  )
 
   async function salvar() {
     if (!nome.trim()) return
@@ -371,7 +384,7 @@ export function SimpleEntityCrud({
             'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
             modalEdicao.saindo ? 'anim-fade-out' : 'anim-fade',
           )}
-          onClick={() => setEditando(null)}
+          onClick={aoTentarFechar}
         >
           <div
             className={cx(
@@ -383,11 +396,21 @@ export function SimpleEntityCrud({
             <h3 className="text-lg font-semibold text-neutral-100">
               {modalEdicao.valor === 'novo' ? `Novo(a) ${singular}` : `Editar ${singular}`}
             </h3>
+            <form
+              className="flex flex-col gap-4"
+              onSubmit={(e) => {
+                e.preventDefault()
+                salvar()
+              }}
+            >
             <label className="flex flex-col gap-1 text-sm text-neutral-400">
               Nome
               <input
                 value={nome}
-                onChange={(e) => setNome(e.target.value)}
+                onChange={(e) => {
+                  setNome(e.target.value)
+                  setSujo(true)
+                }}
                 autoFocus
                 className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
               />
@@ -398,7 +421,10 @@ export function SimpleEntityCrud({
                 type="number"
                 min={1}
                 value={order}
-                onChange={(e) => setOrder(Math.max(1, Number(e.target.value)))}
+                onChange={(e) => {
+                  setOrder(Math.max(1, Number(e.target.value)))
+                  setSujo(true)
+                }}
                 className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
               />
             </label>
@@ -408,7 +434,10 @@ export function SimpleEntityCrud({
                   Categoria
                   <select
                     value={categoria}
-                    onChange={(e) => setCategoria(e.target.value as 'padrao' | 'squad')}
+                    onChange={(e) => {
+                      setCategoria(e.target.value as 'padrao' | 'squad')
+                      setSujo(true)
+                    }}
                     className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                   >
                     <option value="padrao">Padrão do sistema</option>
@@ -420,7 +449,10 @@ export function SimpleEntityCrud({
                     Squad
                     <select
                       value={squadId}
-                      onChange={(e) => setSquadId(e.target.value)}
+                      onChange={(e) => {
+                        setSquadId(e.target.value)
+                        setSujo(true)
+                      }}
                       className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                     >
                       <option value="" disabled>
@@ -439,7 +471,13 @@ export function SimpleEntityCrud({
             {iconePicker && modalEdicao.valor !== 'novo' && (
               <label className="flex flex-col gap-1 text-sm text-neutral-400">
                 Ícone
-                <IconePicker valor={iconeEscolhido} onChange={setIconeEscolhido} />
+                <IconePicker
+                  valor={iconeEscolhido}
+                  onChange={(v) => {
+                    setIconeEscolhido(v)
+                    setSujo(true)
+                  }}
+                />
               </label>
             )}
             <div className="flex justify-end gap-2">
@@ -451,8 +489,7 @@ export function SimpleEntityCrud({
                 Cancelar
               </button>
               <button
-                type="button"
-                onClick={salvar}
+                type="submit"
                 disabled={!nome.trim() || (Boolean(squadPicker) && categoria === 'squad' && !squadId) || salvando}
                 className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
@@ -465,9 +502,16 @@ export function SimpleEntityCrud({
                 )}
               </button>
             </div>
+            </form>
           </div>
         </div>
       )}
+
+      <ModalConfirmarDescarte
+        aberto={confirmando}
+        onDescartar={confirmarDescarte}
+        onCancelar={cancelarDescarte}
+      />
 
       {modalApagar.montado && modalApagar.valor && (
         <div

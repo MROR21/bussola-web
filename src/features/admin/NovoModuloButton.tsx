@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../../components/Icon'
 import { IconePicker } from '../../components/IconePicker'
+import { ModalConfirmarDescarte } from '../../components/ModalConfirmarDescarte'
 import { Spinner } from '../../components/Spinner'
+import { useConfirmarDescarte } from '../../hooks/useConfirmarDescarte'
 import { useSaidaValor } from '../../hooks/useSaida'
 import { ICONE_MODULO_PADRAO } from '../../utils/moduloIcones'
 import { listarSquads } from '../squads/squadsService'
@@ -23,6 +25,9 @@ export function NovoModuloButton({ onCriado }: { onCriado: () => void }) {
   const [categoria, setCategoria] = useState<Categoria>('padrao')
   const [squadId, setSquadId] = useState<string>('')
   const [icone, setIcone] = useState(ICONE_MODULO_PADRAO)
+  // Vira true no onChange de qualquer campo — só pra saber se pede confirmação antes de descartar
+  // num clique fora (ver useConfirmarDescarte.ts).
+  const [sujo, setSujo] = useState(false)
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
@@ -43,6 +48,7 @@ export function NovoModuloButton({ onCriado }: { onCriado: () => void }) {
     setIcone(ICONE_MODULO_PADRAO)
     setErro(null)
     setAberto(true)
+    setSujo(false)
     try {
       const lista = await listarSquads()
       setSquads(lista)
@@ -51,6 +57,12 @@ export function NovoModuloButton({ onCriado }: { onCriado: () => void }) {
       // sem squads carregados a categoria "Squad" fica sem opção pra escolher — não trava a criação
     }
   }
+
+  const fecharModal = () => setAberto(false)
+  const { confirmando, aoTentarFechar, confirmarDescarte, cancelarDescarte } = useConfirmarDescarte(
+    sujo,
+    fecharModal,
+  )
 
   async function salvar() {
     if (!nome.trim()) return
@@ -87,7 +99,7 @@ export function NovoModuloButton({ onCriado }: { onCriado: () => void }) {
             'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
             modal.saindo ? 'anim-fade-out' : 'anim-fade',
           )}
-          onClick={() => setAberto(false)}
+          onClick={aoTentarFechar}
         >
           <div
             className={cx(
@@ -97,11 +109,21 @@ export function NovoModuloButton({ onCriado }: { onCriado: () => void }) {
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-neutral-100">Novo módulo</h3>
+            <form
+              className="flex flex-col gap-4"
+              onSubmit={(e) => {
+                e.preventDefault()
+                salvar()
+              }}
+            >
             <label className="flex flex-col gap-1 text-sm text-neutral-400">
               Nome do módulo
               <input
                 value={nome}
-                onChange={(e) => setNome(e.target.value)}
+                onChange={(e) => {
+                  setNome(e.target.value)
+                  setSujo(true)
+                }}
                 autoFocus
                 className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
               />
@@ -110,7 +132,10 @@ export function NovoModuloButton({ onCriado }: { onCriado: () => void }) {
               Categoria
               <select
                 value={categoria}
-                onChange={(e) => setCategoria(e.target.value as Categoria)}
+                onChange={(e) => {
+                  setCategoria(e.target.value as Categoria)
+                  setSujo(true)
+                }}
                 className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
               >
                 <option value="padrao">Padrão do sistema</option>
@@ -126,7 +151,10 @@ export function NovoModuloButton({ onCriado }: { onCriado: () => void }) {
                 Squad
                 <select
                   value={squadId}
-                  onChange={(e) => setSquadId(e.target.value)}
+                  onChange={(e) => {
+                    setSquadId(e.target.value)
+                    setSujo(true)
+                  }}
                   className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                 >
                   {squads.length === 0 && <option value="">Nenhum squad cadastrado</option>}
@@ -140,7 +168,13 @@ export function NovoModuloButton({ onCriado }: { onCriado: () => void }) {
             )}
             <label className="flex flex-col gap-1 text-sm text-neutral-400">
               Ícone
-              <IconePicker valor={icone} onChange={setIcone} />
+              <IconePicker
+                valor={icone}
+                onChange={(v) => {
+                  setIcone(v)
+                  setSujo(true)
+                }}
+              />
             </label>
             {erro && (
               <p className="flex items-center gap-1.5 text-sm text-red-300">
@@ -156,8 +190,7 @@ export function NovoModuloButton({ onCriado }: { onCriado: () => void }) {
                 Cancelar
               </button>
               <button
-                type="button"
-                onClick={salvar}
+                type="submit"
                 disabled={!nome.trim() || (categoria === 'squad' && !squadId) || salvando}
                 className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
@@ -170,9 +203,16 @@ export function NovoModuloButton({ onCriado }: { onCriado: () => void }) {
                 )}
               </button>
             </div>
+            </form>
           </div>
         </div>
       )}
+
+      <ModalConfirmarDescarte
+        aberto={confirmando}
+        onDescartar={confirmarDescarte}
+        onCancelar={cancelarDescarte}
+      />
 
       {toastFeedback.montado && toastFeedback.valor && (
         <div

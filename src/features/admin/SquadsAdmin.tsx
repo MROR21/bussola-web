@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { EstadoErro } from '../../components/EstadoErro'
 import { Icon } from '../../components/Icon'
 import { KebabMenu } from '../../components/KebabMenu'
+import { ModalConfirmarDescarte } from '../../components/ModalConfirmarDescarte'
 import { Carregando, Spinner } from '../../components/Spinner'
+import { useConfirmarDescarte } from '../../hooks/useConfirmarDescarte'
 import { useSaidaValor } from '../../hooks/useSaida'
 import { cx } from '../../utils/cx'
 import { apagarSquad, criarSquad, editarSquad, listarModulos, listarSquadsAdmin } from './adminService'
@@ -40,6 +42,9 @@ export function SquadsAdmin() {
   const [error, setError] = useState<string | null>(null)
   const [editando, setEditando] = useState<SquadAdmin | 'novo' | null>(null)
   const [form, setForm] = useState<Form | null>(null)
+  // Vira true no onChange de qualquer campo — só pra saber se pede confirmação antes de descartar
+  // num clique fora (ver useConfirmarDescarte.ts).
+  const [sujo, setSujo] = useState(false)
   const [salvando, setSalvando] = useState(false)
   const [apagando, setApagando] = useState<SquadAdmin | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
@@ -82,6 +87,7 @@ export function SquadsAdmin() {
     // "Criar módulo novo" é o padrão — vincular um já existente é a exceção (e some da vista sem
     // querer o vínculo antigo dele, ver comentário no botão), então não faz sentido pré-selecionar.
     setForm({ nome: '', moduloNome: '', moduloAutoSync: true, modoModulo: 'novo', moduloIdExistente: '' })
+    setSujo(false)
   }
 
   function abrirEdicao(squad: SquadAdmin) {
@@ -95,7 +101,14 @@ export function SquadsAdmin() {
       modoModulo: 'novo',
       moduloIdExistente: '',
     })
+    setSujo(false)
   }
+
+  const fecharModalForm = () => setForm(null)
+  const { confirmando, aoTentarFechar, confirmarDescarte, cancelarDescarte } = useConfirmarDescarte(
+    sujo,
+    fecharModalForm,
+  )
 
   function formValido(form: Form, precisaEscolher: boolean): boolean {
     if (!form.nome.trim()) return false
@@ -197,7 +210,7 @@ export function SquadsAdmin() {
             'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
             modalForm.saindo ? 'anim-fade-out' : 'anim-fade',
           )}
-          onClick={() => setForm(null)}
+          onClick={aoTentarFechar}
         >
           <div
             className={cx(
@@ -207,7 +220,13 @@ export function SquadsAdmin() {
             onClick={(e) => e.stopPropagation()}
           >
             {form && (
-              <>
+              <form
+                className="flex flex-col gap-4"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  salvar()
+                }}
+              >
                 <h3 className="text-lg font-semibold text-neutral-100">
                   {editando === 'novo' ? 'Novo squad' : 'Editar squad'}
                 </h3>
@@ -215,13 +234,14 @@ export function SquadsAdmin() {
                   Nome do squad
                   <input
                     value={form.nome}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setForm({
                         ...form,
                         nome: e.target.value,
                         moduloNome: form.moduloAutoSync ? e.target.value : form.moduloNome,
                       })
-                    }
+                      setSujo(true)
+                    }}
                     autoFocus
                     className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                   />
@@ -242,7 +262,10 @@ export function SquadsAdmin() {
                     <div className="flex gap-1 rounded-lg border border-navy-600 bg-navy-900 p-1">
                       <button
                         type="button"
-                        onClick={() => setForm({ ...form, modoModulo: 'novo' })}
+                        onClick={() => {
+                          setForm({ ...form, modoModulo: 'novo' })
+                          setSujo(true)
+                        }}
                         className={cx(
                           'flex-1 rounded-md px-2 py-1 text-xs font-medium transition-colors',
                           form.modoModulo === 'novo'
@@ -254,7 +277,10 @@ export function SquadsAdmin() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setForm({ ...form, modoModulo: 'existente' })}
+                        onClick={() => {
+                          setForm({ ...form, modoModulo: 'existente' })
+                          setSujo(true)
+                        }}
                         disabled={modulosPadrao.length === 0}
                         className={cx(
                           'flex-1 rounded-md px-2 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-30',
@@ -273,7 +299,10 @@ export function SquadsAdmin() {
                     Módulo já existente
                     <select
                       value={form.moduloIdExistente}
-                      onChange={(e) => setForm({ ...form, moduloIdExistente: e.target.value })}
+                      onChange={(e) => {
+                        setForm({ ...form, moduloIdExistente: e.target.value })
+                        setSujo(true)
+                      }}
                       className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                     >
                       <option value="" disabled>
@@ -295,7 +324,10 @@ export function SquadsAdmin() {
                     Nome do módulo (Guia pelo sistema)
                     <input
                       value={form.moduloNome}
-                      onChange={(e) => setForm({ ...form, moduloNome: e.target.value, moduloAutoSync: false })}
+                      onChange={(e) => {
+                        setForm({ ...form, moduloNome: e.target.value, moduloAutoSync: false })
+                        setSujo(true)
+                      }}
                       className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                     />
                     <span className="text-xs text-neutral-500">
@@ -316,8 +348,7 @@ export function SquadsAdmin() {
                     Cancelar
                   </button>
                   <button
-                    type="button"
-                    onClick={salvar}
+                    type="submit"
                     disabled={!formValido(form, precisaEscolherModulo(editando)) || salvando}
                     className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
                   >
@@ -330,11 +361,17 @@ export function SquadsAdmin() {
                     )}
                   </button>
                 </div>
-              </>
+              </form>
             )}
           </div>
         </div>
       )}
+
+      <ModalConfirmarDescarte
+        aberto={confirmando}
+        onDescartar={confirmarDescarte}
+        onCancelar={cancelarDescarte}
+      />
 
       {modalApagar.montado && modalApagar.valor && (
         <div

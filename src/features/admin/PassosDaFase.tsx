@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { Icon } from '../../components/Icon'
 import { KebabMenu } from '../../components/KebabMenu'
 import { MarkdownEditor } from '../../components/MarkdownEditor'
+import { ModalConfirmarDescarte } from '../../components/ModalConfirmarDescarte'
 import { Spinner } from '../../components/Spinner'
+import { useConfirmarDescarte } from '../../hooks/useConfirmarDescarte'
 import { useSaidaValor } from '../../hooks/useSaida'
 import { cx } from '../../utils/cx'
 import type { SkillArea } from '../onboarding/types'
@@ -25,6 +27,9 @@ export function PassosDaFase({ faseId, aoMudar }: { faseId: string; aoMudar?: ()
   const [loading, setLoading] = useState(true)
   const [editando, setEditando] = useState<PassoAdmin | null>(null)
   const [form, setForm] = useState<PassoAdminInput | null>(null)
+  // Vira true em qualquer mudança de campo (ver atualizarForm) — só pra saber se pede confirmação
+  // antes de descartar num clique fora (ver useConfirmarDescarte.ts).
+  const [sujo, setSujo] = useState(false)
   const [salvando, setSalvando] = useState(false)
   const [apagando, setApagando] = useState<PassoAdmin | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
@@ -69,6 +74,7 @@ export function PassosDaFase({ faseId, aoMudar }: { faseId: string; aoMudar?: ()
       conteudo: '',
       videoUrl: '',
     })
+    setSujo(false)
   }
 
   function abrirEdicao(passo: PassoAdmin) {
@@ -83,7 +89,21 @@ export function PassosDaFase({ faseId, aoMudar }: { faseId: string; aoMudar?: ()
       conteudo: passo.conteudo,
       videoUrl: passo.videoUrl,
     })
+    setSujo(false)
   }
+
+  // Atualiza um ou mais campos do form E marca sujo — evita repetir `setSujo(true)` em cada um
+  // dos ~7 onChange do modal.
+  function atualizarForm(patch: Partial<PassoAdminInput>) {
+    setForm((f) => (f ? { ...f, ...patch } : f))
+    setSujo(true)
+  }
+
+  const fecharModalForm = () => setForm(null)
+  const { confirmando, aoTentarFechar, confirmarDescarte, cancelarDescarte } = useConfirmarDescarte(
+    sujo,
+    fecharModalForm,
+  )
 
   async function salvar() {
     if (!form || !form.title.trim()) return
@@ -167,7 +187,7 @@ export function PassosDaFase({ faseId, aoMudar }: { faseId: string; aoMudar?: ()
             'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
             modalForm.saindo ? 'anim-fade-out' : 'anim-fade',
           )}
-          onClick={() => setForm(null)}
+          onClick={aoTentarFechar}
         >
           <div
             className={cx(
@@ -177,7 +197,13 @@ export function PassosDaFase({ faseId, aoMudar }: { faseId: string; aoMudar?: ()
             onClick={(e) => e.stopPropagation()}
           >
             {form && (
-              <>
+              <form
+                className="flex flex-col gap-4"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  salvar()
+                }}
+              >
                 <h3 className="text-lg font-semibold text-neutral-100">
                   {editando ? 'Editar passo' : 'Novo passo'}
                 </h3>
@@ -187,7 +213,7 @@ export function PassosDaFase({ faseId, aoMudar }: { faseId: string; aoMudar?: ()
                     Fase
                     <select
                       value={form.faseId}
-                      onChange={(e) => setForm({ ...form, faseId: e.target.value })}
+                      onChange={(e) => atualizarForm({ faseId: e.target.value })}
                       className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                     >
                       {fases.map((f) => (
@@ -203,7 +229,7 @@ export function PassosDaFase({ faseId, aoMudar }: { faseId: string; aoMudar?: ()
                       type="number"
                       min={1}
                       value={form.order}
-                      onChange={(e) => setForm({ ...form, order: Math.max(1, Number(e.target.value)) })}
+                      onChange={(e) => atualizarForm({ order: Math.max(1, Number(e.target.value)) })}
                       className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                     />
                   </label>
@@ -213,7 +239,7 @@ export function PassosDaFase({ faseId, aoMudar }: { faseId: string; aoMudar?: ()
                   Título
                   <input
                     value={form.title}
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                    onChange={(e) => atualizarForm({ title: e.target.value })}
                     className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                   />
                 </label>
@@ -222,7 +248,7 @@ export function PassosDaFase({ faseId, aoMudar }: { faseId: string; aoMudar?: ()
                   Descrição (resumo de uma linha)
                   <input
                     value={form.description}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    onChange={(e) => atualizarForm({ description: e.target.value })}
                     className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                   />
                 </label>
@@ -232,7 +258,7 @@ export function PassosDaFase({ faseId, aoMudar }: { faseId: string; aoMudar?: ()
                     Área (nivelamento)
                     <select
                       value={form.skillArea}
-                      onChange={(e) => setForm({ ...form, skillArea: e.target.value as SkillArea })}
+                      onChange={(e) => atualizarForm({ skillArea: e.target.value as SkillArea })}
                       className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                     >
                       {SKILL_AREAS.map((s) => (
@@ -246,7 +272,7 @@ export function PassosDaFase({ faseId, aoMudar }: { faseId: string; aoMudar?: ()
                     <input
                       type="checkbox"
                       checked={form.isCompanySpecific}
-                      onChange={(e) => setForm({ ...form, isCompanySpecific: e.target.checked })}
+                      onChange={(e) => atualizarForm({ isCompanySpecific: e.target.checked })}
                     />
                     Específico da Agilean (sempre essencial)
                   </label>
@@ -256,7 +282,7 @@ export function PassosDaFase({ faseId, aoMudar }: { faseId: string; aoMudar?: ()
                   URL do vídeo (opcional)
                   <input
                     value={form.videoUrl}
-                    onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
+                    onChange={(e) => atualizarForm({ videoUrl: e.target.value })}
                     placeholder="https://..."
                     className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                   />
@@ -264,7 +290,7 @@ export function PassosDaFase({ faseId, aoMudar }: { faseId: string; aoMudar?: ()
 
                 <div className="flex flex-col gap-1 text-sm text-neutral-400">
                   Conteúdo
-                  <MarkdownEditor value={form.conteudo} onChange={(v) => setForm({ ...form, conteudo: v })} />
+                  <MarkdownEditor value={form.conteudo} onChange={(v) => atualizarForm({ conteudo: v })} />
                 </div>
 
                 <div className="flex justify-end gap-2">
@@ -276,8 +302,7 @@ export function PassosDaFase({ faseId, aoMudar }: { faseId: string; aoMudar?: ()
                     Cancelar
                   </button>
                   <button
-                    type="button"
-                    onClick={salvar}
+                    type="submit"
                     disabled={!form.title.trim() || salvando}
                     className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
                   >
@@ -290,11 +315,17 @@ export function PassosDaFase({ faseId, aoMudar }: { faseId: string; aoMudar?: ()
                     )}
                   </button>
                 </div>
-              </>
+              </form>
             )}
           </div>
         </div>
       )}
+
+      <ModalConfirmarDescarte
+        aberto={confirmando}
+        onDescartar={confirmarDescarte}
+        onCancelar={cancelarDescarte}
+      />
 
       {modalApagar.montado && modalApagar.valor && (
         <div

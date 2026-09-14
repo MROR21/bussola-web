@@ -3,7 +3,9 @@ import { Acordeao } from '../../components/Acordeao'
 import { EstadoErro } from '../../components/EstadoErro'
 import { Icon } from '../../components/Icon'
 import { KebabMenu } from '../../components/KebabMenu'
+import { ModalConfirmarDescarte } from '../../components/ModalConfirmarDescarte'
 import { Carregando, Spinner } from '../../components/Spinner'
+import { useConfirmarDescarte } from '../../hooks/useConfirmarDescarte'
 import { useSaidaValor } from '../../hooks/useSaida'
 import { cx } from '../../utils/cx'
 import type { Cargo } from '../nivelamento/types'
@@ -31,6 +33,9 @@ export function AcessosAdmin() {
   const [error, setError] = useState<string | null>(null)
   const [editando, setEditando] = useState<AcessoAdmin | null>(null)
   const [form, setForm] = useState<AcessoAdminInput | null>(null)
+  // Vira true em qualquer mudança de campo (ver atualizarForm) — só pra saber se pede confirmação
+  // antes de descartar num clique fora (ver useConfirmarDescarte.ts).
+  const [sujo, setSujo] = useState(false)
   const [salvando, setSalvando] = useState(false)
   const [apagando, setApagando] = useState<AcessoAdmin | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
@@ -70,6 +75,7 @@ export function AcessosAdmin() {
       cargoMinimo: 'Estagiario',
       order: acessos.length > 0 ? Math.max(...acessos.map((a) => a.order)) + 1 : 1,
     })
+    setSujo(false)
   }
 
   function abrirEdicao(acesso: AcessoAdmin) {
@@ -80,7 +86,20 @@ export function AcessosAdmin() {
       cargoMinimo: acesso.cargoMinimo,
       order: acesso.order,
     })
+    setSujo(false)
   }
+
+  // Atualiza um ou mais campos do form E marca sujo — evita repetir `setSujo(true)` em cada onChange.
+  function atualizarForm(patch: Partial<AcessoAdminInput>) {
+    setForm((f) => (f ? { ...f, ...patch } : f))
+    setSujo(true)
+  }
+
+  const fecharModalForm = () => setForm(null)
+  const { confirmando, aoTentarFechar, confirmarDescarte, cancelarDescarte } = useConfirmarDescarte(
+    sujo,
+    fecharModalForm,
+  )
 
   async function salvar() {
     if (!form || !form.nome.trim()) return
@@ -191,7 +210,7 @@ export function AcessosAdmin() {
             'fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4',
             modalForm.saindo ? 'anim-fade-out' : 'anim-fade',
           )}
-          onClick={() => setForm(null)}
+          onClick={aoTentarFechar}
         >
           <div
             className={cx(
@@ -201,7 +220,13 @@ export function AcessosAdmin() {
             onClick={(e) => e.stopPropagation()}
           >
             {form && (
-              <>
+              <form
+                className="flex flex-col gap-4"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  salvar()
+                }}
+              >
                 <h3 className="text-lg font-semibold text-neutral-100">
                   {editando ? 'Editar acesso' : 'Novo acesso'}
                 </h3>
@@ -210,7 +235,7 @@ export function AcessosAdmin() {
                   Nome
                   <input
                     value={form.nome}
-                    onChange={(e) => setForm({ ...form, nome: e.target.value })}
+                    onChange={(e) => atualizarForm({ nome: e.target.value })}
                     placeholder="Ex.: E-mail Agilean"
                     className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                   />
@@ -220,7 +245,7 @@ export function AcessosAdmin() {
                   Link (opcional — leva direto para a página que libera esse acesso)
                   <input
                     value={form.link}
-                    onChange={(e) => setForm({ ...form, link: e.target.value })}
+                    onChange={(e) => atualizarForm({ link: e.target.value })}
                     placeholder="https://..."
                     className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                   />
@@ -231,7 +256,7 @@ export function AcessosAdmin() {
                     Cargo mínimo
                     <select
                       value={form.cargoMinimo}
-                      onChange={(e) => setForm({ ...form, cargoMinimo: e.target.value as Cargo })}
+                      onChange={(e) => atualizarForm({ cargoMinimo: e.target.value as Cargo })}
                       className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                     >
                       {CARGOS.map((c) => (
@@ -247,7 +272,7 @@ export function AcessosAdmin() {
                       type="number"
                       min={1}
                       value={form.order}
-                      onChange={(e) => setForm({ ...form, order: Math.max(1, Number(e.target.value)) })}
+                      onChange={(e) => atualizarForm({ order: Math.max(1, Number(e.target.value)) })}
                       className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                     />
                   </label>
@@ -262,8 +287,7 @@ export function AcessosAdmin() {
                     Cancelar
                   </button>
                   <button
-                    type="button"
-                    onClick={salvar}
+                    type="submit"
                     disabled={!form.nome.trim() || salvando}
                     className="flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
                   >
@@ -276,11 +300,17 @@ export function AcessosAdmin() {
                     )}
                   </button>
                 </div>
-              </>
+              </form>
             )}
           </div>
         </div>
       )}
+
+      <ModalConfirmarDescarte
+        aberto={confirmando}
+        onDescartar={confirmarDescarte}
+        onCancelar={cancelarDescarte}
+      />
 
       {modalApagar.montado && modalApagar.valor && (
         <div
