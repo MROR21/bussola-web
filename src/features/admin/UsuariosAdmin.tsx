@@ -45,14 +45,16 @@ function ListaUsuarios() {
     if (!q) return true
     return `${u.nome} ${u.email}`.toLowerCase().includes(q)
   })
+  // Categorias separadas (Supervisores/Supervisionados) em vez de uma lista só ordenada com
+  // supervisor primeiro — mais fácil de escanear quando a lista cresce.
+  const supervisores = itensFiltrados.filter((u) => u.isGestor)
+  const supervisionados = itensFiltrados.filter((u) => !u.isGestor)
 
   async function carregar() {
     setLoading(true)
     setError(null)
     try {
-      // Supervisor primeiro (sort estável — dentro de cada grupo continua em ordem alfabética,
-      // que já vem pronta do back).
-      setItens([...(await listarUsuariosAdmin())].sort((a, b) => Number(b.isGestor) - Number(a.isGestor)))
+      setItens(await listarUsuariosAdmin())
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao carregar')
     } finally {
@@ -68,7 +70,7 @@ function ListaUsuarios() {
   // esta continua aberta — busca de novo, em silêncio, quando a aba volta a ficar em foco.
   useRefetchOnFocus(() => {
     listarUsuariosAdmin()
-      .then((lista) => setItens([...lista].sort((a, b) => Number(b.isGestor) - Number(a.isGestor))))
+      .then(setItens)
       .catch(() => {})
   })
 
@@ -120,6 +122,68 @@ function ListaUsuarios() {
     else await alternarAcesso(usuario)
   }
 
+  // Uma linha — reaproveitada pelas duas categorias (Supervisores/Supervisionados) abaixo.
+  function linhaUsuario(usuario: UsuarioAdmin) {
+    const souEuMesmo = usuario.id === usuarioLogado?.id
+    // Promover pra supervisor exige acesso ativo (não faz sentido dar o papel pra quem nem
+    // consegue entrar). Revogar/reativar acesso é ação de QUALQUER supervisor, pra qualquer
+    // usuário — sem essa trava de "só o gestor vinculado", que travava o off-boarding sempre que o
+    // dono específico não estava disponível.
+    const naoPodeTornarSupervisor = !usuario.isGestor && !usuario.ativo
+    return (
+      <li
+        key={usuario.id}
+        className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
+      >
+        <div className="flex flex-col gap-1">
+          <span className={cx(usuario.ativo ? 'text-neutral-100' : 'text-neutral-500 line-through')}>
+            {usuario.nome}
+            {souEuMesmo && <span className="ml-1.5 text-xs text-neutral-500">(você)</span>}
+          </span>
+          <span className="text-xs text-neutral-500">{usuario.email}</span>
+          {usuario.gestorNome && (
+            <span className="w-fit truncate rounded-full bg-gold-500/10 px-2 py-0.5 text-xs font-medium text-gold-400">
+              Supervisionado por {usuario.gestorNome}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          {!usuario.ativo && (
+            <span className="anim-pop rounded-full bg-red-500/20 px-2 py-0.5 text-xs font-medium text-red-300">
+              Acesso revogado
+            </span>
+          )}
+          {usuario.isGestor && (
+            <span className="anim-pop rounded-full bg-gold-500/20 px-2 py-0.5 text-xs font-medium text-gold-300">
+              Supervisor
+            </span>
+          )}
+          <KebabMenu
+            acoes={[
+              {
+                label: usuario.isGestor ? 'Remover supervisor' : 'Tornar supervisor',
+                onClick: () => setConfirmando({ usuario, acao: 'gestor' }),
+                disabled: alterando === usuario.id || souEuMesmo || naoPodeTornarSupervisor,
+                title: souEuMesmo
+                  ? 'Você não pode alterar sua própria permissão de supervisor.'
+                  : naoPodeTornarSupervisor
+                    ? 'Não dá para tornar supervisor alguém com o acesso revogado.'
+                    : undefined,
+              },
+              {
+                label: usuario.ativo ? 'Revogar acesso' : 'Reativar acesso',
+                onClick: () => setConfirmando({ usuario, acao: 'ativo' }),
+                disabled: alterando === usuario.id || souEuMesmo,
+                title: souEuMesmo ? 'Você não pode revogar o seu próprio acesso.' : undefined,
+                tone: usuario.ativo ? 'perigo' : 'sucesso',
+              },
+            ]}
+          />
+        </div>
+      </li>
+    )
+  }
+
   if (loading) return <Carregando texto="Carregando..." />
   if (error) return <EstadoErro onRetry={carregar} />
 
@@ -136,74 +200,34 @@ function ListaUsuarios() {
         className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-gold-500"
       />
 
-      {/* Acima de ~4 itens a lista rola DENTRO de si mesma (altura travada) em vez de esticar a
-          página inteira — a barra de rolagem personalizada (index.css) já cuida do visual. */}
-      <ul key={busca} className="anim-fade flex max-h-[19rem] flex-col gap-2 overflow-y-auto pr-1">
-        {itens.length > 0 && itensFiltrados.length === 0 && (
-          <p className="anim-fade text-sm text-neutral-500">Nenhum usuário encontrado.</p>
-        )}
-        {itensFiltrados.map((usuario) => {
-          const souEuMesmo = usuario.id === usuarioLogado?.id
-          // Promover pra supervisor exige acesso ativo (não faz sentido dar o papel pra quem nem
-          // consegue entrar). Revogar/reativar acesso é ação de QUALQUER supervisor, pra qualquer
-          // usuário — sem essa trava de "só o gestor vinculado", que travava o off-boarding sempre
-          // que o dono específico não estava disponível.
-          const naoPodeTornarSupervisor = !usuario.isGestor && !usuario.ativo
-          return (
-          <li
-            key={usuario.id}
-            className="flex items-center justify-between gap-3 rounded-xl border border-navy-700 bg-navy-800 p-3"
-          >
-            <div className="flex flex-col gap-1">
-              <span className={cx(usuario.ativo ? 'text-neutral-100' : 'text-neutral-500 line-through')}>
-                {usuario.nome}
-                {souEuMesmo && <span className="ml-1.5 text-xs text-neutral-500">(você)</span>}
-              </span>
-              <span className="text-xs text-neutral-500">{usuario.email}</span>
-              {usuario.gestorNome && (
-                <span className="w-fit truncate rounded-full bg-gold-500/10 px-2 py-0.5 text-xs font-medium text-gold-400">
-                  Supervisionado por {usuario.gestorNome}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-3">
-              {!usuario.ativo && (
-                <span className="anim-pop rounded-full bg-red-500/20 px-2 py-0.5 text-xs font-medium text-red-300">
-                  Acesso revogado
-                </span>
-              )}
-              {usuario.isGestor && (
-                <span className="anim-pop rounded-full bg-gold-500/20 px-2 py-0.5 text-xs font-medium text-gold-300">
-                  Supervisor
-                </span>
-              )}
-              <KebabMenu
-                acoes={[
-                  {
-                    label: usuario.isGestor ? 'Remover supervisor' : 'Tornar supervisor',
-                    onClick: () => setConfirmando({ usuario, acao: 'gestor' }),
-                    disabled: alterando === usuario.id || souEuMesmo || naoPodeTornarSupervisor,
-                    title: souEuMesmo
-                      ? 'Você não pode alterar sua própria permissão de supervisor.'
-                      : naoPodeTornarSupervisor
-                        ? 'Não dá para tornar supervisor alguém com o acesso revogado.'
-                        : undefined,
-                  },
-                  {
-                    label: usuario.ativo ? 'Revogar acesso' : 'Reativar acesso',
-                    onClick: () => setConfirmando({ usuario, acao: 'ativo' }),
-                    disabled: alterando === usuario.id || souEuMesmo,
-                    title: souEuMesmo ? 'Você não pode revogar o seu próprio acesso.' : undefined,
-                    tone: usuario.ativo ? 'perigo' : 'sucesso',
-                  },
-                ]}
-              />
-            </div>
-          </li>
-          )
-        })}
-        {itens.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nenhum usuário ainda.</p>}
-      </ul>
+      {itens.length > 0 && itensFiltrados.length === 0 && (
+        <p className="anim-fade text-sm text-neutral-500">Nenhum usuário encontrado.</p>
+      )}
+      {itens.length === 0 && <p className="anim-fade text-sm text-neutral-500">Nenhum usuário ainda.</p>}
+
+      {supervisores.length > 0 && (
+        <section className="flex flex-col gap-2">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+            Supervisores
+          </h3>
+          {/* Acima de ~4 itens a lista rola DENTRO de si mesma (altura travada) em vez de esticar a
+              página inteira — a barra de rolagem personalizada (index.css) já cuida do visual. */}
+          <ul key={busca} className="anim-fade flex max-h-[19rem] flex-col gap-2 overflow-y-auto pr-1">
+            {supervisores.map(linhaUsuario)}
+          </ul>
+        </section>
+      )}
+
+      {supervisionados.length > 0 && (
+        <section className="flex flex-col gap-2">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+            Supervisionados
+          </h3>
+          <ul key={busca} className="anim-fade flex max-h-[19rem] flex-col gap-2 overflow-y-auto pr-1">
+            {supervisionados.map(linhaUsuario)}
+          </ul>
+        </section>
+      )}
 
       {modalConfirmar.montado && modalConfirmar.valor && (
         <div
