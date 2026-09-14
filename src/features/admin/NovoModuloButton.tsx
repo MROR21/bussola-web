@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../../components/Icon'
+import { IconePicker } from '../../components/IconePicker'
 import { Spinner } from '../../components/Spinner'
 import { useSaidaValor } from '../../hooks/useSaida'
+import { ICONE_MODULO_PADRAO } from '../../utils/moduloIcones'
 import { listarSquads } from '../squads/squadsService'
 import type { Squad } from '../squads/types'
 import { cx } from '../../utils/cx'
@@ -20,6 +22,7 @@ export function NovoModuloButton({ onCriado }: { onCriado: () => void }) {
   const [nome, setNome] = useState('')
   const [categoria, setCategoria] = useState<Categoria>('padrao')
   const [squadId, setSquadId] = useState<string>('')
+  const [icone, setIcone] = useState(ICONE_MODULO_PADRAO)
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<{ texto: string; ok: boolean } | null>(null)
@@ -37,6 +40,7 @@ export function NovoModuloButton({ onCriado }: { onCriado: () => void }) {
     setNome('')
     setCategoria('padrao')
     setSquadId('')
+    setIcone(ICONE_MODULO_PADRAO)
     setErro(null)
     setAberto(true)
     try {
@@ -56,7 +60,7 @@ export function NovoModuloButton({ onCriado }: { onCriado: () => void }) {
     try {
       const modulos = await listarModulos()
       const order = modulos.length > 0 ? Math.max(...modulos.map((m) => m.order)) + 1 : 1
-      await criarModulo(nome.trim(), categoria === 'squad' ? squadId : null, order)
+      await criarModulo(nome.trim(), categoria === 'squad' ? squadId : null, order, icone)
       setAberto(false)
       onCriado()
       setFeedback({ texto: 'Módulo criado.', ok: true })
@@ -134,6 +138,10 @@ export function NovoModuloButton({ onCriado }: { onCriado: () => void }) {
                 </select>
               </label>
             )}
+            <label className="flex flex-col gap-1 text-sm text-neutral-400">
+              Ícone
+              <IconePicker valor={icone} onChange={setIcone} />
+            </label>
             {erro && (
               <p className="flex items-center gap-1.5 text-sm text-red-300">
                 <Icon name="warning" className="text-base" /> {erro}

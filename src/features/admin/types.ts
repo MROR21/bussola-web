@@ -24,9 +24,11 @@ export interface SquadAdmin {
 }
 
 // Módulo já vem com o vínculo de squad (nullable — null = "padrão do sistema", ex. "Básico do
-// dev", criado à mão; preenchido = nasceu junto de um squad, ver POST /admin/squads).
+// dev", criado à mão; preenchido = nasceu junto de um squad, ver POST /admin/squads). `icone` é um
+// nome do material-symbols escolhido na criação/edição (ver IconePicker.tsx/moduloIcones.ts).
 export interface Modulo extends EntidadeSimples {
   squadId: string | null
+  icone: string
 }
 
 // Um passo da Jornada como o admin edita (espelha PassoRequest/a projeção de GET /admin/passos).

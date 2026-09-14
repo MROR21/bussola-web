@@ -53,16 +53,18 @@ export const editarFase = (id: string, nome: string, order: number) =>
   apiSend('PUT', `/admin/fases/${id}`, { nome, order })
 export const apagarFase = (id: string) => apiSend('DELETE', `/admin/fases/${id}`)
 
-// Módulos. `criarModulo` escolhe a categoria na hora (squadId ou null pra "padrão do sistema") —
-// `editarModulo` continua só nome+ordem, o vínculo com squad não muda por ali (ver
-// CriarModuloRequest no back). `mudarSquadModulo` é o jeito de corrigir/trocar/desfazer esse
-// vínculo DEPOIS de criado (endpoint próprio, ver MudarSquadModuloRequest no back).
+// Módulos. `criarModulo` escolhe a categoria e o ícone na hora — `editarModulo` continua só
+// nome+ordem, nem squad nem ícone mudam por ali (ver CriarModuloRequest no back).
+// `mudarSquadModulo`/`mudarIconeModulo` são os jeitos de corrigir/trocar cada um DEPOIS de criado
+// (endpoints próprios, ver MudarSquadModuloRequest/MudarIconeModuloRequest no back).
 export const listarModulos = () => apiGet<Modulo[]>('/admin/modulos')
-export const criarModulo = (nome: string, squadId: string | null, order: number) =>
-  apiPost<EntidadeSimples>('/admin/modulos', { nome, squadId, order })
+export const criarModulo = (nome: string, squadId: string | null, order: number, icone: string) =>
+  apiPost<EntidadeSimples>('/admin/modulos', { nome, squadId, order, icone })
 export const editarModulo = (id: string, nome: string, order: number) =>
   apiSend('PUT', `/admin/modulos/${id}`, { nome, order })
 export const apagarModulo = (id: string) => apiSend('DELETE', `/admin/modulos/${id}`)
+export const mudarIconeModulo = (id: string, icone: string) =>
+  apiSend('PUT', `/admin/modulos/${id}/icone`, { icone })
 export const mudarSquadModulo = (id: string, squadId: string | null) =>
   apiSend('PUT', `/admin/modulos/${id}/squad`, { squadId })
 

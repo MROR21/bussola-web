@@ -22,6 +22,7 @@ import {
   listarFluxosAdmin,
   listarModulos,
   listarPassosAdmin,
+  mudarIconeModulo,
   mudarSquadModulo,
 } from '../features/admin/adminService'
 import { listarSquads } from '../features/squads/squadsService'
@@ -81,6 +82,12 @@ export function AdminPage() {
   // (ou zerar) o squad vinculado, em vez de precisar de uma ação separada só pra isso.
   async function salvarCategoriaModulo(id: string, squadId: string | null) {
     await mudarSquadModulo(id, squadId)
+    setRefreshGuias((n) => n + 1)
+  }
+
+  // Mesma ideia, mas pro `iconePicker` — troca o ícone do módulo direto no "Editar".
+  async function salvarIconeModulo(id: string, icone: string) {
+    await mudarIconeModulo(id, icone)
     setRefreshGuias((n) => n + 1)
   }
 
@@ -186,6 +193,10 @@ export function AdminPage() {
                 squadIdAtual: (item) => (item as Modulo).squadId,
                 salvar: salvarCategoriaModulo,
               }}
+              iconePicker={{
+                iconeAtual: (item) => (item as Modulo).icone,
+                salvar: salvarIconeModulo,
+              }}
             />
           </section>
           <section className="flex flex-col gap-3">
@@ -210,6 +221,10 @@ export function AdminPage() {
                 squads,
                 squadIdAtual: (item) => (item as Modulo).squadId,
                 salvar: salvarCategoriaModulo,
+              }}
+              iconePicker={{
+                iconeAtual: (item) => (item as Modulo).icone,
+                salvar: salvarIconeModulo,
               }}
             />
           </section>

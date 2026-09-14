@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { EstadoErro } from '../../components/EstadoErro'
 import { Icon } from '../../components/Icon'
+import { IconePicker } from '../../components/IconePicker'
 import { KebabMenu } from '../../components/KebabMenu'
 import { Carregando, Spinner } from '../../components/Spinner'
 import { useSaidaValor } from '../../hooks/useSaida'
@@ -28,6 +29,7 @@ export function SimpleEntityCrud({
   ocultarTitulo,
   ocultarNovo,
   squadPicker,
+  iconePicker,
 }: {
   titulo: string
   icone: string
@@ -63,6 +65,12 @@ export function SimpleEntityCrud({
     squadIdAtual: (item: EntidadeSimples) => string | null
     salvar: (id: string, squadId: string | null) => Promise<void>
   }
+  // Mesma ideia do squadPicker, mas pro ícone do módulo (ver IconePicker.tsx) — troca depois de
+  // criado passa pelo endpoint próprio (.../icone), nunca pelo PUT genérico de nome/ordem.
+  iconePicker?: {
+    iconeAtual: (item: EntidadeSimples) => string
+    salvar: (id: string, icone: string) => Promise<void>
+  }
 }) {
   const [itens, setItens] = useState<EntidadeSimples[]>([])
   const [filhosPorId, setFilhosPorId] = useState<Record<string, number>>({})
@@ -73,6 +81,7 @@ export function SimpleEntityCrud({
   const [order, setOrder] = useState(1)
   const [categoria, setCategoria] = useState<'padrao' | 'squad'>('padrao')
   const [squadId, setSquadId] = useState('')
+  const [iconeEscolhido, setIconeEscolhido] = useState('')
   const [salvando, setSalvando] = useState(false)
   const [apagando, setApagando] = useState<EntidadeSimples | null>(null)
   const [movendo, setMovendo] = useState<string | null>(null)
@@ -189,6 +198,7 @@ export function SimpleEntityCrud({
       setCategoria(atual ? 'squad' : 'padrao')
       setSquadId(atual ?? '')
     }
+    if (iconePicker) setIconeEscolhido(iconePicker.iconeAtual(item))
   }
 
   async function salvar() {
@@ -205,6 +215,9 @@ export function SimpleEntityCrud({
           if (squadIdNovo !== squadPicker.squadIdAtual(editando)) {
             await squadPicker.salvar(editando.id, squadIdNovo)
           }
+        }
+        if (iconePicker && iconeEscolhido !== iconePicker.iconeAtual(editando)) {
+          await iconePicker.salvar(editando.id, iconeEscolhido)
         }
       }
       setEditando(null)
@@ -422,6 +435,12 @@ export function SimpleEntityCrud({
                   </label>
                 )}
               </>
+            )}
+            {iconePicker && modalEdicao.valor !== 'novo' && (
+              <label className="flex flex-col gap-1 text-sm text-neutral-400">
+                Ícone
+                <IconePicker valor={iconeEscolhido} onChange={setIconeEscolhido} />
+              </label>
             )}
             <div className="flex justify-end gap-2">
               <button

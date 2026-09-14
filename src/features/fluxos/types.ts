@@ -11,6 +11,7 @@ export interface ModuloPublico {
   nome: string
   order: number
   squadId: string | null
+  icone: string
 }
 
 // Um fluxo do Guia pelo sistema (espelha a entidade Fluxo do back, em camelCase). `squad`/`modulo`

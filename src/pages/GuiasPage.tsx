@@ -10,16 +10,8 @@ import { useTitulo } from '../hooks/useTitulo'
 import { getFluxosConcluidos, listarFluxos, listarModulosPublico } from '../features/fluxos/fluxosService'
 import type { Fluxo, ModuloPublico, TipoConteudo } from '../features/fluxos/types'
 import { useRefetchOnFocus } from '../hooks/useAtualizarEmSegundoPlano'
+import { ICONE_MODULO_PADRAO } from '../utils/moduloIcones'
 import { cx } from '../utils/cx'
-
-// Ícone por módulo (fallback "extension" = peça/módulo genérico).
-const MODULO_ICONE: Record<string, string> = {
-  'Mão de Obra': 'engineering',
-  'Básico do dev': 'handyman',
-  'Quiz Quality': 'quiz',
-  'Agilean (desktop)': 'desktop_windows',
-}
-const iconeDoModulo = (m: string) => MODULO_ICONE[m] ?? 'extension'
 
 // Resumo breve por módulo, pro cabeçalho de dentro dele — o Módulo (`Bussola.Domain.Entities.
 // Modulo`) só tem Nome/Order no banco, sem campo de descrição (mesmo caso do FASE_RESUMO em
@@ -71,6 +63,11 @@ export function GuiasPage() {
   const [abaConteudo, setAbaConteudo] = useState<TipoConteudo>('Fluxo')
   const moduloAtual = modulos.find((m) => m.nome === moduloSelecionado)
   const moduloEhPadrao = moduloAtual?.squadId === null
+  // Ícone escolhido pelo admin na criação/edição do módulo (ver IconePicker.tsx) — antes era um
+  // dicionário fixo por NOME aqui mesmo, só cobria 4 módulos; qualquer um novo caía num ícone
+  // genérico sem jeito de corrigir sem mexer em código.
+  const iconeDoModulo = (nome: string): string =>
+    modulos.find((m) => m.nome === nome)?.icone ?? ICONE_MODULO_PADRAO
 
   useTitulo(moduloSelecionado ?? 'Guia pelo sistema')
 
