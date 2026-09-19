@@ -27,6 +27,9 @@ const ABAS: { value: FluxoAdmin['tipo']; label: string }[] = [
 export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMudar?: () => void }) {
   const [aba, setAba] = useState<FluxoAdmin['tipo']>('Fluxo')
   const [fluxos, setFluxos] = useState<FluxoAdmin[]>([])
+  // Sem filtro de módulo — só pra sugerir categorias já usadas em QUALQUER módulo (ver
+  // `categoriasSugeridas`), já que `fluxos` acima fica restrito ao módulo deste painel.
+  const [todosFluxos, setTodosFluxos] = useState<FluxoAdmin[]>([])
   const [modulos, setModulos] = useState<Modulo[]>([])
   const [squads, setSquads] = useState<Squad[]>([])
   const [loading, setLoading] = useState(true)
@@ -48,6 +51,7 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
     try {
       const [fs, ms, sqs] = await Promise.all([listarFluxosAdmin(), listarModulos(), listarSquads()])
       setFluxos(fs.filter((f) => f.moduloId === moduloId).sort((a, b) => a.order - b.order))
+      setTodosFluxos(fs)
       setModulos([...ms].sort((a, b) => a.order - b.order))
       setSquads(sqs)
     } catch (e) {
@@ -80,6 +84,14 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
   }, [ehPadrao, aba])
 
   const itensDaAba = fluxos.filter((f) => f.tipo === aba)
+
+  // Categorias já usadas em QUALQUER módulo, pra sugerir no campo abaixo (datalist) — evita typo
+  // fragmentando a mesma categoria em variantes diferentes (ex. "Processos Específicos" só se
+  // repete entre squads se o texto bater exatamente). Continua sendo texto livre: dá pra digitar
+  // uma categoria nova que ainda não existe em lugar nenhum.
+  const categoriasSugeridas = [...new Set(todosFluxos.map((f) => f.categoria).filter(Boolean))].sort(
+    (a, b) => a.localeCompare(b, 'pt-BR'),
+  )
 
   function abrirNovo() {
     setEditando(null)
@@ -336,8 +348,15 @@ export function FluxosDoModulo({ moduloId, aoMudar }: { moduloId: string; aoMuda
                     <input
                       value={form.categoria}
                       onChange={(e) => atualizarForm({ categoria: e.target.value })}
+                      list="categorias-existentes"
+                      placeholder="Escolha uma existente ou digite uma nova"
                       className="rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-neutral-100 outline-none transition-colors focus:border-gold-500"
                     />
+                    <datalist id="categorias-existentes">
+                      {categoriasSugeridas.map((c) => (
+                        <option key={c} value={c} />
+                      ))}
+                    </datalist>
                   </label>
                 </div>
 
